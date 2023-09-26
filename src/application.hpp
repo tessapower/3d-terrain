@@ -48,7 +48,9 @@ private:
 	bool m_showWireframe = false;
 
 	// geometry
-	basic_model m_model;
+	basic_model m_model_rock;
+	basic_model m_model_bunny;
+	basic_model m_model_cliff;
 
 public:
 	// setup

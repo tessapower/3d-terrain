@@ -41,9 +41,15 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
 	GLuint shader = sb.build();
 
-	m_model.shader = shader;
-	m_model.mesh = load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build();
-	m_model.color = vec3(1, 0, 0);
+	m_model_rock.shader = shader;
+	m_model_rock.mesh = load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//rock.obj")).build();
+	m_model_rock.color = vec3(1, 0, 0);
+	m_model_cliff.shader = shader;
+	m_model_cliff.mesh = load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//cliff.obj")).build();
+	m_model_cliff.color = vec3(1, 0, 0);
+	m_model_bunny.shader = shader;
+	m_model_bunny.mesh = load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//bunny2.obj")).build();
+	m_model_bunny.color = vec3(1, 0, 0);
 }
 
 
@@ -80,7 +86,9 @@ void Application::render() {
 
 
 	// draw the model
-	m_model.draw(view, proj);
+	m_model_rock.draw(glm::translate(view, vec3(-5, 0, 0)), proj);
+	m_model_bunny.draw(glm::scale(glm::translate(view, vec3(5, 0, 0)), vec3(15)), proj);
+	m_model_cliff.draw(glm::translate(view, vec3(0, 0, 0)), proj);
 }
 
 
