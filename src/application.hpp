@@ -9,6 +9,7 @@
 #include "opengl.hpp"
 #include "cgra/cgra_mesh.hpp"
 #include "skeleton_model.hpp"
+#include "simplified_mesh.hpp"
 
 
 // Basic model that holds the shader, mesh and transform for drawing.
@@ -48,7 +49,7 @@ private:
 	bool m_showWireframe = false;
 
 	// geometry
-	basic_model m_model_rock;
+	simplified_mesh m_model_rock;
 	basic_model m_model_bunny;
 	basic_model m_model_cliff;
 

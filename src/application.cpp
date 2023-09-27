@@ -15,6 +15,7 @@
 #include "cgra/cgra_image.hpp"
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
+#include "simplified_mesh.hpp"
 
 
 using namespace std;
@@ -43,7 +44,6 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 
 	m_model_rock.shader = shader;
 	m_model_rock.mesh = load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//rock.obj")).build();
-	m_model_rock.color = vec3(1, 0, 0);
 	m_model_cliff.shader = shader;
 	m_model_cliff.mesh = load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//cliff.obj")).build();
 	m_model_cliff.color = vec3(1, 0, 0);
