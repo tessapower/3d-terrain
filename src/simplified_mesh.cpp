@@ -40,6 +40,35 @@ void draw(glm::vec2 screenSize, const glm::mat4& view, const glm::mat4& proj) {
 
 	float voxelEdgeLength = d / sqrt(3);
 
+	// TODO: Grid discretization (Mi,d)
+
+	// TODO: Compute f(p) for all grid points p in G
+
+	for (int cube : cubes) {
+
+		// TODO: Lookup template case
+		// template = templates[cube];
+
+		for (patch : cube_case) {
+
+			// TODO: Compute the iso-points on cube edges
+
+			// TODO: For the quadratic program
+
+			// Solve for feature vertices
+
+		}
+
+	}
+
+	// TODO: Run edge flip on output
+
+	// TODO: Run feature filter on output
+
+	// TODO: Run remove interior on output
+
+	// TODO: Store mesh
+
 }
 
 
@@ -70,4 +99,37 @@ vec3 featureVertexInsertion(vec3 x, vec3* p, vec3* np, int len) {
 	}
 
 	return argMin;
+}
+
+/// <summary>
+/// Flip flip vertices around for some reason
+/// </summary>
+/// <param name="input">Input mesh</param>
+void edgeFlip(vector<vec3>& input) {
+	vector<vec3> Q;
+
+	// BVHTree T;
+	// T.build(input) - I think this is another paper we need to implement
+
+	/**
+	
+	
+	for (edge e : input) {
+		if (e.oppVs are feature vertices) {
+			Q.push_back(e);
+		}
+	}
+
+	while (Q.size() != 0) {
+		edge e = Q.pop_back();
+
+		if (!e.wasFlipped) {
+			if (isIntersectionTree(input, T, e)) {
+				flipEdge(input, e);
+				T.refit(input);
+			}
+		}
+	}
+
+	*/
 }
