@@ -32,13 +32,17 @@ void simplified_mesh::draw(const glm::mat4& view, const glm::mat4& proj) {
 	mesh.draw(); // draw
 }
 
-void simplified_mesh::build(glm::vec2 screenSize, const mesh_builder builder) {
+void simplified_mesh::set_model(const mesh_builder builder) {
+	this->builder = builder;
+}
+
+void simplified_mesh::build(glm::vec2 screenSize) {
 
 	int nF = 5000; // Target number of triangles
 
 	// TODO: Calculate bounding box for mesh
-	vec3 topRight;
-	vec3 bottomLeft;
+	vec3 topRight = builder.vertices[0].pos;
+	vec3 bottomLeft = builder.vertices[0].pos;
 
 	for (mesh_vertex vertex : builder.vertices) {
 		if (vertex.pos.y > topRight.y) {
@@ -62,8 +66,42 @@ void simplified_mesh::build(glm::vec2 screenSize, const mesh_builder builder) {
 	}
 
 	// Bounding cube debugging
-	if (false) {
+	if (debugging == 1) {
+		mesh_builder bounding_box = mesh_builder();
 
+		vec3 size = topRight - bottomLeft;
+
+		bounding_box.push_vertex(mesh_vertex{ bottomLeft, vec3(1,0,0) });
+		bounding_box.push_vertex(mesh_vertex{ bottomLeft + vec3(size.x, 0, 0), vec3(1,0,0)});
+		bounding_box.push_vertex(mesh_vertex{ bottomLeft + vec3(0, 0, size.z), vec3(1,0,0) });
+		bounding_box.push_vertex(mesh_vertex{ bottomLeft + vec3(size.x, 0, size.z), vec3(1,0,0) });
+
+		bounding_box.push_vertex(mesh_vertex{ bottomLeft + vec3(0, size.y, 0), vec3(1,0,0) });
+		bounding_box.push_vertex(mesh_vertex{ bottomLeft + vec3(size.x, size.y, 0), vec3(1,0,0) });
+		bounding_box.push_vertex(mesh_vertex{ bottomLeft + vec3(0, size.y, size.z), vec3(1,0,0) });
+		bounding_box.push_vertex(mesh_vertex{ bottomLeft + vec3(size.x, size.y, size.z), vec3(1,0,0) });
+
+		bounding_box.push_indices(
+			{
+				0, 1, 2, // front face
+				1, 3, 2,
+				4, 5, 6, // back face
+				5, 7, 6,
+				0, 1, 4, // bottom face
+				1, 5, 4,
+				2, 3, 6, // top face
+				3, 7, 6,
+				0, 2, 4, // left face
+				2, 6, 4,
+				1, 3, 5, // right face
+				3, 7, 5
+			}
+		);
+
+
+		mesh = bounding_box.build();
+
+		return;
 	}
 	else {
 		mesh = builder.build();

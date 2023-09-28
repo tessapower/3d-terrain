@@ -50,8 +50,10 @@ private:
 
 	// geometry
 	simplified_mesh m_model_rock;
-	basic_model m_model_bunny;
-	basic_model m_model_cliff;
+	simplified_mesh m_model_bunny;
+	simplified_mesh m_model_cliff;
+
+	int debugging = 0;
 
 public:
 	// setup
