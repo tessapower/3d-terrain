@@ -116,7 +116,7 @@ void Application::renderGUI() {
 
 	ImGui::Separator();
 
-	if (ImGui::Combo("Debugging", &debugging, "None\0Bounding Box\0Voxel Grid\0Voxel Collisions\0", 4)) {
+	if (ImGui::Combo("Debugging", &debugging, "None\0Bounding Box\0Voxel Collisions\0Voxel\0", 4)) {
 		m_model_rock.debugging = debugging;
 		//m_model_rock.build(vec2());
 		m_model_cliff.debugging = debugging;
