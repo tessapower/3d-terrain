@@ -321,10 +321,11 @@ void simplified_mesh::draw(const glm::mat4& view, const glm::mat4& proj) {
 }
 
 float adapt(float v0, float v1) {
+	return 0.5;
 	return (0 - v0) / (v1 - v0);
 }
 
-vec3 edge_to_boundary_vertex(int edge, vec3 point, float* f_eval) {
+vec3 edge_to_boundary_vertex(int edge, vec3 point, float* f_eval, float voxelEdgeLength) {
 
 	int v0 = EDGES[edge][0];
 	int v1 = EDGES[edge][1];
@@ -341,9 +342,9 @@ vec3 edge_to_boundary_vertex(int edge, vec3 point, float* f_eval) {
 	vec3 vert_pos1 = vec3(VERTICES[v1][0], VERTICES[v1][1], VERTICES[v1][2]);
 
 	return vec3(
-		point.x + vert_pos0[0] * t0 + vert_pos1[0] * t1,
-		point.y + vert_pos0[1] * t0 + vert_pos1[1] * t1,
-		point.z + vert_pos0[2] * t0 + vert_pos1[2] * t1
+		point.x + (vert_pos0[0] * t0 + vert_pos1[0] * t1) * voxelEdgeLength,
+		point.y + (vert_pos0[1] * t0 + vert_pos1[1] * t1) * voxelEdgeLength,
+		point.z + (vert_pos0[2] * t0 + vert_pos1[2] * t1) * voxelEdgeLength
 	);
 }
 
@@ -352,6 +353,11 @@ void simplified_mesh::set_model(mesh_builder builder) {
 }
 
 void simplified_mesh::build(glm::vec2 screenSize) {
+
+	if (debugging == 0) {
+		mesh = builder.build();
+		return;
+	}
 
 	int nF = 5000; // Target number of triangles
 
@@ -392,7 +398,7 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 	// TODO: Calculate input parameter np
 	
-	vec2 screenSpacePos(300, 100);
+	vec2 screenSpacePos(400, 200);
 
 	float lp = screenSpacePos.x; // Pixel length of screenspace bounding box
 	float l = sqrt(pow(screenSpacePos.x, 2) + pow(screenSpacePos.y, 2)); // Diagonal length of screenspace bounding box
@@ -408,8 +414,8 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 	vec3 gridSize = vec3(
 		std::ceil((topRight.x - bottomLeft.x) / voxelEdgeLength),
 		std::ceil((topRight.y - bottomLeft.y) / voxelEdgeLength),
-			std::ceil((topRight.z - bottomLeft.z) / voxelEdgeLength)
-		);
+		std::ceil((topRight.z - bottomLeft.z) / voxelEdgeLength)
+	);
 
 	vector<vector<vector<float>>> G(gridSize.x, vector(gridSize.y, vector(gridSize.z, 9999999999.9f)));
 
@@ -419,6 +425,7 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 		for (int y = 0; y < gridSize.y; y++) {
 			for (int z = 0; z < gridSize.z; z++) {
 				vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x,y,z), gridSize);
+
 				// Loop over all points
 				for (auto t : builder.vertices) {
 					G[x][y][z] = std::min(G[x][y][z], glm::distance(t.pos, gridPoint));
@@ -446,7 +453,7 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 					vec3 size(sizeFloat);
 
-					debugging.append(debug_box(gridPoint - (size/2.0f), size));
+					debugging.append(debug_box(gridPoint - (size / 2.0f), size));
 				}
 			}
 		}
@@ -457,16 +464,15 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 		return;
 	}
 
+
+
 	mesh_builder output;
 	
 	for (int x = 0; x < gridSize.x - 1; x++) {
 		for (int y = 0; y < gridSize.y - 1; y++) {
 			for (int z = 0; z < gridSize.z - 1; z++) {
 
-				float circle_function(float x, float y, float z) {
-					return 2.5 - std::sqrt(x * x + y * y + z * z);
-				}
-
+				
 				float values[8] = {
 					G[x][y][z],
 					G[x + 1][y][z],
@@ -478,7 +484,7 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 					G[x][y + 1][z + 1],
 				};
 
-				float isolevel = 0.5;
+				float isolevel = 0.6;
 
 				int cubeIndex = 0;
 				if (values[0] < isolevel) cubeIndex |= 1;
@@ -500,12 +506,12 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 					vector<int> faceEdges = faces[face];
 
-					int size = b.vertices.size() + 1;
+					int size = b.vertices.size() + 0;
 
 					for (int i = 0; i < faceEdges.size(); i++) {
 						b.push_vertex(mesh_vertex {
-							edge_to_boundary_vertex(faceEdges[i], gridPoint, values),
-							vec3(0, 1, 0)
+							edge_to_boundary_vertex(faceEdges[i], gridPoint, values, voxelEdgeLength),
+							vec3(1, 0, 0)
 						});
 					}
 
@@ -514,11 +520,13 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 					b.push_index(size + 2);
 				}
 
+				//b.append(debug_box(gridPoint, vec3(voxelEdgeLength)));
+
 				output.append(b);
 
-				if (b.vertices.size() > 0) {
-					mesh = output.build();
-					return;
+				if (b.vertices.size() > 5) {
+					//mesh = output.build();
+					//return;
 				}
 			}
 		}
@@ -532,16 +540,6 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 	mesh = output.build();
 
-}
-
-
-float discretization(vec3 p) {
-	// q must be an element of the mesh
-	vec3 q = vec3(); // TODO: Figure out where this comes from
-
-	vec3 a = p - q;
-
-	return sqrt(dot(a, a));
 }
 
 vec3 gridToWorldPosition(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize) {
