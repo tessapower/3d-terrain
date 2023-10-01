@@ -7,6 +7,9 @@
 // project
 #include "cgra/cgra_geometry.hpp"
 #include "simplified_mesh.hpp"
+#include <chrono>
+#include <unordered_map>
+#include <array>
 
 
 using namespace std;
@@ -336,8 +339,6 @@ vec3 edge_to_boundary_vertex(int edge, vec3 point, float* f_eval, float voxelEdg
 	float t0 = 1.0 - adapt(f0, f1);
 	float t1 = 1.0 - t0;
 
-	printf("%f %f\n", t0, t1);
-
 	vec3 vert_pos0 = vec3(VERTICES[v0][0], VERTICES[v0][1], VERTICES[v0][2]);
 	vec3 vert_pos1 = vec3(VERTICES[v1][0], VERTICES[v1][1], VERTICES[v1][2]);
 
@@ -386,6 +387,9 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 		}
 	}
 
+	bottomLeft = vec3(bottomLeft.x - 2, bottomLeft.y - 2, bottomLeft.z - 2);
+	topRight = vec3(topRight.x + 2, topRight.y + 2, topRight.z + 2);
+
 	// Bounding cube debugging
 	if (debugging == 1) {
 		mesh_builder t = debug_box(bottomLeft, topRight - bottomLeft);
@@ -398,12 +402,12 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 	// TODO: Calculate input parameter np
 	
-	vec2 screenSpacePos(400, 200);
+	vec2 screenSpacePos(200, 100);
 
 	float lp = screenSpacePos.x; // Pixel length of screenspace bounding box
 	float l = sqrt(pow(screenSpacePos.x, 2) + pow(screenSpacePos.y, 2)); // Diagonal length of screenspace bounding box
 
-	float np = (screenSpacePos.x * screenSpacePos.y) / 100; //l / lp; // the maximum number of pixels that the high-poly mesh’s diagonal could occupy across all potential rendering view
+	float np = (screenSpacePos.x * screenSpacePos.y) / 100; //l / lp; // the maximum number of pixels that the high-poly meshï¿½s diagonal could occupy across all potential rendering view
 	float d = l / np;
 
 	float voxelEdgeLength = d / sqrt(3);
@@ -417,21 +421,35 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 		std::ceil((topRight.z - bottomLeft.z) / voxelEdgeLength)
 	);
 
-	vector<vector<vector<float>>> G(gridSize.x, vector(gridSize.y, vector(gridSize.z, 9999999999.9f)));
+	if (G.size() == 0) {
 
-	// Calculate unsigned distance field
-	// Compute f(p) for all grid points p in G
-	for (int x = 0; x < gridSize.x; x++) {
-		for (int y = 0; y < gridSize.y; y++) {
-			for (int z = 0; z < gridSize.z; z++) {
-				vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x,y,z), gridSize);
+		auto start = std::chrono::high_resolution_clock::now();
 
-				// Loop over all points
-				for (auto t : builder.vertices) {
-					G[x][y][z] = std::min(G[x][y][z], glm::distance(t.pos, gridPoint));
+		cout << "Starting \n";
+
+		G = vector(gridSize.x, vector(gridSize.y, vector(gridSize.z, 9999999999.9f)));
+
+		// Calculate unsigned distance field
+		// Compute f(p) for all grid points p in G
+		for (int x = 0; x < gridSize.x; x++) {
+			for (int y = 0; y < gridSize.y; y++) {
+				for (int z = 0; z < gridSize.z; z++) {
+					vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
+
+					// Loop over all points
+					for (auto t : builder.vertices) {
+						G[x][y][z] = std::min(G[x][y][z], glm::distance(t.pos, gridPoint));
+					}
 				}
 			}
 		}
+
+		// Get the duration in microseconds
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
+
+		// Print the duration
+		cout << "Time taken to generate G: "
+			<< duration.count() << " microseconds" << endl;
 	}
 
 	// Visualize unsigned distance field
@@ -472,7 +490,6 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 		for (int y = 0; y < gridSize.y - 1; y++) {
 			for (int z = 0; z < gridSize.z - 1; z++) {
 
-				
 				float values[8] = {
 					G[x][y][z],
 					G[x + 1][y][z],
@@ -506,28 +523,41 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 					vector<int> faceEdges = faces[face];
 
-					int size = b.vertices.size() + 0;
+					int size = b.vertices.size();
 
-					for (int i = 0; i < faceEdges.size(); i++) {
-						b.push_vertex(mesh_vertex {
-							edge_to_boundary_vertex(faceEdges[i], gridPoint, values, voxelEdgeLength),
+					mesh_vertex vertices[3] = {
+						mesh_vertex {
+							edge_to_boundary_vertex(faceEdges[0], gridPoint, values, voxelEdgeLength),
 							vec3(1, 0, 0)
-						});
-					}
+						},
+						mesh_vertex {
+							edge_to_boundary_vertex(faceEdges[1], gridPoint, values, voxelEdgeLength),
+							vec3(1, 0, 0)
+						},
+						mesh_vertex {
+							edge_to_boundary_vertex(faceEdges[2], gridPoint, values, voxelEdgeLength),
+							vec3(1, 0, 0)
+						},
+					};
+
+					vec3 v1 = vec3(vertices[1].pos.x - vertices[0].pos.x, vertices[1].pos.y - vertices[0].pos.y, vertices[1].pos.z - vertices[0].pos.z);
+					vec3 v2 = vec3(vertices[2].pos.x - vertices[0].pos.x, vertices[2].pos.y - vertices[0].pos.y, vertices[2].pos.z - vertices[0].pos.z);
+					vec3 surfNormal = normalize(cross(v1, v2));
+
+					vertices[0].norm = surfNormal;
+					vertices[1].norm = surfNormal;
+					vertices[2].norm = surfNormal;
+
+					b.push_vertex(vertices[0]);
+					b.push_vertex(vertices[1]);
+					b.push_vertex(vertices[2]);
 
 					b.push_index(size);
 					b.push_index(size + 1);
 					b.push_index(size + 2);
 				}
 
-				//b.append(debug_box(gridPoint, vec3(voxelEdgeLength)));
-
 				output.append(b);
-
-				if (b.vertices.size() > 5) {
-					//mesh = output.build();
-					//return;
-				}
 			}
 		}
 	}

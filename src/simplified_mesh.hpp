@@ -8,6 +8,9 @@
 #include <cgra/cgra_mesh.hpp>
 
 class simplified_mesh {
+private:
+	std::vector<std::vector<std::vector<float>>> G;
+
 public:
 	GLuint shader = 0;
 	cgra::gl_mesh mesh;
