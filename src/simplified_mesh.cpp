@@ -10,7 +10,7 @@
 #include <chrono>
 #include <unordered_map>
 #include <array>
-
+#include "par_for.h"
 
 using namespace std;
 using namespace glm;
@@ -425,13 +425,13 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 		auto start = std::chrono::high_resolution_clock::now();
 
-		cout << "Starting \n";
+		cout << "Starting\n";
 
 		G = vector(gridSize.x, vector(gridSize.y, vector(gridSize.z, 9999999999.9f)));
 
 		// Calculate unsigned distance field
 		// Compute f(p) for all grid points p in G
-		for (int x = 0; x < gridSize.x; x++) {
+		pl::thread_par_for(0, gridSize.x, [&](unsigned x) {
 			for (int y = 0; y < gridSize.y; y++) {
 				for (int z = 0; z < gridSize.z; z++) {
 					vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
@@ -442,7 +442,7 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 					}
 				}
 			}
-		}
+		});
 
 		// Get the duration in microseconds
 		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
