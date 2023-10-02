@@ -1,71 +1,58 @@
-
 #pragma once
 
-// glm
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// project
-#include "opengl.hpp"
 #include "cgra/cgra_mesh.hpp"
-#include "skeleton_model.hpp"
-
+#include "opengl.hpp"
 
 // Basic model that holds the shader, mesh and transform for drawing.
 // Can be copied and modified for adding in extra information for drawing
 // including textures for texture mapping etc.
 struct basic_model {
-	GLuint shader = 0;
-	cgra::gl_mesh mesh;
-	glm::vec3 color{0.7};
-	glm::mat4 modelTransform{1.0};
-	GLuint texture;
+  GLuint shader = 0;
+  cgra::gl_mesh mesh;
+  glm::vec3 color{0.7f};
+  glm::mat4 model_transform{1.0f};
+  GLuint texture;
 
-	void draw(const glm::mat4 &view, const glm::mat4 proj);
+  void draw(const glm::mat4 &view, const glm::mat4 &projection);
 };
 
+class application {
+ private:
+  glm::vec2 m_window_size_;
+  GLFWwindow *m_window_;
 
-// Main application class
-//
-class Application {
-private:
-	// window
-	glm::vec2 m_windowsize;
-	GLFWwindow *m_window;
+  // Orbital camera
+  float m_pitch_ = 0.86f;
+  float m_yaw_ = -0.86f;
+  float m_distance_ = 20.0f;
 
-	// oribital camera
-	float m_pitch = .86;
-	float m_yaw = -.86;
-	float m_distance = 20;
+  // last input
+  bool m_left_mouse_down_ = false;
+  glm::vec2 m_mouse_position_;
 
-	// last input
-	bool m_leftMouseDown = false;
-	glm::vec2 m_mousePosition;
+  bool m_show_wireframe_ = false;
 
-	// drawing flags
-	bool m_show_axis = false;
-	bool m_show_grid = false;
-	bool m_showWireframe = false;
+  basic_model m_model_;
 
-	// geometry
-	basic_model m_model;
+ public:
+  // setup
+  explicit application(GLFWwindow *);
 
-public:
-	// setup
-	Application(GLFWwindow *);
+  // disable copy constructors (for safety)
+  application(const application &) = delete;
+  application &operator=(const application &) = delete;
 
-	// disable copy constructors (for safety)
-	Application(const Application&) = delete;
-	Application& operator=(const Application&) = delete;
+  // rendering callbacks (every frame)
+  void render();
+  void render_gui();
 
-	// rendering callbacks (every frame)
-	void render();
-	void renderGUI();
-
-	// input callbacks
-	void cursorPosCallback(double xpos, double ypos);
-	void mouseButtonCallback(int button, int action, int mods);
-	void scrollCallback(double xoffset, double yoffset);
-	void keyCallback(int key, int scancode, int action, int mods);
-	void charCallback(unsigned int c);
+  // input callbacks
+  void cursor_pos_cb(double x_pos, double y_pos);
+  void mouse_button_cb(int button, int action, int mods);
+  void scroll_cb(double x_offset, double y_offset);
+  void key_cb(int key, int scan_code, int action, int mods);
+  void char_cb(unsigned int c);
 };

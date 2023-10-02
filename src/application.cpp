@@ -23,7 +23,7 @@ void basic_model::draw(const glm::mat4 &view, const glm::mat4 &projection) {
   mesh.draw();
 }
 
-Application::Application(GLFWwindow *window) : m_window(window) {
+Application::Application(GLFWwindow *window) : m_window_(window) {
   cgra::shader_builder sb;
   sb.set_shader(GL_VERTEX_SHADER,
                 CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
@@ -31,19 +31,19 @@ Application::Application(GLFWwindow *window) : m_window(window) {
                 CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
   const GLuint shader = sb.build();
 
-  m_model.shader = shader;
-  m_model.mesh = cgra::load_wavefront_data(
+  m_model_.shader = shader;
+  m_model_.mesh = cgra::load_wavefront_data(
                      CGRA_SRCDIR + std::string("/res//assets//teapot.obj"))
                      .build();
-  m_model.color = glm::vec3(1.0f, 0.0f, 0.f);
+  m_model_.color = glm::vec3(1.0f, 0.0f, 0.f);
 }
 
 void Application::render() {
   // Retrieve the window height
   int width, height;
-  glfwGetFramebufferSize(m_window, &width, &height);
+  glfwGetFramebufferSize(m_window_, &width, &height);
 
-  m_windowsize = glm::vec2(width, height);
+  m_window_size_ = glm::vec2(width, height);
   glViewport(0, 0, width, height);
 
   // Clear the back-buffer
@@ -59,15 +59,15 @@ void Application::render() {
 
   // Camera
   const glm::mat4 view =
-      glm::translate(glm::mat4(1), glm::vec3(0, 0, -m_distance)) *
-      glm::rotate(glm::mat4(1), m_pitch, glm::vec3(1, 0, 0)) *
-      glm::rotate(glm::mat4(1), m_yaw, glm::vec3(0, 1, 0));
+      glm::translate(glm::mat4(1), glm::vec3(0, 0, -m_distance_)) *
+      glm::rotate(glm::mat4(1), m_pitch_, glm::vec3(1, 0, 0)) *
+      glm::rotate(glm::mat4(1), m_yaw_, glm::vec3(0, 1, 0));
 
   // helpful draw options
-  glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
+  glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
 
   // draw the model
-  m_model.draw(view, projection);
+  m_model_.draw(view, projection);
 }
 
 void Application::render_gui() {
@@ -81,7 +81,7 @@ void Application::render_gui() {
               1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
   // helpful drawing options
-  ImGui::Checkbox("Wireframe", &m_showWireframe);
+  ImGui::Checkbox("Wireframe", &m_show_wireframe_);
   ImGui::SameLine();
   if (ImGui::Button("Screenshot")) cgra::rgba_image::screenshot(true);
 
@@ -90,32 +90,32 @@ void Application::render_gui() {
 }
 
 void Application::cursor_pos_cb(double x_pos, double y_pos) {
-  if (m_leftMouseDown) {
-    const glm::vec2 wh_size = m_windowsize / 2.0f;
+  if (m_left_mouse_down_) {
+    const glm::vec2 wh_size = m_window_size_ / 2.0f;
 
     // clamp the pitch to [-pi/2, pi/2]
-    m_pitch += static_cast<float>(
-        acos(glm::clamp((m_mousePosition.y - wh_size.y) / wh_size.y, -1.0f,
+    m_pitch_ += static_cast<float>(
+        acos(glm::clamp((m_mouse_position_.y - wh_size.y) / wh_size.y, -1.0f,
                         1.0f)) -
         acos(glm::clamp((static_cast<float>(y_pos) - wh_size.y) / wh_size.y,
                         -1.0f, 1.0f)));
-    m_pitch = static_cast<float>(
-        glm::clamp(m_pitch, -glm::pi<float>() / 2, glm::pi<float>() / 2));
+    m_pitch_ = static_cast<float>(
+        glm::clamp(m_pitch_, -glm::pi<float>() / 2, glm::pi<float>() / 2));
 
     // wrap the yaw to [-pi, pi]
-    m_yaw += static_cast<float>(
-        acos(glm::clamp((m_mousePosition.x - wh_size.x) / wh_size.x, -1.0f,
+    m_yaw_ += static_cast<float>(
+        acos(glm::clamp((m_mouse_position_.x - wh_size.x) / wh_size.x, -1.0f,
                         1.0f)) -
         acos(glm::clamp((static_cast<float>(x_pos) - wh_size.x) / wh_size.x,
                         -1.0f, 1.0f)));
-    if (m_yaw > glm::pi<float>())
-      m_yaw -= static_cast<float>(2 * glm::pi<float>());
-    else if (m_yaw < -glm::pi<float>())
-      m_yaw += static_cast<float>(2 * glm::pi<float>());
+    if (m_yaw_ > glm::pi<float>())
+      m_yaw_ -= static_cast<float>(2 * glm::pi<float>());
+    else if (m_yaw_ < -glm::pi<float>())
+      m_yaw_ += static_cast<float>(2 * glm::pi<float>());
   }
 
   // updated mouse position
-  m_mousePosition = glm::vec2(x_pos, y_pos);
+  m_mouse_position_ = glm::vec2(x_pos, y_pos);
 }
 
 void Application::mouse_button_cb(const int button, const int action,
@@ -124,13 +124,13 @@ void Application::mouse_button_cb(const int button, const int action,
 
   // capture is left-mouse down
   if (button == GLFW_MOUSE_BUTTON_LEFT)
-    m_leftMouseDown =
+    m_left_mouse_down_ =
         (action == GLFW_PRESS);  // only other option is GLFW_RELEASE
 }
 
 void Application::scroll_cb(const double x_offset, const double y_offset) {
   (void)x_offset;  // currently un-used
-  m_distance *= glm::pow(1.1f, -y_offset);
+  m_distance_ *= glm::pow(1.1f, -y_offset);
 }
 
 void Application::key_cb(const int key, const int scan_code, const int action,
