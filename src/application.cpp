@@ -57,13 +57,13 @@ void application::render() {
   const glm::mat4 projection =
       glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 1000.f);
 
+  // Update values that affect camera speed
+  const auto current_frame = static_cast<float>(glfwGetTime());
+  m_delta_time_ = current_frame - m_last_frame_;
+  m_last_frame_ = current_frame;
+
   // Camera
-  constexpr float radius = 30.0f;
-  const float cam_x = radius * static_cast<float>(glm::sin(glfwGetTime()));
-  const float cam_z = radius * static_cast<float>(glm::cos(glfwGetTime()));
-  const glm::mat4 view =
-      glm::lookAt(glm::vec3(cam_x, 0.0, cam_z), glm::vec3(0.0f, 0.0f, 0.0f),
-                  glm::vec3(0.0f, 1.0f, 0.0f));
+  const auto view = glm::lookAt(m_camera_pos_, m_camera_pos_ + m_camera_front_, m_camera_up_);
 
   // helpful draw options
   glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
@@ -91,53 +91,48 @@ void application::render_gui() {
   ImGui::End();
 }
 
-void application::cursor_pos_cb(double x_pos, double y_pos) {
-  if (m_left_mouse_down_) {
-    const glm::vec2 wh_size = m_window_size_ / 2.0f;
-
-    // clamp the pitch to [-pi/2, pi/2]
-    m_pitch_ += static_cast<float>(
-        acos(glm::clamp((m_mouse_position_.y - wh_size.y) / wh_size.y, -1.0f,
-                        1.0f)) -
-        acos(glm::clamp((static_cast<float>(y_pos) - wh_size.y) / wh_size.y,
-                        -1.0f, 1.0f)));
-    m_pitch_ = static_cast<float>(
-        glm::clamp(m_pitch_, -glm::pi<float>() / 2, glm::pi<float>() / 2));
-
-    // wrap the yaw to [-pi, pi]
-    m_yaw_ += static_cast<float>(
-        acos(glm::clamp((m_mouse_position_.x - wh_size.x) / wh_size.x, -1.0f,
-                        1.0f)) -
-        acos(glm::clamp((static_cast<float>(x_pos) - wh_size.x) / wh_size.x,
-                        -1.0f, 1.0f)));
-    if (m_yaw_ > glm::pi<float>())
-      m_yaw_ -= static_cast<float>(2 * glm::pi<float>());
-    else if (m_yaw_ < -glm::pi<float>())
-      m_yaw_ += static_cast<float>(2 * glm::pi<float>());
-  }
-
+void application::cursor_pos_cb(const double x_pos, const double y_pos) {
   // updated mouse position
   m_mouse_position_ = glm::vec2(x_pos, y_pos);
 }
 
-void application::mouse_button_cb(const int button, const int action,
-                                  const int mods) {
+void application::mouse_button_cb(const int button, const int action, const int mods) {
   (void)mods;  // currently un-used
 
   // capture is left-mouse down
   if (button == GLFW_MOUSE_BUTTON_LEFT)
-    m_left_mouse_down_ =
-        (action == GLFW_PRESS);  // only other option is GLFW_RELEASE
+    // only other option is GLFW_RELEASE
+    m_left_mouse_down_ = (action == GLFW_PRESS);
 }
 
 void application::scroll_cb(const double x_offset, const double y_offset) {
   (void)x_offset;  // currently un-used
-  m_distance_ *= glm::pow(1.1f, -y_offset);
+  (void)y_offset;
 }
 
-void application::key_cb(const int key, const int scan_code, const int action,
-                         const int mods) {
-  (void)key, (void)scan_code, (void)action, (void)mods;  // currently un-used
+void application::key_cb(const int key, const int scan_code, const int action, const int mods) {
+  (void)scan_code, (void)action, (void)mods;  // currently un-used
+  const float speed = m_camera_speed_ * m_delta_time_;
+
+  switch (key) {
+    case GLFW_KEY_W: {
+      m_camera_pos_ += speed * m_camera_front_;
+      break;
+    }
+    case GLFW_KEY_S: {
+      m_camera_pos_ -= speed * m_camera_front_;
+      break;
+    }
+    case GLFW_KEY_A: {
+      m_camera_pos_ -= glm::normalize(glm::cross(m_camera_front_, m_camera_up_)) * speed;
+      break;
+    }
+    case GLFW_KEY_D: {
+      m_camera_pos_ += glm::normalize(glm::cross(m_camera_front_, m_camera_up_)) * speed;
+      break;
+    }
+  default: break;
+  }
 }
 
 void application::char_cb(const unsigned int c) {

@@ -25,11 +25,14 @@ class application {
   GLFWwindow *m_window_;
 
   // Orbital camera
-  float m_pitch_ = 0.86f;
-  float m_yaw_ = -0.86f;
-  float m_distance_ = 20.0f;
+  const float m_camera_speed_ = 75.0f;
+  glm::vec3 m_camera_pos_   = glm::vec3(0.0f, 0.0f,  3.0f);
+  glm::vec3 m_camera_front_ = glm::vec3(0.0f, 0.0f, -1.0f);
+  glm::vec3 m_camera_up_    = glm::vec3(0.0f, 1.0f,  0.0f);
 
   // last input
+  float m_delta_time_ = 0.0f;
+  float m_last_frame_ = 0.0f;
   bool m_left_mouse_down_ = false;
   glm::vec2 m_mouse_position_;
 
