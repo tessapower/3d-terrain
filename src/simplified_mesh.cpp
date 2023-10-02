@@ -482,8 +482,6 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 		return;
 	}
 
-
-
 	mesh_builder output;
 	
 	for (int x = 0; x < gridSize.x - 1; x++) {
@@ -503,6 +501,7 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 				float isolevel = 0.6;
 
+				// Calculate cube index
 				int cubeIndex = 0;
 				if (values[0] < isolevel) cubeIndex |= 1;
 				if (values[1] < isolevel) cubeIndex |= 2;
@@ -525,6 +524,7 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 					int size = b.vertices.size();
 
+					// Calculate vertices
 					mesh_vertex vertices[3] = {
 						mesh_vertex {
 							edge_to_boundary_vertex(faceEdges[0], gridPoint, values, voxelEdgeLength),
@@ -540,14 +540,17 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 						},
 					};
 
+					// Calculate edge vertices
 					vec3 v1 = vec3(vertices[1].pos.x - vertices[0].pos.x, vertices[1].pos.y - vertices[0].pos.y, vertices[1].pos.z - vertices[0].pos.z);
 					vec3 v2 = vec3(vertices[2].pos.x - vertices[0].pos.x, vertices[2].pos.y - vertices[0].pos.y, vertices[2].pos.z - vertices[0].pos.z);
-					vec3 surfNormal = normalize(cross(v1, v2));
 
+					// Set normals of face
+					vec3 surfNormal = normalize(cross(v1, v2));
 					vertices[0].norm = surfNormal;
 					vertices[1].norm = surfNormal;
 					vertices[2].norm = surfNormal;
 
+					// Push data to builder
 					b.push_vertex(vertices[0]);
 					b.push_vertex(vertices[1]);
 					b.push_vertex(vertices[2]);
@@ -560,6 +563,19 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 				output.append(b);
 			}
 		}
+	}
+
+	if (debugging == 3) {
+		mesh = output.build();
+		return;
+	}
+
+	int N = 3;
+
+	// Mesh optimisation
+
+	for (int i = 0; i < N; i++) {
+		//output = meshSimplification(builder, output, d, nF);
 	}
 
 	// TODO: Run edge flip on output
