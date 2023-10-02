@@ -33,8 +33,8 @@ application::application(GLFWwindow *window) : m_window_(window) {
 
   m_model_.shader = shader;
   m_model_.mesh = cgra::load_wavefront_data(
-                     CGRA_SRCDIR + std::string("/res//assets//teapot.obj"))
-                     .build();
+                      CGRA_SRCDIR + std::string("/res//assets//teapot.obj"))
+                      .build();
   m_model_.color = glm::vec3(1.0f, 0.0f, 0.f);
 }
 
@@ -58,10 +58,12 @@ void application::render() {
       glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 1000.f);
 
   // Camera
+  constexpr float radius = 30.0f;
+  const float cam_x = radius * static_cast<float>(glm::sin(glfwGetTime()));
+  const float cam_z = radius * static_cast<float>(glm::cos(glfwGetTime()));
   const glm::mat4 view =
-      glm::translate(glm::mat4(1), glm::vec3(0, 0, -m_distance_)) *
-      glm::rotate(glm::mat4(1), m_pitch_, glm::vec3(1, 0, 0)) *
-      glm::rotate(glm::mat4(1), m_yaw_, glm::vec3(0, 1, 0));
+      glm::lookAt(glm::vec3(cam_x, 0.0, cam_z), glm::vec3(0.0f, 0.0f, 0.0f),
+                  glm::vec3(0.0f, 1.0f, 0.0f));
 
   // helpful draw options
   glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
