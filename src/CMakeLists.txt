@@ -6,12 +6,6 @@ SET(sources
 	"application.hpp"
 	"application.cpp"
 
-	# TODO: Remove unused files from project
-	"skeleton.hpp"
-	"skeleton.cpp"
-	"skeleton_model.hpp"
-	"skeleton_model.cpp"
-	
 	"opengl.hpp"
 
 	"main.cpp"
