@@ -1,146 +1,106 @@
-
-// std
-#include <iostream>
 #include <string>
 #include <chrono>
 
-// glm
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// project
 #include "application.hpp"
-#include "cgra/cgra_geometry.hpp"
 #include "cgra/cgra_gui.hpp"
 #include "cgra/cgra_image.hpp"
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
 
-
-using namespace std;
-using namespace cgra;
-using namespace glm;
-
-
-void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
-	mat4 modelview = view * modelTransform;
+void basic_model::draw(const glm::mat4 &view, const glm::mat4& projection) {
+	glm::mat4 model_view = view * modelTransform;
 	
 	glUseProgram(shader); // load shader and variables
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uProjectionMatrix"), 1, false, value_ptr(proj));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uModelViewMatrix"), 1, false, value_ptr(modelview));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "uProjectionMatrix"), 1, false, value_ptr(projection));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "uModelViewMatrix"), 1, false, glm::value_ptr(model_view));
 	glUniform3fv(glGetUniformLocation(shader, "uColor"), 1, value_ptr(color));
 
-	mesh.draw(); // draw
+	mesh.draw();
 }
-
 
 Application::Application(GLFWwindow *window) : m_window(window) {
-	
-	shader_builder sb;
+	cgra::shader_builder sb;
     sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
 	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
-	GLuint shader = sb.build();
+	const GLuint shader = sb.build();
 
 	m_model.shader = shader;
-	m_model.mesh = load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build();
-	m_model.color = vec3(1, 0, 0);
+	m_model.mesh = cgra::load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build();
+	m_model.color = glm::vec3(1.0f, 0.0f, 0.f);
 }
 
-
 void Application::render() {
-	
-	// retrieve the window hieght
+	// Retrieve the window height
 	int width, height;
 	glfwGetFramebufferSize(m_window, &width, &height); 
 
-	m_windowsize = vec2(width, height); // update window size
-	glViewport(0, 0, width, height); // set the viewport to draw to the entire window
+	m_windowsize = glm::vec2(width, height);
+	glViewport(0, 0, width, height);
 
-	// clear the back-buffer
+	// Clear the back-buffer
 	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
-	// enable flags for normal/forward rendering
+	// Enable flags for normal/forward rendering
 	glEnable(GL_DEPTH_TEST); 
 	glDepthFunc(GL_LESS);
 
-	// projection matrix
-	mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
+  const glm::mat4 projection = glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 1000.f);
 
-	// view matrix
-	mat4 view = translate(mat4(1), vec3(0, 0, -m_distance))
-		* rotate(mat4(1), m_pitch, vec3(1, 0, 0))
-		* rotate(mat4(1), m_yaw,   vec3(0, 1, 0));
-
+	// Camera
+  const glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(0, 0, -m_distance))
+		* glm::rotate(glm::mat4(1), m_pitch, glm::vec3(1, 0, 0))
+		* glm::rotate(glm::mat4(1), m_yaw,   glm::vec3(0, 1, 0));
 
 	// helpful draw options
-	if (m_show_grid) drawGrid(view, proj);
-	if (m_show_axis) drawAxis(view, proj);
 	glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
 
-
 	// draw the model
-	m_model.draw(view, proj);
+	m_model.draw(view, projection);
 }
 
-
-void Application::renderGUI() {
-
+void Application::render_gui() {
 	// setup window
 	ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiSetCond_Once);
 	ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
-	ImGui::Begin("Options", 0);
+	ImGui::Begin("Options", nullptr);
 
 	// display current camera parameters
 	ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	ImGui::SliderFloat("Pitch", &m_pitch, -pi<float>() / 2, pi<float>() / 2, "%.2f");
-	ImGui::SliderFloat("Yaw", &m_yaw, -pi<float>(), pi<float>(), "%.2f");
-	ImGui::SliderFloat("Distance", &m_distance, 0, 100, "%.2f", 2.0f);
 
 	// helpful drawing options
-	ImGui::Checkbox("Show axis", &m_show_axis);
-	ImGui::SameLine();
-	ImGui::Checkbox("Show grid", &m_show_grid);
 	ImGui::Checkbox("Wireframe", &m_showWireframe);
 	ImGui::SameLine();
-	if (ImGui::Button("Screenshot")) rgba_image::screenshot(true);
-
-	
-	ImGui::Separator();
-
-	// example of how to use input boxes
-	static float exampleInput;
-	if (ImGui::InputFloat("example input", &exampleInput)) {
-		cout << "example input changed to " << exampleInput << endl;
-	}
+	if (ImGui::Button("Screenshot")) cgra::rgba_image::screenshot(true);
 
 	// finish creating window
 	ImGui::End();
 }
 
-
-void Application::cursorPosCallback(double xpos, double ypos) {
+void Application::cursor_pos_cb(double x_pos, double y_pos) {
 	if (m_leftMouseDown) {
-		vec2 whsize = m_windowsize / 2.0f;
+    const glm::vec2 wh_size = m_windowsize / 2.0f;
 
 		// clamp the pitch to [-pi/2, pi/2]
-		m_pitch += float(acos(glm::clamp((m_mousePosition.y - whsize.y) / whsize.y, -1.0f, 1.0f))
-			- acos(glm::clamp((float(ypos) - whsize.y) / whsize.y, -1.0f, 1.0f)));
-		m_pitch = float(glm::clamp(m_pitch, -pi<float>() / 2, pi<float>() / 2));
+		m_pitch += static_cast<float>(acos(glm::clamp((m_mousePosition.y - wh_size.y) / wh_size.y, -1.0f, 1.0f))
+      - acos(glm::clamp((static_cast<float>(y_pos) - wh_size.y) / wh_size.y, -1.0f, 1.0f)));
+		m_pitch = static_cast<float>(glm::clamp(m_pitch, -glm::pi<float>() / 2, glm::pi<float>() / 2));
 
 		// wrap the yaw to [-pi, pi]
-		m_yaw += float(acos(glm::clamp((m_mousePosition.x - whsize.x) / whsize.x, -1.0f, 1.0f))
-			- acos(glm::clamp((float(xpos) - whsize.x) / whsize.x, -1.0f, 1.0f)));
-		if (m_yaw > pi<float>()) m_yaw -= float(2 * pi<float>());
-		else if (m_yaw < -pi<float>()) m_yaw += float(2 * pi<float>());
+		m_yaw += static_cast<float>(acos(glm::clamp((m_mousePosition.x - wh_size.x) / wh_size.x, -1.0f, 1.0f))
+      - acos(glm::clamp((static_cast<float>(x_pos) - wh_size.x) / wh_size.x, -1.0f, 1.0f)));
+		if (m_yaw > glm::pi<float>()) m_yaw -= static_cast<float>(2 * glm::pi<float>());
+		else if (m_yaw < -glm::pi<float>()) m_yaw += static_cast<float>(2 * glm::pi<float>());
 	}
 
 	// updated mouse position
-	m_mousePosition = vec2(xpos, ypos);
+	m_mousePosition = glm::vec2(x_pos, y_pos);
 }
 
-
-void Application::mouseButtonCallback(int button, int action, int mods) {
+void Application::mouse_button_cb(const int button, const int action, const int mods) {
 	(void)mods; // currently un-used
 
 	// capture is left-mouse down
@@ -148,18 +108,15 @@ void Application::mouseButtonCallback(int button, int action, int mods) {
 		m_leftMouseDown = (action == GLFW_PRESS); // only other option is GLFW_RELEASE
 }
 
-
-void Application::scrollCallback(double xoffset, double yoffset) {
-	(void)xoffset; // currently un-used
-	m_distance *= pow(1.1f, -yoffset);
+void Application::scroll_cb(const double x_offset, const double y_offset) {
+	(void)x_offset; // currently un-used
+	m_distance *= glm::pow(1.1f, -y_offset);
 }
 
-
-void Application::keyCallback(int key, int scancode, int action, int mods) {
-	(void)key, (void)scancode, (void)action, (void)mods; // currently un-used
+void Application::key_cb(const int key, const int scan_code, const int action, const int mods) {
+	(void)key, (void)scan_code, (void)action, (void)mods; // currently un-used
 }
 
-
-void Application::charCallback(unsigned int c) {
+void Application::char_cb(const unsigned int c) {
 	(void)c; // currently un-used
 }
