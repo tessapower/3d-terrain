@@ -11,7 +11,7 @@
 #include "cgra/cgra_wavefront.hpp"
 
 void basic_model::draw(const glm::mat4 &view, const glm::mat4 &projection) {
-  glm::mat4 model_view = view * modelTransform;
+  glm::mat4 model_view = view * model_transform;
 
   glUseProgram(shader);  // load shader and variables
   glUniformMatrix4fv(glGetUniformLocation(shader, "uProjectionMatrix"), 1,
@@ -23,7 +23,7 @@ void basic_model::draw(const glm::mat4 &view, const glm::mat4 &projection) {
   mesh.draw();
 }
 
-Application::Application(GLFWwindow *window) : m_window_(window) {
+application::application(GLFWwindow *window) : m_window_(window) {
   cgra::shader_builder sb;
   sb.set_shader(GL_VERTEX_SHADER,
                 CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
@@ -38,7 +38,7 @@ Application::Application(GLFWwindow *window) : m_window_(window) {
   m_model_.color = glm::vec3(1.0f, 0.0f, 0.f);
 }
 
-void Application::render() {
+void application::render() {
   // Retrieve the window height
   int width, height;
   glfwGetFramebufferSize(m_window_, &width, &height);
@@ -70,7 +70,7 @@ void Application::render() {
   m_model_.draw(view, projection);
 }
 
-void Application::render_gui() {
+void application::render_gui() {
   // setup window
   ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiSetCond_Once);
   ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
@@ -89,7 +89,7 @@ void Application::render_gui() {
   ImGui::End();
 }
 
-void Application::cursor_pos_cb(double x_pos, double y_pos) {
+void application::cursor_pos_cb(double x_pos, double y_pos) {
   if (m_left_mouse_down_) {
     const glm::vec2 wh_size = m_window_size_ / 2.0f;
 
@@ -118,7 +118,7 @@ void Application::cursor_pos_cb(double x_pos, double y_pos) {
   m_mouse_position_ = glm::vec2(x_pos, y_pos);
 }
 
-void Application::mouse_button_cb(const int button, const int action,
+void application::mouse_button_cb(const int button, const int action,
                                   const int mods) {
   (void)mods;  // currently un-used
 
@@ -128,16 +128,16 @@ void Application::mouse_button_cb(const int button, const int action,
         (action == GLFW_PRESS);  // only other option is GLFW_RELEASE
 }
 
-void Application::scroll_cb(const double x_offset, const double y_offset) {
+void application::scroll_cb(const double x_offset, const double y_offset) {
   (void)x_offset;  // currently un-used
   m_distance_ *= glm::pow(1.1f, -y_offset);
 }
 
-void Application::key_cb(const int key, const int scan_code, const int action,
+void application::key_cb(const int key, const int scan_code, const int action,
                          const int mods) {
   (void)key, (void)scan_code, (void)action, (void)mods;  // currently un-used
 }
 
-void Application::char_cb(const unsigned int c) {
+void application::char_cb(const unsigned int c) {
   (void)c;  // currently un-used
 }
