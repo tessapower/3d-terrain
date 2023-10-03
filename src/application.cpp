@@ -73,25 +73,48 @@ void application::render() {
 }
 
 void application::render_gui() {
-  // setup window
   ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiSetCond_Once);
   ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
   ImGui::Begin("Options", nullptr);
 
-  // display current camera parameters
   ImGui::Text("Application %.3f ms/frame (%.1f FPS)",
               1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-  // helpful drawing options
+  ImGui::Text("Camera Pitch %.1f", static_cast<double>(m_camera_pitch_));
+  ImGui::Text("Camera Yaw %.1f", static_cast<double>(m_camera_yaw_));
+
   ImGui::Checkbox("Wireframe", &m_show_wireframe_);
   ImGui::SameLine();
   if (ImGui::Button("Screenshot")) cgra::rgba_image::screenshot(true);
 
-  // finish creating window
   ImGui::End();
 }
 
 void application::cursor_pos_cb(const double x_pos, const double y_pos) {
+  if (m_first_mouse_) {
+    m_mouse_position_ = glm::vec2(x_pos, y_pos);
+    m_first_mouse_ = false;
+  }
+
+  float x_offset = static_cast<float>(x_pos) - m_mouse_position_.x;
+  float y_offset = m_mouse_position_.y - static_cast<float>(y_pos);
+
+  x_offset *= m_sensitivity_;
+  y_offset *= m_sensitivity_;
+
+  m_camera_yaw_ += x_offset;
+  m_camera_pitch_ += y_offset;
+
+  if (m_camera_pitch_ > m_max_pitch_)
+    m_camera_pitch_ = m_max_pitch_;
+  if (m_camera_pitch_ < -m_max_pitch_)
+    m_camera_pitch_ = -m_max_pitch_;
+
+  m_direction_.x = cos(glm::radians(m_camera_yaw_)) * cos(glm::radians(m_camera_pitch_));
+  m_direction_.y = sin(glm::radians(m_camera_pitch_));
+  m_direction_.z = sin(glm::radians(m_camera_yaw_)) * cos(glm::radians(m_camera_pitch_));
+  m_camera_front_ = glm::normalize(m_direction_);
+
   // updated mouse position
   m_mouse_position_ = glm::vec2(x_pos, y_pos);
 }
