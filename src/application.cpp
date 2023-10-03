@@ -62,14 +62,11 @@ void application::render() {
   m_delta_time_ = current_frame - m_last_frame_;
   m_last_frame_ = current_frame;
 
-  // Camera
-  const auto view = glm::lookAt(m_camera_pos_, m_camera_pos_ + m_camera_front_, m_camera_up_);
-
   // helpful draw options
   glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
 
   // draw the model
-  m_model_.draw(view, projection);
+  m_model_.draw(m_camera_.view_matrix(), projection);
 }
 
 void application::render_gui() {
@@ -80,8 +77,8 @@ void application::render_gui() {
   ImGui::Text("Application %.3f ms/frame (%.1f FPS)",
               1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-  ImGui::Text("Camera Pitch %.1f", static_cast<double>(m_camera_pitch_));
-  ImGui::Text("Camera Yaw %.1f", static_cast<double>(m_camera_yaw_));
+  ImGui::Text("Camera Pitch %.1f", static_cast<double>(m_camera_.m_pitch));
+  ImGui::Text("Camera Yaw %.1f", static_cast<double>(m_camera_.m_yaw));
 
   ImGui::Checkbox("Wireframe", &m_show_wireframe_);
   ImGui::SameLine();
@@ -96,24 +93,10 @@ void application::cursor_pos_cb(const double x_pos, const double y_pos) {
     m_first_mouse_ = false;
   }
 
-  float x_offset = static_cast<float>(x_pos) - m_mouse_position_.x;
-  float y_offset = m_mouse_position_.y - static_cast<float>(y_pos);
+  const float x_offset = static_cast<float>(x_pos) - m_mouse_position_.x;
+  const float y_offset = m_mouse_position_.y - static_cast<float>(y_pos);
 
-  x_offset *= m_sensitivity_;
-  y_offset *= m_sensitivity_;
-
-  m_camera_yaw_ += x_offset;
-  m_camera_pitch_ += y_offset;
-
-  if (m_camera_pitch_ > m_max_pitch_)
-    m_camera_pitch_ = m_max_pitch_;
-  if (m_camera_pitch_ < -m_max_pitch_)
-    m_camera_pitch_ = -m_max_pitch_;
-
-  m_direction_.x = cos(glm::radians(m_camera_yaw_)) * cos(glm::radians(m_camera_pitch_));
-  m_direction_.y = sin(glm::radians(m_camera_pitch_));
-  m_direction_.z = sin(glm::radians(m_camera_yaw_)) * cos(glm::radians(m_camera_pitch_));
-  m_camera_front_ = glm::normalize(m_direction_);
+  m_camera_.process_mouse_movement(x_offset, y_offset);
 
   // updated mouse position
   m_mouse_position_ = glm::vec2(x_pos, y_pos);
@@ -139,22 +122,22 @@ void application::key_cb(const int key, const int scan_code, const int action, c
 
   switch (key) {
     case GLFW_KEY_W: {
-      m_camera_pos_ += speed * m_camera_front_;
+      m_camera_.process_keyboard(camera_movement::forward, m_delta_time_);
       break;
     }
     case GLFW_KEY_S: {
-      m_camera_pos_ -= speed * m_camera_front_;
+      m_camera_.process_keyboard(camera_movement::backward, m_delta_time_);
       break;
     }
     case GLFW_KEY_A: {
-      m_camera_pos_ -= glm::normalize(glm::cross(m_camera_front_, m_camera_up_)) * speed;
+      m_camera_.process_keyboard(camera_movement::left, m_delta_time_);
       break;
     }
     case GLFW_KEY_D: {
-      m_camera_pos_ += glm::normalize(glm::cross(m_camera_front_, m_camera_up_)) * speed;
+      m_camera_.process_keyboard(camera_movement::right, m_delta_time_);
       break;
     }
-  default: break;
+    default: break;
   }
 }
 
