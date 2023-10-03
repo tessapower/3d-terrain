@@ -1,7 +1,6 @@
 #include "application.hpp"
 
 #include <chrono>
-#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
 
