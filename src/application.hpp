@@ -60,7 +60,7 @@ class application {
   // input callbacks
   void cursor_pos_cb(double x_pos, double y_pos);
   void mouse_button_cb(int button, int action, int mods);
-  void scroll_cb(double x_offset, double y_offset);
+  [[maybe_unused]] void scroll_cb(double x_offset, double y_offset);
   void key_cb(int key, int scan_code, int action, int mods);
-  void char_cb(unsigned int c);
+  [[maybe_unused]] void char_cb(unsigned int c);
 };

@@ -112,13 +112,12 @@ void application::mouse_button_cb(const int button, const int action, const int 
 }
 
 void application::scroll_cb(const double x_offset, const double y_offset) {
-  (void)x_offset;  // currently un-used
+  (void)x_offset;
   (void)y_offset;
 }
 
 void application::key_cb(const int key, const int scan_code, const int action, const int mods) {
-  (void)scan_code, (void)action, (void)mods;  // currently un-used
-  const float speed = m_camera_speed_ * m_delta_time_;
+  (void)scan_code, (void)action, (void)mods;
 
   switch (key) {
     case GLFW_KEY_W: {
@@ -142,5 +141,5 @@ void application::key_cb(const int key, const int scan_code, const int action, c
 }
 
 void application::char_cb(const unsigned int c) {
-  (void)c;  // currently un-used
+  (void)c;
 }
