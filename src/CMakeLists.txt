@@ -10,6 +10,8 @@ SET(sources
 
 	"main.cpp"
 
+	"camera.hpp"
+
 	"CMakeLists.txt"
 )
 
