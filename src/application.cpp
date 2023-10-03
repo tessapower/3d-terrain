@@ -12,7 +12,8 @@
 void basic_model::draw(const glm::mat4 &view, const glm::mat4 &projection) {
   glm::mat4 model_view = view * model_transform;
 
-  glUseProgram(shader);  // load shader and variables
+  // Load shader and variables into GPU
+  glUseProgram(shader);
   glUniformMatrix4fv(glGetUniformLocation(shader, "uProjectionMatrix"), 1,
                      false, value_ptr(projection));
   glUniformMatrix4fv(glGetUniformLocation(shader, "uModelViewMatrix"), 1, false,
@@ -42,6 +43,7 @@ void application::render() {
   int width, height;
   glfwGetFramebufferSize(m_window_, &width, &height);
 
+  // Set the window size (we do this every time we call render to support resizing)
   m_window_size_ = glm::vec2(width, height);
   glViewport(0, 0, width, height);
 
@@ -53,18 +55,16 @@ void application::render() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
 
-  const glm::mat4 projection =
-      glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 1000.f);
-
   // Update values that affect camera speed
   const auto current_frame = static_cast<float>(glfwGetTime());
   m_delta_time_ = current_frame - m_last_frame_;
   m_last_frame_ = current_frame;
 
-  // helpful draw options
-  glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
+  const glm::mat4 projection =
+      glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 1000.f);
 
-  // draw the model
+  // Draw the model
+  glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
   m_model_.draw(m_camera_.view_matrix(), projection);
 }
 
@@ -95,18 +95,17 @@ void application::cursor_pos_cb(const double x_pos, const double y_pos) {
   const float x_offset = static_cast<float>(x_pos) - m_mouse_position_.x;
   const float y_offset = m_mouse_position_.y - static_cast<float>(y_pos);
 
-  m_camera_.process_mouse_movement(x_offset, y_offset);
+  // Update the camera to use the new offsets
+  m_camera_.update_angle(x_offset, y_offset);
 
-  // updated mouse position
   m_mouse_position_ = glm::vec2(x_pos, y_pos);
 }
 
 void application::mouse_button_cb(const int button, const int action, const int mods) {
-  (void)mods;  // currently un-used
+  (void)mods;
 
-  // capture is left-mouse down
   if (button == GLFW_MOUSE_BUTTON_LEFT)
-    // only other option is GLFW_RELEASE
+    // Other option is GLFW_RELEASE
     m_left_mouse_down_ = (action == GLFW_PRESS);
 }
 
@@ -116,26 +115,29 @@ void application::scroll_cb(const double x_offset, const double y_offset) {
 }
 
 void application::key_cb(const int key, const int scan_code, const int action, const int mods) {
-  (void)scan_code, (void)action, (void)mods;
+  (void)scan_code, (void)mods;
 
-  switch (key) {
-    case GLFW_KEY_W: {
-      m_camera_.process_keyboard(camera_movement::forward, m_delta_time_);
-      break;
+  // Only respond to key presses
+  if (action == GLFW_PRESS) {
+    switch (key) {
+      case GLFW_KEY_W: {
+        m_camera_.move(camera_movement::forward, m_delta_time_);
+        break;
+      }
+      case GLFW_KEY_S: {
+        m_camera_.move(camera_movement::backward, m_delta_time_);
+        break;
+      }
+      case GLFW_KEY_A: {
+        m_camera_.move(camera_movement::left, m_delta_time_);
+        break;
+      }
+      case GLFW_KEY_D: {
+        m_camera_.move(camera_movement::right, m_delta_time_);
+        break;
+      }
+      default: break;
     }
-    case GLFW_KEY_S: {
-      m_camera_.process_keyboard(camera_movement::backward, m_delta_time_);
-      break;
-    }
-    case GLFW_KEY_A: {
-      m_camera_.process_keyboard(camera_movement::left, m_delta_time_);
-      break;
-    }
-    case GLFW_KEY_D: {
-      m_camera_.process_keyboard(camera_movement::right, m_delta_time_);
-      break;
-    }
-    default: break;
   }
 }
 
