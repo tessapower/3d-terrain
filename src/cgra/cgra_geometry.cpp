@@ -1,12 +1,7 @@
-// std
-#include <vector>
-
-//glm
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// project
 #include "cgra_geometry.hpp"
 #include "cgra_shader.hpp"
 #include <opengl.hpp>
