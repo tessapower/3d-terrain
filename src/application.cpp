@@ -117,27 +117,24 @@ void application::scroll_cb(const double x_offset, const double y_offset) {
 void application::key_cb(const int key, const int scan_code, const int action, const int mods) {
   (void)scan_code, (void)mods;
 
-  // Only respond to key presses
-  if (action == GLFW_PRESS) {
-    switch (key) {
-      case GLFW_KEY_W: {
-        m_camera_.move(camera_movement::forward, m_delta_time_);
-        break;
-      }
-      case GLFW_KEY_S: {
-        m_camera_.move(camera_movement::backward, m_delta_time_);
-        break;
-      }
-      case GLFW_KEY_A: {
-        m_camera_.move(camera_movement::left, m_delta_time_);
-        break;
-      }
-      case GLFW_KEY_D: {
-        m_camera_.move(camera_movement::right, m_delta_time_);
-        break;
-      }
-      default: break;
+  switch (key) {
+    case GLFW_KEY_W: {
+      m_camera_.move(camera_movement::forward, m_delta_time_);
+      break;
     }
+    case GLFW_KEY_S: {
+      m_camera_.move(camera_movement::backward, m_delta_time_);
+      break;
+    }
+    case GLFW_KEY_A: {
+      m_camera_.move(camera_movement::left, m_delta_time_);
+      break;
+    }
+    case GLFW_KEY_D: {
+      m_camera_.move(camera_movement::right, m_delta_time_);
+      break;
+    }
+    default: break;
   }
 }
 
