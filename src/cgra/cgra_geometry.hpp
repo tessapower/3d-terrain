@@ -1,22 +1,21 @@
 #pragma once
 
 namespace cgra {
-  
   // creates a mesh for a unit sphere (radius of 1)
   // immediately draws the sphere mesh, assuming the shader is set up
-  void drawSphere();
+  void draw_sphere();
 
-  // creates a mesh for a unit cylinder (radius and hieght of 1) along the z-axis
+  // creates a mesh for a unit cylinder (radius and height of 1) along the z-axis
   // immediately draws the sphere mesh, assuming the shader is set up
-  void drawCylinder();
+  void draw_cylinder();
   
-  // creates a mesh for a unit cone (radius and hieght of 1) along the z-axis
+  // creates a mesh for a unit cone (radius and height of 1) along the z-axis
   // immediately draws the sphere mesh, assuming the shader is set up
-  void drawCone();
+  void draw_cone();
 
   // sets up a shader and draws an axis straight to the current framebuffer
-  void drawAxis(const glm::mat4 &view, const glm::mat4 &proj);
+  void draw_axis(const glm::mat4 &view, const glm::mat4 &proj);
 
   // sets up a shader and draws a grid straight to the current framebuffer
-  void drawGrid(const glm::mat4 &view, const glm::mat4 &proj);
+  void draw_grid(const glm::mat4 &view, const glm::mat4 &proj);
 }
