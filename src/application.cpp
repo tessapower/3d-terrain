@@ -92,11 +92,13 @@ void application::cursor_pos_cb(const double x_pos, const double y_pos) {
     m_first_mouse_ = false;
   }
 
-  const float x_offset = static_cast<float>(x_pos) - m_mouse_position_.x;
-  const float y_offset = m_mouse_position_.y - static_cast<float>(y_pos);
+  if (m_middle_mouse_down_) {
+    const float x_offset = static_cast<float>(x_pos) - m_mouse_position_.x;
+    const float y_offset = m_mouse_position_.y - static_cast<float>(y_pos);
 
-  // Update the camera to use the new offsets
-  m_camera_.update_angle(x_offset, y_offset);
+    // Update the camera to use the new offsets
+    m_camera_.update_angle(x_offset, y_offset);
+  }
 
   m_mouse_position_ = glm::vec2(x_pos, y_pos);
 }
@@ -104,9 +106,17 @@ void application::cursor_pos_cb(const double x_pos, const double y_pos) {
 void application::mouse_button_cb(const int button, const int action, const int mods) {
   (void)mods;
 
-  if (button == GLFW_MOUSE_BUTTON_LEFT)
-    // Other option is GLFW_RELEASE
-    m_left_mouse_down_ = (action == GLFW_PRESS);
+  switch(button) {
+    case GLFW_MOUSE_BUTTON_LEFT: {
+      m_left_mouse_down_ = (action == GLFW_PRESS);
+      break;
+    }
+    case GLFW_MOUSE_BUTTON_MIDDLE: {
+      m_middle_mouse_down_ = (action == GLFW_PRESS);
+      break;
+    }
+    default: break;
+  }
 }
 
 void application::scroll_cb(const double x_offset, const double y_offset) {

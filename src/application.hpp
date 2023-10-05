@@ -38,6 +38,7 @@ class application {
 
   // Mouse Input
   bool m_left_mouse_down_ = false;
+  bool m_middle_mouse_down_ = false;
   bool m_first_mouse_ = true;
   glm::vec2 m_mouse_position_;
 
