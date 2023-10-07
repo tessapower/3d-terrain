@@ -417,10 +417,12 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 	float lp = screenSpacePos.x; // Pixel length of screenspace bounding box
 	float l = sqrt(pow(screenSpacePos.x, 2) + pow(screenSpacePos.y, 2)); // Diagonal length of screenspace bounding box
 
-	float np = (screenSpacePos.x * screenSpacePos.y) / 100; //l / lp; // the maximum number of pixels that the high-poly mesh�s diagonal could occupy across all potential rendering view
+	float np = l / lp; // the maximum number of pixels that the high-poly mesh�s diagonal could occupy across all potential rendering view
 	float d = l / np;
 
 	float voxelEdgeLength = d / sqrt(3);
+
+	printf("voxelEdgeLength: %f\n", voxelEdgeLength);
 
 	voxelEdgeLength = 0.01;
 
@@ -453,9 +455,13 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 				for (int z = 0; z < gridSize.z; z++) {
 					vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
-					for (auto t : builder.vertices) {
-						G[x][y][z] = std::min(G[x][y][z], glm::distance(t.pos, gridPoint));
-					}
+					//for (auto t : builder.vertices) {
+					//	G[x][y][z] = std::min(G[x][y][z], glm::distance(t.pos, gridPoint));
+					//}
+
+					OrthoTree::entity_id_type pointId = octree.GetNearestNeighbors(OrthoTree::Point3D { gridPoint.x, gridPoint.y, gridPoint.z }, 1, octreePoints)[0];
+					OrthoTree::Point3D point = octreePoints[pointId];
+					G[x][y][z] = glm::distance(vec3(point[0], point[1], point[2]), gridPoint);
 				}
 			}
 		}
