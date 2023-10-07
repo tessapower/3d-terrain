@@ -43,14 +43,15 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	GLuint shader = sb.build();
 
 	m_model_rock.shader = shader;
-	//m_model_rock.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")));
-	//m_model_rock.build(vec2());
+	m_model_rock.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res/assets/rock.obj")));
+	m_model_rock.build(vec2());
 	m_model_cliff.shader = shader;
-	m_model_cliff.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")));
+	m_model_cliff.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res/assets/cliff.obj")));
 	m_model_cliff.build(vec2());
 	m_model_bunny.shader = shader;
-	//m_model_bunny.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//lamp2.obj")));
-	//m_model_bunny.build(vec2());
+	m_model_bunny.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res/assets/bunny2.obj")));
+	m_model_bunny.isolevel = 0.007;
+	m_model_bunny.build(vec2());
 }
 
 
@@ -116,13 +117,13 @@ void Application::renderGUI() {
 
 	ImGui::Separator();
 
-	if (ImGui::Combo("Debugging", &debugging, "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0", 4)) {
+	if (ImGui::Combo("Debugging", &debugging, "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0", 5)) {
 		m_model_rock.debugging = debugging;
 		//m_model_rock.build(vec2());
 		m_model_cliff.debugging = debugging;
-		m_model_cliff.build(vec2());
+		//m_model_cliff.build(vec2());
 		m_model_bunny.debugging = debugging;
-		//m_model_bunny.build(vec2());
+		m_model_bunny.build(vec2());
 	}
 
 	// finish creating window
