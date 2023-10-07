@@ -53,6 +53,9 @@ private:
 	simplified_mesh m_model_bunny;
 	simplified_mesh m_model_cliff;
 
+	float voxelEdgeLength = 0.01;
+	float isolevel = 0.007;
+
 	int debugging = 0;
 
 public:

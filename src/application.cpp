@@ -117,6 +117,18 @@ void Application::renderGUI() {
 
 	ImGui::Separator();
 
+	if (ImGui::SliderFloat("Voxel Size", &voxelEdgeLength, 0.01, 0.03)) {
+		m_model_bunny.voxelEdgeLength = voxelEdgeLength;
+		m_model_bunny.build(vec2());
+	}
+
+	if (ImGui::SliderFloat("Isolevel", &isolevel, 0.01, 0.1)) {
+		printf("before: %f\n", m_model_bunny.isolevel);
+		m_model_bunny.isolevel = isolevel;
+		m_model_bunny.build(vec2());
+		printf("after: %f\n", m_model_bunny.isolevel);
+	}
+
 	if (ImGui::Combo("Debugging", &debugging, "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0", 5)) {
 		m_model_rock.debugging = debugging;
 		//m_model_rock.build(vec2());

@@ -13,8 +13,8 @@
 #include "par_for.h"
 #include <queue> 
 
-// Octree
-#include "octree.h"
+// Blender kdtree
+#include "KDTree.h"
 
 using namespace std;
 using namespace glm;
@@ -356,15 +356,16 @@ vec3 edge_to_boundary_vertex(int edge, vec3 point, float* f_eval, float voxelEdg
 void simplified_mesh::set_model(mesh_builder builder) {
 	this->builder = builder;
 
-	// Generate octree
-	int maxDepth = 7;
-	octreePoints.clear();
+	tree = jk::tree::KDTree<int, 3, 512>();
 
-	for (mesh_vertex vertices : builder.vertices) {
-		octreePoints.push_back(OrthoTree::Point3D { vertices.pos.x, vertices.pos.y, vertices.pos.z });
+	// Reserve proper space
+	tree.reserve(builder.vertices.size());
+
+	for (int i = 0; i < builder.vertices.size(); i++) {
+		tree.addPoint({ builder.vertices[i].pos.x, builder.vertices[i].pos.y, builder.vertices[i].pos.z }, i, false);
 	}
-	
-	octree = OrthoTree::OctreePoint(octreePoints, maxDepth);
+
+	tree.splitOutstanding();
 }
 
 void simplified_mesh::build(glm::vec2 screenSize) {
@@ -417,14 +418,8 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 	float lp = screenSpacePos.x; // Pixel length of screenspace bounding box
 	float l = sqrt(pow(screenSpacePos.x, 2) + pow(screenSpacePos.y, 2)); // Diagonal length of screenspace bounding box
 
-	float np = l / lp; // the maximum number of pixels that the high-poly mesh�s diagonal could occupy across all potential rendering view
+	float np = l / lp; // the maximum number of pixels that the high-poly mesh's diagonal could occupy across all potential rendering view
 	float d = l / np;
-
-	float voxelEdgeLength = d / sqrt(3);
-
-	printf("voxelEdgeLength: %f\n", voxelEdgeLength);
-
-	voxelEdgeLength = 0.01;
 
 	// Grid discretization (Mi,d)
 
@@ -439,37 +434,40 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 		std::ceil((topRight.z - bottomLeft.z) / voxelEdgeLength)
 	);
 
-	if (G.size() == 0) {
+	printf("Size: %f %f %f\n", gridSize.x, gridSize.y, gridSize.z);
 
-		auto start = std::chrono::high_resolution_clock::now();
+	auto start = std::chrono::high_resolution_clock::now();
 
-		cout << "Starting\n";
+	cout << "Starting\n";
 
-		G = vector(gridSize.x, vector(gridSize.y, vector(gridSize.z, 9999999999.9f)));
 
-		// Calculate unsigned distance field
-		// Compute f(p) for all grid points p in G
-		pl::thread_par_for(0, gridSize.x, [&](unsigned x) {
-		//for (int x = 0; x < gridSize.x; x++) {
-			for (int y = 0; y < gridSize.y; y++) {
-				for (int z = 0; z < gridSize.z; z++) {
-					vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
-					for (auto t : builder.vertices) {
-						G[x][y][z] = std::min(G[x][y][z], glm::distance(t.pos, gridPoint));
-					}
-				}
+	G = vector(gridSize.x, vector(gridSize.y, vector(gridSize.z, 9999999999.9f)));
+
+	// Calculate unsigned distance field
+	// Compute f(p) for all grid points p in G
+	pl::thread_par_for(0, gridSize.x, [&](unsigned x) {
+	//for (int x = 0; x < gridSize.x; x++) {
+		for (int y = 0; y < gridSize.y; y++) {
+			for (int z = 0; z < gridSize.z; z++) {
+				vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
+
+				printf("P: %f %f %f     %f %f %f      %f %f %f        %f %f %f\n", topRight.x, topRight.y, topRight.z, bottomLeft.x, bottomLeft.y, bottomLeft.z, x, y, z, gridSize.x, gridSize.y, gridSize.z);
+
+				auto point = tree.searchKnn({ gridPoint.x, gridPoint.y, gridPoint.z }, 1)[0];
+					
+				G[x][y][z] = glm::distance(builder.vertices[point.payload].pos, gridPoint);
 			}
-		//}
-		});
+		}
+	//}
+	});
 
-		// Get the duration in microseconds
-		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
+	// Get the duration in microseconds
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
 
-		// Print the duration
-		cout << "Time taken to generate G: "
-			<< duration.count() << " microseconds" << endl;
-	}
+	// Print the duration
+	cout << "Time taken to generate G: "
+		<< duration.count() << " microseconds" << endl;
 
 	// Visualize unsigned distance field
 	if (debugging == 2) {
@@ -597,7 +595,14 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 	cout << "Mesh generated with V: " << output.vertices.size() << " I: " << output.indices.size() << "\n";
 
-	mesh = output.build();
+	// Buffers cannot be empty, so create perceptually empty mesh
+	if (output.vertices.size() > 0) {
+		mesh = output.build();
+	}
+	else {
+		// Build an invisible mesh
+		mesh = debug_box(vec3(0), vec3(0)).build();
+	}
 
 }
 
