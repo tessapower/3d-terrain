@@ -449,23 +449,19 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 		// Calculate unsigned distance field
 		// Compute f(p) for all grid points p in G
-		//pl::thread_par_for(0, gridSize.x, [&](unsigned x) {
-		for (int x = 0; x < gridSize.x; x++) {
+		pl::thread_par_for(0, gridSize.x, [&](unsigned x) {
+		//for (int x = 0; x < gridSize.x; x++) {
 			for (int y = 0; y < gridSize.y; y++) {
 				for (int z = 0; z < gridSize.z; z++) {
 					vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
-					//for (auto t : builder.vertices) {
-					//	G[x][y][z] = std::min(G[x][y][z], glm::distance(t.pos, gridPoint));
-					//}
-
-					OrthoTree::entity_id_type pointId = octree.GetNearestNeighbors(OrthoTree::Point3D { gridPoint.x, gridPoint.y, gridPoint.z }, 1, octreePoints)[0];
-					OrthoTree::Point3D point = octreePoints[pointId];
-					G[x][y][z] = glm::distance(vec3(point[0], point[1], point[2]), gridPoint);
+					for (auto t : builder.vertices) {
+						G[x][y][z] = std::min(G[x][y][z], glm::distance(t.pos, gridPoint));
+					}
 				}
 			}
-		}
-		//});
+		//}
+		});
 
 		// Get the duration in microseconds
 		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
