@@ -10,6 +10,7 @@
 #include "cgra/cgra_mesh.hpp"
 #include "skeleton_model.hpp"
 #include "simplified_mesh.hpp"
+#include "cloud_model.hpp"
 
 
 // Basic model that holds the shader, mesh and transform for drawing.
@@ -51,7 +52,8 @@ private:
 	// geometry
 	simplified_mesh m_model_rock;
 	simplified_mesh m_model_bunny;
-	simplified_mesh m_model_cliff;
+
+	cloud_model clouds;
 
 	float voxelEdgeLength = 0.01;
 	float isolevel = 0.007;

@@ -16,6 +16,9 @@ SET(sources
 	"skeleton_model.cpp"
 	"simplified_mesh.hpp"
 	"simplified_mesh.cpp"
+	"cloud_model.hpp"
+	"cloud_model.cpp"
+	"PerlinNoise.hpp"
 	
 	"opengl.hpp"
 
@@ -25,7 +28,7 @@ SET(sources
 )
 
 # Add executable target and link libraries
-add_executable(${CGRA_PROJECT} ${sources})
+add_executable(${CGRA_PROJECT} ${sources} "cloud_model.cpp")
 
 # ----TODO--------------------- #
 # list your subdirectories here #

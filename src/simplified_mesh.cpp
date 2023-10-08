@@ -22,7 +22,6 @@ using namespace cgra;
 
 vec3 gridToWorldPosition(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize);
 mesh_builder debug_box(vec3 bottomLeft, vec3 size);
-mesh_builder meshSimplification(mesh_builder input_mesh, mesh_builder processed_mesh, float d, float nF);
 
 /*
 
@@ -332,7 +331,6 @@ void simplified_mesh::draw(const glm::mat4& view, const glm::mat4& proj) {
 
 float adapt(float v0, float v1) {
 	return 0.5;
-	return (0 - v0) / (v1 - v0);
 }
 
 vec3 edge_to_boundary_vertex(int edge, vec3 point, float* f_eval, float voxelEdgeLength) {
@@ -356,6 +354,7 @@ vec3 edge_to_boundary_vertex(int edge, vec3 point, float* f_eval, float voxelEdg
 void simplified_mesh::set_model(mesh_builder builder) {
 	this->builder = builder;
 
+	// Create kdtree
 	tree = jk::tree::KDTree<int, 3, 512>();
 
 	// Reserve proper space
@@ -365,22 +364,12 @@ void simplified_mesh::set_model(mesh_builder builder) {
 		tree.addPoint({ builder.vertices[i].pos.x, builder.vertices[i].pos.y, builder.vertices[i].pos.z }, i, false);
 	}
 
+	// Sort tree afterwards for faster performance
 	tree.splitOutstanding();
-}
 
-void simplified_mesh::build(glm::vec2 screenSize) {
-
-	cout << "Input mesh with V: " << builder.vertices.size() << " I: " << builder.indices.size() << "\n";
-
-	if (debugging == 0) {
-		mesh = builder.build();
-		return;
-	}
-
-	int nF = 5000; // Target number of triangles
-
-	vec3 topRight = builder.vertices[0].pos;
-	vec3 bottomLeft = builder.vertices[0].pos;
+	// Calculate bounding box
+	topRight = builder.vertices[0].pos;
+	bottomLeft = builder.vertices[0].pos;
 
 	for (mesh_vertex vertex : builder.vertices) {
 		if (vertex.pos.y > topRight.y) {
@@ -403,31 +392,23 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 		}
 	}
 
-	// Bounding cube debugging
-	if (debugging == 1) {
-		mesh_builder t = debug_box(bottomLeft, topRight - bottomLeft);
-		t.append(builder);
-		mesh = t.build();
-		return;
-	}
-
-	// TODO: Project bounding box using projection & view matrix
-	
-	vec2 screenSpacePos(200, 100);
-
-	float lp = screenSpacePos.x; // Pixel length of screenspace bounding box
-	float l = sqrt(pow(screenSpacePos.x, 2) + pow(screenSpacePos.y, 2)); // Diagonal length of screenspace bounding box
-
-	float np = l / lp; // the maximum number of pixels that the high-poly mesh's diagonal could occupy across all potential rendering view
-	float d = l / np;
-
-	// Grid discretization (Mi,d)
-
 	// Expand it slightly to allow for edges to be built
 	bottomLeft = vec3(bottomLeft.x - voxelEdgeLength * 2.0f, bottomLeft.y - voxelEdgeLength * 2.0f, bottomLeft.z - voxelEdgeLength * 2.0f);
 	topRight = vec3(topRight.x + voxelEdgeLength * 2.0f, topRight.y + voxelEdgeLength * 2.0f, topRight.z + voxelEdgeLength * 2.0f);
+}
 
-	// Calculate grid points
+/// <summary>
+/// Builds the unsigned distance field from the model, then runs build
+/// </summary>
+void simplified_mesh::build_from_model() {
+
+	cout << "Input mesh with V: " << builder.vertices.size() << " I: " << builder.indices.size() << "\n";
+
+	if (debugging == 0) {
+		mesh = builder.build();
+		return;
+	}
+
 	vec3 gridSize = vec3(
 		std::ceil((topRight.x - bottomLeft.x) / voxelEdgeLength),
 		std::ceil((topRight.y - bottomLeft.y) / voxelEdgeLength),
@@ -440,27 +421,23 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 	cout << "Starting\n";
 
-
-
 	G = vector(gridSize.x, vector(gridSize.y, vector(gridSize.z, 9999999999.9f)));
+
+	// Grid discretization (Mi,d)
 
 	// Calculate unsigned distance field
 	// Compute f(p) for all grid points p in G
 	pl::thread_par_for(0, gridSize.x, [&](unsigned x) {
-	//for (int x = 0; x < gridSize.x; x++) {
 		for (int y = 0; y < gridSize.y; y++) {
 			for (int z = 0; z < gridSize.z; z++) {
 				vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
-				printf("P: %f %f %f     %f %f %f      %f %f %f        %f %f %f\n", topRight.x, topRight.y, topRight.z, bottomLeft.x, bottomLeft.y, bottomLeft.z, x, y, z, gridSize.x, gridSize.y, gridSize.z);
-
 				auto point = tree.searchKnn({ gridPoint.x, gridPoint.y, gridPoint.z }, 1)[0];
-					
+
 				G[x][y][z] = glm::distance(builder.vertices[point.payload].pos, gridPoint);
 			}
 		}
-	//}
-	});
+		});
 
 	// Get the duration in microseconds
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
@@ -489,12 +466,34 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 		debugging.append(builder);
 		mesh = debugging.build();
+		return;
+	}
 
+	build();
+}
+
+/// <summary>
+/// Builds the mesh from the unsigned distance field
+/// </summary>
+void simplified_mesh::build() {
+
+	vec3 gridSize = vec3(
+		std::ceil((topRight.x - bottomLeft.x) / voxelEdgeLength),
+		std::ceil((topRight.y - bottomLeft.y) / voxelEdgeLength),
+		std::ceil((topRight.z - bottomLeft.z) / voxelEdgeLength)
+	);
+
+	// Bounding cube debugging
+	if (debugging == 1) {
+		mesh_builder t = debug_box(bottomLeft, topRight - bottomLeft);
+		t.append(builder);
+		mesh = t.build();
 		return;
 	}
 
 	mesh_builder output;
 	
+	// Convert into mesh
 	for (int x = 0; x < gridSize.x - 1; x++) {
 		for (int y = 0; y < gridSize.y - 1; y++) {
 			for (int z = 0; z < gridSize.z - 1; z++) {
@@ -579,20 +578,6 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 		return;
 	}
 
-	int N = 3;
-
-	// Mesh optimisation
-
-	for (int i = 0; i < N; i++) {
-		output = meshSimplification(builder, output, d, nF);
-	}
-
-	// TODO: Run edge flip on output
-
-	// TODO: Run feature filter on output
-
-	// TODO: Run remove interior on output
-
 	cout << "Mesh generated with V: " << output.vertices.size() << " I: " << output.indices.size() << "\n";
 
 	// Buffers cannot be empty, so create perceptually empty mesh
@@ -606,12 +591,6 @@ void simplified_mesh::build(glm::vec2 screenSize) {
 
 }
 
-mesh_builder meshSimplification(mesh_builder input_mesh, mesh_builder processed_mesh, float d, float nF) {
-	priority_queue<int> points;
-
-	return processed_mesh;
-}
-
 vec3 gridToWorldPosition(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize) {
 
 	if (position.x > gridSize.x || position.x < 0 || position.y > gridSize.y || position.y < 0 || position.z > gridSize.z || position.z < 0) {
@@ -621,59 +600,6 @@ vec3 gridToWorldPosition(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gri
 	vec3 size = topRight - bottomLeft;
 
 	return bottomLeft + vec3(position.x * (size.x / gridSize.x), position.y * (size.y / gridSize.y), position.z * (size.z / gridSize.z));
-}
-
-/// <summary>
-/// Feature Vertex Insertion.
-/// We use one vertex per local patch with a disk-topology to provide more degrees of freedom to capture sharp features.
-/// Its position can be computed by minimizing the distance to patch vertices along the normal directions
-/// </summary>
-/// <param name="x">Desired position</param>
-/// <param name="pi">Iso-Countour vertex</param>
-/// <param name="npi">Iso-Countour normal</param>
-/// <returns></returns>
-float featureVertexInsertion(vec3 x, vec3* p, vec3* np, int len) {
-	float argMin = std::numeric_limits<float>::max();
-
-	for (int i = 0; i < len; i++) {
-		float v = pow(dot(np[i], x - p[i]), 2);
-		argMin = std::min(v, argMin);
-	}
-
-	return argMin;
-}
-
-/// <summary>
-/// Flip flip vertices around for some reason
-/// </summary>
-/// <param name="input">Input mesh</param>
-void edgeFlip(vector<vec3>& input) {
-	vector<vec3> Q;
-
-	// BVHTree T;
-	// T.build(input) - I think this is another paper we need to implement
-
-	/**
-	
-	
-	for (edge e : input) {
-		if (e.oppVs are feature vertices) {
-			Q.push_back(e);
-		}
-	}
-
-	while (Q.size() != 0) {
-		edge e = Q.pop_back();
-
-		if (!e.wasFlipped) {
-			if (isIntersectionTree(input, T, e)) {
-				flipEdge(input, e);
-				T.refit(input);
-			}
-		}
-	}
-
-	*/
 }
 
 mesh_builder debug_box(vec3 bottomLeft, vec3 size) {

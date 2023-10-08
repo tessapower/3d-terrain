@@ -12,10 +12,9 @@
 
 
 class simplified_mesh {
-private:
+public:
 	std::vector<std::vector<std::vector<float>>> G;
 
-public:
 	GLuint shader = 0;
 	cgra::gl_mesh mesh;
 	float isolevel = 0.6f;
@@ -25,10 +24,16 @@ public:
 	int debugging = 0;
 	float voxelEdgeLength = 0.01;
 
+
+	// Bounding box
+	glm::vec3 topRight;
+	glm::vec3 bottomLeft;
+
 	jk::tree::KDTree<int, 3, 512> tree;
 
 	simplified_mesh() { }
 	void draw(const glm::mat4& view, const glm::mat4& proj);
 	void set_model(const cgra::mesh_builder builder);
-	void build(glm::vec2 screenSize);
+	void build(); // Builds the mesh from the unsigned distance field
+	void build_from_model(); // Builds the unsigned distance field from the model, then runs build
 };
