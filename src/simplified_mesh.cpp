@@ -23,7 +23,7 @@ using namespace std;
 using namespace glm;
 using namespace cgra;
 
-vec3 gridToWorldPosition(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize);
+vec3 grid_to_world_position(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize);
 mesh_builder debug_box(vec3 bottomLeft, vec3 size);
 
 /*
@@ -336,7 +336,7 @@ float adapt(float v0, float v1) {
 	return 0.5;
 }
 
-vec3 edge_to_boundary_vertex(int edge, vec3 point, float* f_eval, float voxelEdgeLength) {
+vec3 edge_to_boundary_vertex(int edge, vec3 point, const float* f_eval, float voxelEdgeLength) {
 
 	int v0 = EDGES[edge][0];
 	int v1 = EDGES[edge][1];
@@ -431,7 +431,7 @@ void simplified_mesh::build_from_model() {
 	pl::thread_par_for(0, gridSize.x, [&](unsigned x) {
 		for (int y = 0; y < gridSize.y; y++) {
 			for (int z = 0; z < gridSize.z; z++) {
-				vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
+				vec3 gridPoint = grid_to_world_position(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
 				auto point = tree.searchKnn({ gridPoint.x, gridPoint.y, gridPoint.z }, 1)[0];
 
@@ -455,7 +455,7 @@ void simplified_mesh::build_from_model() {
 		for (int x = 0; x < gridSize.x; x++) {
 			for (int y = 0; y < gridSize.y; y++) {
 				for (int z = 0; z < gridSize.z; z++) {
-					const vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
+					const vec3 gridPoint = grid_to_world_position(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
 					const float sizeFloat = G[x][y][z] < isolevel ? voxelEdgeLength / 2.f : 0.f;
 
@@ -527,7 +527,7 @@ void simplified_mesh::build() {
 
 				vector<vector<int>> faces = TRI_TABLE[cubeIndex];
 
-				const vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
+				const vec3 gridPoint = grid_to_world_position(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
 				for (int face = 0; face < faces.size(); face++) {
 
@@ -602,7 +602,7 @@ void simplified_mesh::build() {
 
 }
 
-vec3 gridToWorldPosition(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize) {
+vec3 grid_to_world_position(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize) {
 
 	if (position.x > gridSize.x || position.x < 0 || position.y > gridSize.y || position.y < 0 || position.z > gridSize.z || position.z < 0) {
 		throw std::invalid_argument("Position outside of gridsize");
