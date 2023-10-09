@@ -8,10 +8,12 @@ SET(sources
 
 	"simplified_mesh.hpp"
 	"simplified_mesh.cpp"
+	"simplified_mesh_debugging.hpp"
 	"cloud_model.hpp"
 	"cloud_model.cpp"
-	"PerlinNoise.hpp"
-	"KDTree.h"
+	"../ext/PerlinNoise.hpp"
+	"../ext/KDTree.h"
+	"../ext/par_for.h"
 	
 	"opengl.hpp"
 

@@ -412,7 +412,7 @@ void simplified_mesh::build_from_model() {
 		return;
 	}
 
-	vec3 gridSize = vec3(
+	const vec3 gridSize = vec3(
 		std::ceil((topRight.x - bottomLeft.x) / voxelEdgeLength),
 		std::ceil((topRight.y - bottomLeft.y) / voxelEdgeLength),
 		std::ceil((topRight.z - bottomLeft.z) / voxelEdgeLength)
@@ -420,9 +420,7 @@ void simplified_mesh::build_from_model() {
 
 	printf("Size: %f %f %f\n", gridSize.x, gridSize.y, gridSize.z);
 
-	auto start = std::chrono::high_resolution_clock::now();
-
-	cout << "Starting\n";
+	const auto start = std::chrono::high_resolution_clock::now();
 
 	G = vector(gridSize.x, vector(gridSize.y, vector(gridSize.z, 9999999999.9f)));
 
@@ -452,15 +450,16 @@ void simplified_mesh::build_from_model() {
 	// Visualize unsigned distance field
 	if (debugging == 2) {
 		mesh_builder debugging;
-		//mesh_builder builder;
+
+		// Loop over and create squares the size of the value
 		for (int x = 0; x < gridSize.x; x++) {
 			for (int y = 0; y < gridSize.y; y++) {
 				for (int z = 0; z < gridSize.z; z++) {
-					vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
+					const vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
-					float sizeFloat = G[x][y][z] < isolevel ? voxelEdgeLength / 2.f : 0.f;
+					const float sizeFloat = G[x][y][z] < isolevel ? voxelEdgeLength / 2.f : 0.f;
 
-					vec3 size(sizeFloat);
+					const vec3 size(sizeFloat);
 
 					debugging.append(debug_box(gridPoint - (size / 2.0f), size));
 				}
@@ -480,7 +479,7 @@ void simplified_mesh::build_from_model() {
 /// </summary>
 void simplified_mesh::build() {
 
-	vec3 gridSize = vec3(
+	const vec3 gridSize = vec3(
 		std::ceil((topRight.x - bottomLeft.x) / voxelEdgeLength),
 		std::ceil((topRight.y - bottomLeft.y) / voxelEdgeLength),
 		std::ceil((topRight.z - bottomLeft.z) / voxelEdgeLength)
@@ -504,7 +503,7 @@ void simplified_mesh::build() {
 		for (int y = 0; y < gridSize.y - 1; y++) {
 			for (int z = 0; z < gridSize.z - 1; z++) {
 
-				float values[8] = {
+				const float values[8] = {
 					G[x][y][z],
 					G[x + 1][y][z],
 					G[x + 1][y + 1][z],
@@ -528,7 +527,7 @@ void simplified_mesh::build() {
 
 				vector<vector<int>> faces = TRI_TABLE[cubeIndex];
 
-				vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
+				const vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
 				for (int face = 0; face < faces.size(); face++) {
 
@@ -537,17 +536,17 @@ void simplified_mesh::build() {
 					int size = output.vertices.size();
 
 					// Calculate vertices
-					vec3 vertices[3] = {
+					const vec3 vertices[3] = {
 						edge_to_boundary_vertex(faceEdges[0], gridPoint, values, voxelEdgeLength),
 						edge_to_boundary_vertex(faceEdges[1], gridPoint, values, voxelEdgeLength),
 						edge_to_boundary_vertex(faceEdges[2], gridPoint, values, voxelEdgeLength)
 					};
 
-					vec3 v1 = vec3(vertices[1].x - vertices[0].x, vertices[1].y - vertices[0].y, vertices[1].z - vertices[0].z);
-					vec3 v2 = vec3(vertices[2].x - vertices[0].x, vertices[2].y - vertices[0].y, vertices[2].z - vertices[0].z);
+					const vec3 v1 = vec3(vertices[1].x - vertices[0].x, vertices[1].y - vertices[0].y, vertices[1].z - vertices[0].z);
+					const vec3 v2 = vec3(vertices[2].x - vertices[0].x, vertices[2].y - vertices[0].y, vertices[2].z - vertices[0].z);
 
 					// Set normals of face
-					vec3 surfNormal = normalize(cross(v1, v2));
+					const vec3 surfNormal = normalize(cross(v1, v2));
 
 					for (int vertex = 0; vertex < 3; vertex++) {
 						if (!smoothNormals || positions.find(vertices[vertex]) == positions.end()) {
@@ -609,7 +608,7 @@ vec3 gridToWorldPosition(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gri
 		throw std::invalid_argument("Position outside of gridsize");
 	}
 
-	vec3 size = topRight - bottomLeft;
+	const vec3 size = topRight - bottomLeft;
 
 	return bottomLeft + vec3(position.x * (size.x / gridSize.x), position.y * (size.y / gridSize.y), position.z * (size.z / gridSize.z));
 }

@@ -9,6 +9,7 @@
 
 // Blender kdtree
 #include "KDTree.h"
+#include <simplified_mesh_debugging.hpp>
 
 
 class simplified_mesh {
@@ -21,7 +22,7 @@ public:
 
 	cgra::mesh_builder builder;
 
-	int debugging = 0;
+	simplified_mesh_debugging debugging = simplified_mesh_debugging::result;
 	float voxelEdgeLength = 0.01;
 	bool smoothNormals = true;
 

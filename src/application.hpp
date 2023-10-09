@@ -8,6 +8,7 @@
 #include "simplified_mesh.hpp"
 #include "cloud_model.hpp"
 #include "opengl.hpp"
+#include <simplified_mesh_debugging.hpp>
 
 /**
  * \brief Basic model that holds the shader, mesh and transform for drawing.
@@ -61,7 +62,7 @@ class application {
   float isolevel = 0.007;
   bool smoothing = true;
 
-  int debugging = 0;
+  simplified_mesh_debugging debugging = simplified_mesh_debugging::result;
 
   // end Voxel Settings
 

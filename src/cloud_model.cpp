@@ -21,7 +21,7 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
-float cloudFalloff(float x) { return 1.f - ((x - 1.f) * (x - 1.f)); }
+float cloud_falloff(float x) { return 1.f - ((x - 1.f) * (x - 1.f)); }
 
 void cloud_model::simulate() {
 
@@ -37,10 +37,10 @@ void cloud_model::simulate() {
 
 				// Fade out at top and bottom
 				if (y > size.y - fadeOutRange) {
-					noise *= cloudFalloff(1. - (y - (size.y - fadeOutRange)) / fadeOutRange);
+					noise *= cloud_falloff(1. - (y - (size.y - fadeOutRange)) / fadeOutRange);
 				}
 				else if (y < fadeOutRange) {
-					noise *= cloudFalloff(y / fadeOutRange);
+					noise *= cloud_falloff(y / fadeOutRange);
 				}
 
 				// 1 is not solid, 0 is solid

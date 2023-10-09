@@ -21,6 +21,7 @@ application *application_ptr = nullptr;
 }  // namespace
 
 int main() {
+
   // initialize the GLFW library
   if (!glfwInit()) {
     std::cerr << "Error: Could not initialize GLFW" << std::endl;

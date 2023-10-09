@@ -120,7 +120,7 @@ void application::render_gui() {
     clouds.mesh.build();
   }
 
-  if (ImGui::Combo("Debugging", &debugging, "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0", 5)) {
+  if (ImGui::Combo("Debugging", (int*)(&debugging), "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0", 5)) {
     m_model_bunny.debugging = debugging;
     m_model_bunny.build_from_model();
     clouds.mesh.debugging = debugging;
@@ -131,7 +131,7 @@ void application::render_gui() {
     clouds.simulate();
   }
 
-  if (ImGui::SliderFloat("Cloud Fade Out", &clouds.fadeOutRange, 0.0, 40.0)) {
+  if (ImGui::SliderFloat("Cloud Fade Out", &clouds.fadeOutRange, 0.0, 20.0)) {
     clouds.simulate();
   }
 
