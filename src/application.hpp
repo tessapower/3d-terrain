@@ -1,71 +1,96 @@
-
 #pragma once
 
-// glm
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// project
-#include "opengl.hpp"
+#include "camera.hpp"
 #include "cgra/cgra_mesh.hpp"
-#include "skeleton_model.hpp"
+#include "opengl.hpp"
 
-
-// Basic model that holds the shader, mesh and transform for drawing.
-// Can be copied and modified for adding in extra information for drawing
-// including textures for texture mapping etc.
+/**
+ * \brief Basic model that holds the shader, mesh and transform for drawing.
+ */
 struct basic_model {
-	GLuint shader = 0;
-	cgra::gl_mesh mesh;
-	glm::vec3 color{0.7};
-	glm::mat4 modelTransform{1.0};
-	GLuint texture;
+  GLuint shader = 0;
+  cgra::gl_mesh mesh;
+  glm::vec3 color{0.7f};
+  glm::mat4 model_transform{1.0f};
+  GLuint texture{};
 
-	void draw(const glm::mat4 &view, const glm::mat4 proj);
+  void draw(const glm::mat4 &view, const glm::mat4 &projection);
 };
 
+/**
+ * \brief Represents the application which is responsible for rendering the scene and the
+ * user interface.
+ */
+class application {
+ private:
+  glm::vec2 m_window_size_;
+  GLFWwindow *m_window_;
 
-// Main application class
-//
-class Application {
-private:
-	// window
-	glm::vec2 m_windowsize;
-	GLFWwindow *m_window;
+  // Flying Camera
+  const glm::vec3 m_camera_pos_   = glm::vec3(0.0f, 0.0f,  3.0f);
+  const glm::vec3 m_camera_front_ = glm::vec3(0.0f, 0.0f, -1.0f);
+  const glm::vec3 m_camera_up_    = glm::vec3(0.0f, 1.0f,  0.0f);
+  camera m_camera_{m_camera_pos_, m_camera_up_, m_camera_front_};
+  glm::vec3 m_direction_ = glm::vec3(0.0f);
 
-	// oribital camera
-	float m_pitch = .86;
-	float m_yaw = -.86;
-	float m_distance = 20;
+  // Mouse Input
+  bool m_left_mouse_down_ = false;
+  bool m_middle_mouse_down_ = false;
+  bool m_first_mouse_ = true;
+  glm::vec2 m_mouse_position_;
 
-	// last input
-	bool m_leftMouseDown = false;
-	glm::vec2 m_mousePosition;
+  // Time Between Frames
+  float m_delta_time_ = 0.0f;
+  float m_last_frame_ = 0.0f;
 
-	// drawing flags
-	bool m_show_axis = false;
-	bool m_show_grid = false;
-	bool m_showWireframe = false;
+  bool m_show_wireframe_ = false;
+  basic_model m_model_;
 
-	// geometry
-	basic_model m_model;
+ public:
+  explicit application(GLFWwindow *);
 
-public:
-	// setup
-	Application(GLFWwindow *);
+  // The copy and assignment constructors are deleted to prevent multiple
+  // instances of the application existing.
+  application(const application &) = delete;
+  application &operator=(const application &) = delete;
 
-	// disable copy constructors (for safety)
-	Application(const Application&) = delete;
-	Application& operator=(const Application&) = delete;
+  /**
+   * \brief Renders the application to the screen.
+   */
+  void render();
 
-	// rendering callbacks (every frame)
-	void render();
-	void renderGUI();
+  /**
+   * \brief Renders the user interface components to the screen.
+   */
+  void render_gui();
 
-	// input callbacks
-	void cursorPosCallback(double xpos, double ypos);
-	void mouseButtonCallback(int button, int action, int mods);
-	void scrollCallback(double xoffset, double yoffset);
-	void keyCallback(int key, int scancode, int action, int mods);
-	void charCallback(unsigned int c);
+  /**
+   * \brief A callback function to respond to the cursor moving.
+   * \param x_pos The x coordinate of the cursor's position.
+   * \param y_pos The y coordinate of the cursor's position.
+   */
+  void cursor_pos_cb(double x_pos, double y_pos);
+
+  /**
+   * \brief A callback function to respond to mouse button clicks.
+   */
+  void mouse_button_cb(int button, int action, int mods);
+
+  /**
+   * \brief A callback function to respond to the scroll wheel moving.
+   */
+  [[maybe_unused]] void scroll_cb(double x_offset, double y_offset);
+
+  /**
+   * \brief A callback function to respond to keys being pressed or released.
+   */
+  void key_cb(int key, int scan_code, int action, int mods);
+
+  /**
+   * \brief A callback function to respond to characters being typed.
+   */
+  [[maybe_unused]] void char_cb(unsigned int c);
 };

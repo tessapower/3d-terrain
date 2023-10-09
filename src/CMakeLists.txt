@@ -2,22 +2,15 @@
 #########################################################
 # Source Files
 #########################################################
-
-# ----TODO------------------- #
-# list your source files here #
-# --------------------------- #
 SET(sources
 	"application.hpp"
 	"application.cpp"
 
-	"skeleton.hpp"
-	"skeleton.cpp"
-	"skeleton_model.hpp"
-	"skeleton_model.cpp"
-	
 	"opengl.hpp"
 
 	"main.cpp"
+
+	"camera.hpp"
 
 	"CMakeLists.txt"
 )
@@ -25,12 +18,7 @@ SET(sources
 # Add executable target and link libraries
 add_executable(${CGRA_PROJECT} ${sources})
 
-# ----TODO--------------------- #
-# list your subdirectories here #
-# ----------------------------- #
 add_subdirectory(cgra)
-
-
 
 #########################################################
 # Link and Build Executable
