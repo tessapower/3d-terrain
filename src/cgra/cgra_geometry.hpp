@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace cgra {
   // creates a mesh for a unit sphere (radius of 1)
   // immediately draws the sphere mesh, assuming the shader is set up

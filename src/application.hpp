@@ -52,16 +52,16 @@ class application {
   basic_model m_model_;
 
   // Voxel settings
-	// geometry
-	simplified_mesh m_model_bunny;
+  // geometry
+  simplified_mesh m_model_bunny;
 
-	cloud_model clouds;
+  cloud_model clouds;
 
-	float voxelEdgeLength = 0.01;
-	float isolevel = 0.007;
-	bool smoothing = true;
+  float voxelEdgeLength = 0.01;
+  float isolevel = 0.007;
+  bool smoothing = true;
 
-	int debugging = 0;
+  int debugging = 0;
 
   // end Voxel Settings
 

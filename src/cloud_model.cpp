@@ -21,6 +21,8 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
+float cloudFalloff(float x) { return 1.f - ((x - 1.f) * (x - 1.f)); }
+
 void cloud_model::simulate() {
 
 	// Generate volumeric data
@@ -35,29 +37,13 @@ void cloud_model::simulate() {
 
 				// Fade out at top and bottom
 				if (y > size.y - fadeOutRange) {
-					noise *= 1. + ((y - size.y + fadeOutRange) / fadeOutRange);
+					noise *= cloudFalloff(1. - (y - (size.y - fadeOutRange)) / fadeOutRange);
 				}
 				else if (y < fadeOutRange) {
-					noise *= 1. + ((fadeOutRange - y) / fadeOutRange);
+					noise *= cloudFalloff(y / fadeOutRange);
 				}
 
-				// Fade out x axis
-				if (x > size.x - fadeOutRange) {
-					noise += (x - size.x + fadeOutRange) / fadeOutRange;
-				}
-				else if (x < fadeOutRange) {
-					noise += (fadeOutRange - x) / fadeOutRange;
-				}
-
-				// Fade out z axis
-				if (z > size.z - fadeOutRange) {
-					noise *= 1. + ((z - size.z + fadeOutRange) / fadeOutRange);
-				}
-				else if (z < fadeOutRange) {
-					noise *= 1. + ((fadeOutRange - z) / fadeOutRange);
-				}
-
-				// 0 is solid, 1 is not solid
+				// 1 is not solid, 0 is solid
 				cloudData[x][y][z] = noise > cloudThreshold ? 0.0 : 1.0;
 			}
 		}
@@ -73,6 +59,8 @@ void cloud_model::simulate() {
 }
 
 void cloud_model::draw(const glm::mat4& view, const glm::mat4 proj) {
+	mat4 viewmodel = glm::scale(view, vec3(5.f));
+	viewmodel = glm::translate(viewmodel, vec3(size.x / -2.f, 10.f, size.z / -2.f));
 	mesh.shader = shader;
-	mesh.draw(view, proj); // draw
+	mesh.draw(viewmodel, proj); // draw
 }
