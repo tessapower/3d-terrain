@@ -42,12 +42,8 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
 	GLuint shader = sb.build();
 
-	m_model_rock.shader = shader;
-	m_model_rock.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res/assets/rock.obj")));
-	m_model_rock.build_from_model();
-
 	m_model_bunny.shader = shader;
-	m_model_bunny.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res/assets/bunny2.obj")));
+	m_model_bunny.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res/assets/bunny.obj")));
 	m_model_bunny.isolevel = 0.007;
 	m_model_bunny.build_from_model();
 
@@ -89,7 +85,6 @@ void Application::render() {
 
 
 	// draw the model
-	m_model_rock.draw(glm::translate(view, vec3(-5, 0, 0)), proj);
 	m_model_bunny.draw(glm::scale(glm::translate(view, vec3(0, 0, 0)), vec3(15)), proj);
 	clouds.draw(view, proj);
 }
@@ -124,15 +119,18 @@ void Application::renderGUI() {
 	}
 
 	if (ImGui::SliderFloat("Isolevel", &isolevel, 0.01, 0.1)) {
-		printf("before: %f\n", m_model_bunny.isolevel);
 		m_model_bunny.isolevel = isolevel;
 		m_model_bunny.build_from_model();
-		printf("after: %f\n", m_model_bunny.isolevel);
+	}
+
+	if (ImGui::Checkbox("Normal Smoothing", &smoothing)) {
+		m_model_bunny.smoothNormals = smoothing;
+		m_model_bunny.build_from_model();
+		clouds.mesh.smoothNormals = smoothing;
+		clouds.mesh.build();
 	}
 
 	if (ImGui::Combo("Debugging", &debugging, "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0", 5)) {
-		m_model_rock.debugging = debugging;
-		//m_model_rock.build(vec2());
 		m_model_bunny.debugging = debugging;
 		m_model_bunny.build_from_model();
 	}

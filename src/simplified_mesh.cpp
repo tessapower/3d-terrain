@@ -1,8 +1,11 @@
 #pragma once
 
+#define GLM_ENABLE_EXPERIMENTAL 1
+
 // glm
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/hash.hpp>
 
 // project
 #include "cgra/cgra_geometry.hpp"
@@ -393,8 +396,8 @@ void simplified_mesh::set_model(mesh_builder builder) {
 	}
 
 	// Expand it slightly to allow for edges to be built
-	bottomLeft = vec3(bottomLeft.x - voxelEdgeLength * 2.0f, bottomLeft.y - voxelEdgeLength * 2.0f, bottomLeft.z - voxelEdgeLength * 2.0f);
-	topRight = vec3(topRight.x + voxelEdgeLength * 2.0f, topRight.y + voxelEdgeLength * 2.0f, topRight.z + voxelEdgeLength * 2.0f);
+	bottomLeft = vec3(bottomLeft.x - voxelEdgeLength * 6.0f, bottomLeft.y - voxelEdgeLength * 6.0f, bottomLeft.z - voxelEdgeLength * 6.0f);
+	topRight = vec3(topRight.x + voxelEdgeLength * 6.0f, topRight.y + voxelEdgeLength * 6.0f, topRight.z + voxelEdgeLength * 6.0f);
 }
 
 /// <summary>
@@ -492,6 +495,9 @@ void simplified_mesh::build() {
 	}
 
 	mesh_builder output;
+
+	// Stores positions with their vertices indices
+	std::unordered_map<vec3, int> positions;
 	
 	// Convert into mesh
 	for (int x = 0; x < gridSize.x - 1; x++) {
@@ -524,53 +530,59 @@ void simplified_mesh::build() {
 
 				vec3 gridPoint = gridToWorldPosition(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
-				mesh_builder b;
-
 				for (int face = 0; face < faces.size(); face++) {
 
 					vector<int> faceEdges = faces[face];
 
-					int size = b.vertices.size();
+					int size = output.vertices.size();
 
 					// Calculate vertices
-					mesh_vertex vertices[3] = {
-						mesh_vertex {
-							edge_to_boundary_vertex(faceEdges[0], gridPoint, values, voxelEdgeLength),
-							vec3(1, 0, 0)
-						},
-						mesh_vertex {
-							edge_to_boundary_vertex(faceEdges[1], gridPoint, values, voxelEdgeLength),
-							vec3(1, 0, 0)
-						},
-						mesh_vertex {
-							edge_to_boundary_vertex(faceEdges[2], gridPoint, values, voxelEdgeLength),
-							vec3(1, 0, 0)
-						},
+					vec3 vertices[3] = {
+						edge_to_boundary_vertex(faceEdges[0], gridPoint, values, voxelEdgeLength),
+						edge_to_boundary_vertex(faceEdges[1], gridPoint, values, voxelEdgeLength),
+						edge_to_boundary_vertex(faceEdges[2], gridPoint, values, voxelEdgeLength)
 					};
 
-					// Calculate edge vertices
-					vec3 v1 = vec3(vertices[1].pos.x - vertices[0].pos.x, vertices[1].pos.y - vertices[0].pos.y, vertices[1].pos.z - vertices[0].pos.z);
-					vec3 v2 = vec3(vertices[2].pos.x - vertices[0].pos.x, vertices[2].pos.y - vertices[0].pos.y, vertices[2].pos.z - vertices[0].pos.z);
+					vec3 v1 = vec3(vertices[1].x - vertices[0].x, vertices[1].y - vertices[0].y, vertices[1].z - vertices[0].z);
+					vec3 v2 = vec3(vertices[2].x - vertices[0].x, vertices[2].y - vertices[0].y, vertices[2].z - vertices[0].z);
 
 					// Set normals of face
 					vec3 surfNormal = normalize(cross(v1, v2));
-					vertices[0].norm = surfNormal;
-					vertices[1].norm = surfNormal;
-					vertices[2].norm = surfNormal;
 
-					// Push data to builder
-					b.push_vertex(vertices[0]);
-					b.push_vertex(vertices[1]);
-					b.push_vertex(vertices[2]);
+					for (int vertex = 0; vertex < 3; vertex++) {
+						if (!smoothNormals || positions.find(vertices[vertex]) == positions.end()) {
+							// New vertex!
 
-					b.push_index(size);
-					b.push_index(size + 1);
-					b.push_index(size + 2);
+							// Push data to builder
+							// Use first field of uv as total normals stored in vertex to keep a running total for smoothing
+							output.push_vertex(mesh_vertex{ vertices[vertex], surfNormal, vec2(1, 0)});
+							output.push_index(size);
+
+							// Store vertex
+							positions[vertices[vertex]] = size;
+
+							size++;
+						}
+						else {
+							// Existing vertex, combine
+							int index = positions[vertices[vertex]];
+							output.push_index(index);
+
+							// Add normal data
+							output.vertices[index].norm += surfNormal;
+							// Use first field of uv as total normals stored in vertex to keep a running total for smoothing
+							output.vertices[index].uv.x++;
+						}
+					}
 				}
-
-				output.append(b);
 			}
 		}
+	}
+
+	// Calculate final running totals for normal map
+	for (mesh_vertex vertex : output.vertices) {
+		vertex.norm = vertex.norm / vertex.uv.x;
+		vertex.uv.x = 0.f;
 	}
 
 	if (debugging == 3) {

@@ -24,10 +24,11 @@ public:
 	glm::mat4 modelTransform{1.0};
 	GLuint texture;
 
-	vec3 noiseScale{ 80.f, 30.f, 80.f };
-	double cloudThreshold = 0.3;
+	vec3 noiseScale{ 80.f, 40.f, 80.f };
+	double cloudThreshold = 0.4;
 	double voxelEdgeLength = 1.0;
-	vec3 size{ 200.f, 60.f, 200.f };
+	vec3 size{ 200.f, 30.f, 200.f };
+	double fadeOutRange = 4.;
 
 	vector<vector<vector<float>>> cloudData;
 

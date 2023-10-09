@@ -28,8 +28,6 @@ void cloud_model::simulate() {
 
 	const siv::PerlinNoise perlin{ 0 };
 
-	double fadeOutRange = 15;
-
 	for (int x = 0; x < size.x; x++) {
 		for (int y = 0; y < size.y; y++) {
 			for (int z = 0; z < size.z; z++) {
@@ -37,10 +35,10 @@ void cloud_model::simulate() {
 
 				// Fade out at top and bottom
 				if (y > size.y - fadeOutRange) {
-					noise += (y - size.y + fadeOutRange) / fadeOutRange;
+					noise *= 1. + ((y - size.y + fadeOutRange) / fadeOutRange);
 				}
 				else if (y < fadeOutRange) {
-					noise += (fadeOutRange - y) / fadeOutRange;
+					noise *= 1. + ((fadeOutRange - y) / fadeOutRange);
 				}
 
 				// Fade out x axis
@@ -53,10 +51,10 @@ void cloud_model::simulate() {
 
 				// Fade out z axis
 				if (z > size.z - fadeOutRange) {
-					noise += (z - size.z + fadeOutRange) / fadeOutRange;
+					noise *= 1. + ((z - size.z + fadeOutRange) / fadeOutRange);
 				}
 				else if (z < fadeOutRange) {
-					noise += (fadeOutRange - z) / fadeOutRange;
+					noise *= 1. + ((fadeOutRange - z) / fadeOutRange);
 				}
 
 				// 0 is solid, 1 is not solid
@@ -64,6 +62,8 @@ void cloud_model::simulate() {
 			}
 		}
 	}
+
+	std::cout << "Finished building noise map\n";
 
 	mesh.G = cloudData;
 	mesh.topRight = size;

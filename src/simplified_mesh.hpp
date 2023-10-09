@@ -23,7 +23,7 @@ public:
 
 	int debugging = 0;
 	float voxelEdgeLength = 0.01;
-
+	bool smoothNormals = true;
 
 	// Bounding box
 	glm::vec3 topRight;

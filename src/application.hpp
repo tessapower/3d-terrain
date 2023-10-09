@@ -50,13 +50,13 @@ private:
 	bool m_showWireframe = false;
 
 	// geometry
-	simplified_mesh m_model_rock;
 	simplified_mesh m_model_bunny;
 
 	cloud_model clouds;
 
 	float voxelEdgeLength = 0.01;
 	float isolevel = 0.007;
+	bool smoothing = true;
 
 	int debugging = 0;
 
