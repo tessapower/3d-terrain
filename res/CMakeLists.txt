@@ -2,7 +2,8 @@
 
 # list your shader source files here
 SET(SHADERS
-	
+	"shaders/color_frag.glsl"
+	"shaders/color_vert.glsl"
 )
 
 add_custom_target(

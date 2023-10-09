@@ -2,18 +2,10 @@
 #########################################################
 # Source Files
 #########################################################
-
-# ----TODO------------------- #
-# list your source files here #
-# --------------------------- #
 SET(sources
 	"application.hpp"
 	"application.cpp"
 
-	"skeleton.hpp"
-	"skeleton.cpp"
-	"skeleton_model.hpp"
-	"skeleton_model.cpp"
 	"simplified_mesh.hpp"
 	"simplified_mesh.cpp"
 	"cloud_model.hpp"
@@ -24,18 +16,15 @@ SET(sources
 
 	"main.cpp"
 
+	"camera.hpp"
+
 	"CMakeLists.txt"
 )
 
 # Add executable target and link libraries
 add_executable(${CGRA_PROJECT} ${sources} "cloud_model.cpp")
 
-# ----TODO--------------------- #
-# list your subdirectories here #
-# ----------------------------- #
 add_subdirectory(cgra)
-
-
 
 #########################################################
 # Link and Build Executable

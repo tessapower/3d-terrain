@@ -11,10 +11,10 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(CGRAFunctions)
 
 # Project Name
-set(CGRA_PROJECT "base" CACHE STRING "CGRA Project Name")
+set(CGRA_PROJECT "base" CACHE STRING "CGRA350 Group Project")
 
 # Project
-project("CGRA_PROJECT_${CGRA_PROJECT}" CXX C)
+project("CGRA350_group_project" CXX C)
 
 # Enable IDE Project Folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -31,15 +31,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-
-
 #########################################################
 # Find OpenGL
 #########################################################
 
 find_package(OpenGL REQUIRED)
-
-
 
 #########################################################
 # Find OpenMP
@@ -51,8 +47,6 @@ if (OPENMP_FOUND)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 	add_definitions(-DCGRA_HAVE_OPENMP)
 endif()
-
-
 
 #########################################################
 # Include Subprojects
@@ -66,8 +60,6 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/ext/imgui")
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glm")
 include_directories("${PROJECT_SOURCE_DIR}/ext") # Add ext in order to access glm subfiles (hack)
 include_directories("${PROJECT_SOURCE_DIR}/src") # Add source to include directory
-
-
 
 #########################################################
 # Set Compiler Flags
@@ -112,8 +104,6 @@ elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
 	# Promote missing return to error
 	add_compile_options(-Werror=return-type)
 endif()
-
-
 
 #########################################################
 # Source Files
