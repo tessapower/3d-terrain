@@ -11,6 +11,7 @@ SET(sources
 	"cloud_model.hpp"
 	"cloud_model.cpp"
 	"PerlinNoise.hpp"
+	"KDTree.h"
 	
 	"opengl.hpp"
 
@@ -22,7 +23,7 @@ SET(sources
 )
 
 # Add executable target and link libraries
-add_executable(${CGRA_PROJECT} ${sources} "cloud_model.cpp")
+add_executable(${CGRA_PROJECT} ${sources})
 
 add_subdirectory(cgra)
 
