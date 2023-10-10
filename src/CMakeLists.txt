@@ -12,8 +12,6 @@ SET(sources
 	"cloud_model.hpp"
 	"cloud_model.cpp"
 	"../ext/PerlinNoise.hpp"
-	"../ext/KDTree.h"
-	"../ext/par_for.h"
 	
 	"opengl.hpp"
 

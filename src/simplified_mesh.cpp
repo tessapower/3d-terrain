@@ -13,17 +13,14 @@
 #include <chrono>
 #include <unordered_map>
 #include <array>
-#include "par_for.h"
-#include <queue> 
-
-// Blender kdtree
-#include "KDTree.h"
+#include <queue>
 
 using namespace std;
 using namespace glm;
 using namespace cgra;
 
 vec3 grid_to_world_position(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize);
+vec3 world_to_grid_position(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize);
 mesh_builder debug_box(vec3 bottomLeft, vec3 size);
 
 /*
@@ -357,19 +354,6 @@ vec3 edge_to_boundary_vertex(int edge, vec3 point, const float* f_eval, float vo
 void simplified_mesh::set_model(mesh_builder builder) {
 	this->builder = builder;
 
-	// Create kdtree
-	tree = jk::tree::KDTree<int, 3, 512>();
-
-	// Reserve proper space
-	tree.reserve(builder.vertices.size());
-
-	for (int i = 0; i < builder.vertices.size(); i++) {
-		tree.addPoint({ builder.vertices[i].pos.x, builder.vertices[i].pos.y, builder.vertices[i].pos.z }, i, false);
-	}
-
-	// Sort tree afterwards for faster performance
-	tree.splitOutstanding();
-
 	// Calculate bounding box
 	topRight = builder.vertices[0].pos;
 	bottomLeft = builder.vertices[0].pos;
@@ -427,18 +411,39 @@ void simplified_mesh::build_from_model() {
 	// Grid discretization (Mi,d)
 
 	// Calculate unsigned distance field
-	// Compute f(p) for all grid points p in G
-	pl::thread_par_for(0, gridSize.x, [&](unsigned x) {
-		for (int y = 0; y < gridSize.y; y++) {
-			for (int z = 0; z < gridSize.z; z++) {
-				vec3 gridPoint = grid_to_world_position(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
-				auto point = tree.searchKnn({ gridPoint.x, gridPoint.y, gridPoint.z }, 1)[0];
+	vector<vector<vector<vec3>>> cachedWorldPositions = vector(gridSize.x, vector(gridSize.y, vector(gridSize.z, vec3(0))));
 
-				G[x][y][z] = glm::distance(builder.vertices[point.payload].pos, gridPoint);
+	// After
+	for (mesh_vertex vertex : builder.vertices) {
+		vec3 pos = world_to_grid_position(topRight, bottomLeft, vertex.pos, gridSize);
+
+		// Get surrounding 8 vertices
+		vec3 vertices[] = {
+			vec3(floorf(pos.x), floorf(pos.y), floorf(pos.z)),
+			vec3(ceilf(pos.x), floorf(pos.y), floorf(pos.z)),
+			vec3(floorf(pos.x), floorf(pos.y), ceilf(pos.z)),
+			vec3(ceilf(pos.x), floorf(pos.y), ceilf(pos.z)),
+			vec3(floorf(pos.x), ceilf(pos.y), floorf(pos.z)),
+			vec3(ceilf(pos.x), ceilf(pos.y), floorf(pos.z)),
+			vec3(floorf(pos.x), ceilf(pos.y), ceilf(pos.z)),
+			vec3(ceilf(pos.x), ceilf(pos.y), ceilf(pos.z)),
+		};
+
+		for (int i = 0; i < 8; i++) {
+			vec3* gridPoint = &vertices[i];
+
+			if (cachedWorldPositions[gridPoint->x][gridPoint->y][gridPoint->z] == vec3(0)) {
+				cachedWorldPositions[gridPoint->x][gridPoint->y][gridPoint->z] = grid_to_world_position(topRight, bottomLeft, *gridPoint, gridSize);
 			}
+
+			G[gridPoint->x][gridPoint->y][gridPoint->z] =
+				std::min(
+					G[gridPoint->x][gridPoint->y][gridPoint->z],
+					glm::distance(cachedWorldPositions[gridPoint->x][gridPoint->y][gridPoint->z], vertex.pos)
+				);
 		}
-		});
+	}
 
 	// Get the duration in microseconds
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
@@ -588,11 +593,6 @@ void simplified_mesh::build() {
 		vertex.uv.x = 0.f;
 	}
 
-	if (debugging == 3) {
-		mesh = output.build();
-		return;
-	}
-
 	cout << "Mesh generated with V: " << output.vertices.size() << " I: " << output.indices.size() << "\n";
 
 	// Buffers cannot be empty, so create perceptually empty mesh
@@ -603,7 +603,11 @@ void simplified_mesh::build() {
 		// Build an invisible mesh
 		mesh = debug_box(vec3(0), vec3(0)).build();
 	}
+}
 
+vec3 world_to_grid_position(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize) {
+	const vec3 size = topRight - bottomLeft;
+	return ((position - bottomLeft) / size) * gridSize;
 }
 
 vec3 grid_to_world_position(vec3 topRight, vec3 bottomLeft, vec3 position, vec3 gridSize) {
