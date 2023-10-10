@@ -106,6 +106,7 @@ void application::render() {
   const auto current_frame = static_cast<float>(glfwGetTime());
   m_delta_time_ = current_frame - m_last_frame_;
   m_last_frame_ = current_frame;
+  m_camera_.update(m_delta_time_);
 
   const glm::mat4 projection =
       glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 10000.f);
@@ -305,24 +306,28 @@ void application::scroll_cb(const double x_offset, const double y_offset) {
 void application::key_cb(const int key, const int scan_code, const int action, const int mods) {
   (void)scan_code, (void)mods;
 
-  switch (key) {
-    case GLFW_KEY_W: {
-      m_camera_.move(camera_movement::forward, m_delta_time_);
-      break;
+  if (action == GLFW_PRESS) {
+    switch (key) {
+      case GLFW_KEY_W: {
+        m_camera_.set_direction(camera_movement::forward);
+        break;
+      }
+      case GLFW_KEY_S: {
+        m_camera_.set_direction(camera_movement::backward);
+        break;
+      }
+      case GLFW_KEY_A: {
+        m_camera_.set_direction(camera_movement::left);
+        break;
+      }
+      case GLFW_KEY_D: {
+        m_camera_.set_direction(camera_movement::right);
+        break;
+      }
+      default: break;
     }
-    case GLFW_KEY_S: {
-      m_camera_.move(camera_movement::backward, m_delta_time_);
-      break;
-    }
-    case GLFW_KEY_A: {
-      m_camera_.move(camera_movement::left, m_delta_time_);
-      break;
-    }
-    case GLFW_KEY_D: {
-      m_camera_.move(camera_movement::right, m_delta_time_);
-      break;
-    }
-    default: break;
+  } else if (action == GLFW_RELEASE) {
+    m_camera_.set_direction(camera_movement::rest);
   }
 }
 

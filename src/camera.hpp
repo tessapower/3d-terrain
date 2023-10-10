@@ -6,7 +6,7 @@
 /**
  * \brief Defines the different directions the camera can move in.
  */
-enum camera_movement { forward, backward, left, right };
+enum camera_movement { forward, backward, left, right, rest };
 
 constexpr float default_pitch = 0.0f;
 constexpr float default_yaw = -89.0f;
@@ -26,6 +26,9 @@ class camera {
   glm::vec3 m_up_{};
   glm::vec3 m_right_{};
   glm::vec3 m_world_up_{};
+
+  camera_movement m_current_direction_ = rest;
+  float m_delta_time_ = 0.0f;
 
  public:
   float m_yaw;
@@ -57,32 +60,19 @@ class camera {
   }
 
   /**
-   * \brief Moves the camera in the given direction based on its internal settings and the given
-   * time since the last frame.
-   * \param direction The direction in which the camera should move.
+   * \brief Updates the camera given the given time since the last frame.
    * \param delta_time The time since the last frame.
    */
-  void move(const camera_movement direction, const float delta_time) noexcept {
-    const float speed = m_speed_ * delta_time;
+  void update(const float delta_time) noexcept {
+    m_delta_time_ = delta_time;
+    update_position();
+  }
 
-    switch(direction) {
-      case forward: {
-        m_position_ += m_front_ * speed;
-        break;
-      }
-      case backward: {
-        m_position_ -= m_front_ * speed;
-        break;
-      }
-      case left: {
-        m_position_ -= m_right_ * speed;
-        break;
-      }
-      case right: {
-        m_position_ += m_right_ * speed;
-        break;
-      }
-    }
+  /**
+   * \brief Sets the direction in which the camera will move in the next frame.
+   */
+  void set_direction(camera_movement const& direction) noexcept {
+    m_current_direction_ = direction;
   }
 
   /**
@@ -120,5 +110,32 @@ private:
     // Normalize the vectors, because their length gets closer to 0 the more you look up or down
     // which results in slower movement.
     m_up_ = glm::normalize(glm::cross(m_right_, m_front_));
+  }
+
+  void update_position() {
+    const float speed = m_speed_ * m_delta_time_;
+    glm::vec3 delta{};
+
+    switch (m_current_direction_) {
+    case forward: {
+      delta = m_front_ * speed;
+      break;
+    }
+    case backward: {
+      delta = -m_front_ * speed;
+      break;
+    }
+    case left: {
+      delta = -m_right_ * speed;
+      break;
+    }
+    case right: {
+      delta = m_right_ * speed;
+      break;
+    }
+    case rest: break;
+    }
+
+    m_position_ += delta;
   }
 };
