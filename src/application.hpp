@@ -78,10 +78,11 @@ class application {
   //Tree Values
   basic_model m_model;
 
-  int TreeAmount = 100;
+  int TreeAmount = 35;
 
   vector<Tree> m_trees;
   vector<int> m_treePositions;
+  vector<float> m_treeSizes;
 
  public:
   explicit application(GLFWwindow *);

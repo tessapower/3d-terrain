@@ -67,12 +67,14 @@ application::application(GLFWwindow *window) : m_window_(window) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<int> randVertices(0, m_terrain.builder.getVertices().size());
+  std::uniform_real_distribution<float> sizeTree(3, 7);
 
   for (int i = 0; i < TreeAmount; i++) {
       Tree T;
       T.m_shader = shader;
       m_treePositions.push_back(randVertices(gen));
 	  m_trees.push_back(T);
+      m_treeSizes.push_back(sizeTree(gen));
   }
   m_trees[0].generateLeaves(5, 500);
   m_trees[0].generateTree();
@@ -125,7 +127,9 @@ void application::render() {
   for (int i = 0; i < m_trees.size(); i++) {
       m_trees[i].draw(m_camera_.view_matrix(), projection);
       mesh_vertex terrainVertices = m_terrain.builder.getVertex(m_treePositions[i]);
-      m_trees[i].modelTransform = glm::translate(mat4(1.0f), terrainVertices.pos);
+      mat4 translationMatrix = glm::translate(mat4(1.0f), terrainVertices.pos);
+      m_trees[i].modelTranslate = translationMatrix;
+      m_trees[i].modelScale = vec3(m_treeSizes[i]);
   }
 
 }
