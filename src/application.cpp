@@ -9,6 +9,10 @@
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
 #include "simplified_mesh.hpp"
+#include "texture_loader.hpp"
+#include "mesh_deformation.hpp"
+#include <terrain_model.hpp>
+
 
 void basic_model::draw(const glm::mat4 &view, const glm::mat4 &projection) {
   glm::mat4 model_view = view * model_transform;
@@ -31,6 +35,19 @@ application::application(GLFWwindow *window) : m_window_(window) {
   sb.set_shader(GL_FRAGMENT_SHADER,
                 CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
   const GLuint shader = sb.build();
+
+  // shek
+  glUseProgram(shader);
+  texture_loader tl{};
+  tl.loadTextures(shader);
+
+  m_terrain.shader = shader;
+  m_terrain.createFlatGround();
+
+  m_mesh_deform.setModel(m_terrain);
+  m_mesh_deform.deformMesh(m_terrain.selectedPoint, m_terrain.m_isBump, 0, 0); // initial computation of TBN, normals
+  m_terrain = m_mesh_deform.getModel();
+  // end shek
 
   m_model_bunny.shader = shader;
   m_model_bunny.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res/assets/bunny.obj")));
@@ -74,9 +91,15 @@ void application::render() {
 
   glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
 
+
+  // draw the terrain first to not mess up the other objects!!!!
+  m_terrain.draw(m_camera_.view_matrix(), projection);
+  m_mesh_deform.m_view = m_camera_.view_matrix();
+  m_mesh_deform.m_proj = projection;
+
   // draw the model
   m_model_bunny.draw(glm::scale(glm::translate(m_camera_.view_matrix(), vec3(15, 0, 0)), vec3(15)), projection);
-
+  
   clouds.draw(m_camera_.view_matrix(), projection);
   m_model_.draw(m_camera_.view_matrix(), projection);
 }
@@ -138,6 +161,44 @@ void application::render_gui() {
 
   // finish creating window
   ImGui::End();
+
+  // Mesh Editing & Texturing window
+  int width, height;
+  glfwGetFramebufferSize(m_window_, &width, &height);
+  // setup window
+  ImGui::SetNextWindowPos(ImVec2(width - 305, 5), ImGuiSetCond_Once);
+  ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
+  ImGui::Begin("Mesh Editing & Texturing", 0);
+
+  if (ImGui::SliderFloat("Radius", &m_terrain.m_radius, 0, 100, "%.2f", 2.0f)) m_mesh_deform.setModel(m_terrain);
+  if (ImGui::SliderFloat("Strength", &m_terrain.m_strength, 0, 10, "%.2f", 2.0f)) m_mesh_deform.setModel(m_terrain);
+  if (ImGui::SliderFloat("Grass/Mud Height", &m_terrain.m_heightChange1, -5, 50, "%.2f", 2.0f)) m_mesh_deform.setModel(m_terrain);
+  if (ImGui::SliderFloat("Mud/Rocks Height", &m_terrain.m_heightChange2, -50, 5, "%.2f", 2.0f)) m_mesh_deform.setModel(m_terrain);
+  if (ImGui::SliderFloat("Heightmap Scale", &m_terrain.m_heightScale, 0, 1, "%.2f", 2.0f)) m_mesh_deform.setModel(m_terrain);
+
+  if (ImGui::RadioButton("Normal Map", (m_terrain.m_tex == 1) ? true : false)) {
+      m_terrain.m_tex = 1 - m_terrain.m_tex;
+      m_mesh_deform.setModel(m_terrain);
+  }
+
+  bool notBump = !m_terrain.m_isBump;
+  if (ImGui::Checkbox("Raise", &m_terrain.m_isBump)) {
+      notBump = !m_terrain.m_isBump;
+      m_mesh_deform.setModel(m_terrain);
+  }
+  ImGui::SameLine();
+  if (ImGui::Checkbox("Excavate", &notBump)) {
+      m_terrain.m_isBump = !notBump;
+      m_mesh_deform.setModel(m_terrain);
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Deform")) {
+      m_mesh_deform.deformMesh(m_terrain.selectedPoint, m_terrain.m_isBump, m_terrain.m_radius, m_terrain.m_strength);
+      m_terrain = m_mesh_deform.getModel();
+  }
+
+  // finish creating window
+  ImGui::End();
 }
 
 void application::cursor_pos_cb(const double x_pos, const double y_pos) {
@@ -162,9 +223,17 @@ void application::mouse_button_cb(const int button, const int action, const int 
 
   switch(button) {
     case GLFW_MOUSE_BUTTON_LEFT: {
-      m_left_mouse_down_ = (action == GLFW_PRESS);
-      break;
+        // Capture is left-mouse down
+        m_left_mouse_down_ = (action == GLFW_PRESS);
+        if (m_left_mouse_down_) {
+            double xpos, ypos;
+            glfwGetCursorPos(m_window_, &xpos, &ypos);
+            m_mesh_deform.mouseIntersectMesh(xpos, ypos, m_window_size_.x, m_window_size_.y);
+            m_terrain = m_mesh_deform.getModel();
+        }
+        break;
     }
+                               
     case GLFW_MOUSE_BUTTON_MIDDLE: {
       m_middle_mouse_down_ = (action == GLFW_PRESS);
       break;

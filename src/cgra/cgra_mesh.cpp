@@ -59,6 +59,13 @@ namespace cgra {
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(mesh_vertex), (void *)(offsetof(mesh_vertex, uv)));
 
+		// do the same thing for Tangents but bind it to location=3
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(mesh_vertex), (void*)(offsetof(mesh_vertex, tang)));
+
+		// do the same thing for Bitangents but bind it to location=4
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(mesh_vertex), (void*)(offsetof(mesh_vertex, bitang)));
 
 		// IBO
 		//

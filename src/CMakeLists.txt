@@ -21,6 +21,15 @@ SET(sources
 
 	"camera.hpp"
 
+	"mesh_deformation.hpp"
+	"mesh_deformation.cpp"
+
+	"texture_loader.hpp"
+	"texture_loader.cpp"
+
+	"terrain_model.hpp"
+	"terrain_model.cpp"
+  
 	"Tree.hpp"
 	"Tree.cpp"
 

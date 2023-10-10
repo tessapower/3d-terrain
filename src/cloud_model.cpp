@@ -60,7 +60,7 @@ void cloud_model::simulate() {
 
 void cloud_model::draw(const glm::mat4& view, const glm::mat4 proj) {
 	mat4 viewmodel = glm::scale(view, vec3(5.f));
-	viewmodel = glm::translate(viewmodel, vec3(size.x / -2.f, 10.f, size.z / -2.f));
+	viewmodel = glm::translate(viewmodel, vec3(size.x / -2.f, 40.f, size.z / -2.f));
 	mesh.shader = shader;
 	mesh.draw(viewmodel, proj); // draw
 }
