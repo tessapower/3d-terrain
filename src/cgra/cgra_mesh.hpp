@@ -75,6 +75,14 @@ namespace cgra {
 			indices.insert(indices.end(), inds);
 		}
 
+		mesh_vertex getVertex(int val) {
+			return vertices[val];
+		}
+
+		std::vector<mesh_vertex> getVertices() {
+			return vertices;
+		}
+
 		void append(mesh_builder builder) {
 			for (int i = 0; i < builder.indices.size(); i++) {
 				indices.push_back(vertices.size() + builder.indices[i]);

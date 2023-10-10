@@ -12,6 +12,7 @@
 #include "texture_loader.hpp"
 #include "mesh_deformation.hpp"
 #include <terrain_model.hpp>
+#include <random>
 
 
 void basic_model::draw(const glm::mat4 &view, const glm::mat4 &projection) {
@@ -62,6 +63,24 @@ application::application(GLFWwindow *window) : m_window_(window) {
                       CGRA_SRCDIR + std::string("/res//assets//teapot.obj"))
                       .build();
   m_model_.color = glm::vec3(1.0f, 0.0f, 0.f);
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<int> randVertices(0, m_terrain.builder.getVertices().size());
+
+  for (int i = 0; i < TreeAmount; i++) {
+      Tree T;
+      T.m_shader = shader;
+      m_treePositions.push_back(randVertices(gen));
+	  m_trees.push_back(T);
+  }
+  m_trees[0].generateLeaves(5, 500);
+  m_trees[0].generateTree();
+  for (int i = 1; i < m_trees.size(); i++) {
+      m_trees[i].Branches = m_trees[0].Branches;
+      m_trees[i].mesh = m_trees[0].mesh;
+      m_trees[i].leaves = m_trees[0].leaves;
+  }
 }
 
 void application::render() {
@@ -102,6 +121,13 @@ void application::render() {
   
   clouds.draw(m_camera_.view_matrix(), projection);
   m_model_.draw(m_camera_.view_matrix(), projection);
+
+  for (int i = 0; i < m_trees.size(); i++) {
+      m_trees[i].draw(m_camera_.view_matrix(), projection);
+      mesh_vertex terrainVertices = m_terrain.builder.getVertex(m_treePositions[i]);
+      m_trees[i].modelTransform = glm::translate(mat4(1.0f), terrainVertices.pos);
+  }
+
 }
 
 void application::render_gui() {
@@ -198,6 +224,31 @@ void application::render_gui() {
   }
 
   // finish creating window
+  ImGui::End();
+
+  // Tree window
+  ImGui::SetNextWindowPos(ImVec2(width - 305, 215), ImGuiSetCond_Once);
+  ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
+  ImGui::Begin("Tree Settings", nullptr);
+
+  if (ImGui::Button("Spooky Mode")) {
+      for (int i = 0; i < m_trees.size(); i++) {
+          m_trees[i].spookyMode = !m_trees[i].spookyMode;
+      }
+  }
+  if (ImGui::Button("New Tree")) {
+      m_trees[0].generateLeaves(5, 500);
+      m_trees[0].generateTree();
+      for (int i = 1; i < m_trees.size(); i++) {
+          m_trees[i].Branches = m_trees[0].Branches;
+          m_trees[i].mesh = m_trees[0].mesh;
+          m_trees[i].leaves = m_trees[0].leaves;
+      }
+  }
+  if (ImGui::Button("Print Tree")) {
+      m_trees[0].printTree();
+  }
+
   ImGui::End();
 }
 

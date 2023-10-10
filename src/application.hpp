@@ -12,6 +12,7 @@
 #include "texture_loader.hpp"
 #include "mesh_deformation.hpp"
 #include <terrain_model.hpp>
+#include "Tree.hpp"
 
 
 /**
@@ -74,6 +75,13 @@ class application {
   terrain_model m_terrain;
   mesh_deformation m_mesh_deform;
 
+  //Tree Values
+  basic_model m_model;
+
+  int TreeAmount = 100;
+
+  vector<Tree> m_trees;
+  vector<int> m_treePositions;
 
  public:
   explicit application(GLFWwindow *);
