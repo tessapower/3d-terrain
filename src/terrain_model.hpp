@@ -17,7 +17,7 @@ public:
 	std::vector<std::vector<int>> adjacent_faces;
 
 	// variables
-	int m_tex = 0;
+	int m_tex = 1;
 	cgra::mesh_vertex selectedPoint;
 	float m_radius = 25;
 	bool m_isBump = true;
