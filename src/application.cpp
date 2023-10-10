@@ -8,6 +8,7 @@
 #include "cgra/cgra_image.hpp"
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
+#include "simplified_mesh.hpp"
 
 void basic_model::draw(const glm::mat4 &view, const glm::mat4 &projection) {
   glm::mat4 model_view = view * model_transform;
@@ -30,6 +31,14 @@ application::application(GLFWwindow *window) : m_window_(window) {
   sb.set_shader(GL_FRAGMENT_SHADER,
                 CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
   const GLuint shader = sb.build();
+
+  m_model_bunny.shader = shader;
+  m_model_bunny.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res/assets/bunny.obj")));
+  m_model_bunny.isolevel = 0.007;
+  m_model_bunny.build_from_model();
+
+  clouds.shader = shader;
+  clouds.simulate();
 
   m_model_.shader = shader;
   m_model_.mesh = cgra::load_wavefront_data(
@@ -61,10 +70,14 @@ void application::render() {
   m_last_frame_ = current_frame;
 
   const glm::mat4 projection =
-      glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 1000.f);
+      glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 10000.f);
 
-  // Draw the model
   glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
+
+  // draw the model
+  m_model_bunny.draw(glm::scale(glm::translate(m_camera_.view_matrix(), vec3(15, 0, 0)), vec3(15)), projection);
+
+  clouds.draw(m_camera_.view_matrix(), projection);
   m_model_.draw(m_camera_.view_matrix(), projection);
 }
 
@@ -83,6 +96,47 @@ void application::render_gui() {
   ImGui::SameLine();
   if (ImGui::Button("Screenshot")) cgra::rgba_image::screenshot(true);
 
+  ImGui::End();
+
+  // Voxel window
+  ImGui::SetNextWindowPos(ImVec2(5, 215), ImGuiSetCond_Once);
+  ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
+  ImGui::Begin("Voxel Settings", nullptr);
+
+  if (ImGui::SliderFloat("Voxel Size", &voxelEdgeLength, 0.004, 0.03)) {
+    m_model_bunny.voxelEdgeLength = voxelEdgeLength;
+    m_model_bunny.build_from_model();
+  }
+
+  if (ImGui::SliderFloat("Isolevel", &isolevel, 0.01, 0.1)) {
+    m_model_bunny.isolevel = isolevel;
+    m_model_bunny.build_from_model();
+  }
+
+  if (ImGui::Checkbox("Normal Smoothing", &smoothing)) {
+    m_model_bunny.smoothNormals = smoothing;
+    m_model_bunny.build_from_model();
+    clouds.mesh.smoothNormals = smoothing;
+    clouds.mesh.build();
+  }
+
+  if (ImGui::Combo("Debugging", (int*)(&debugging), "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0", 5)) {
+    m_model_bunny.debugging = debugging;
+    m_model_bunny.build_from_model();
+    clouds.mesh.debugging = debugging;
+    clouds.mesh.build();
+  }
+
+  if (ImGui::SliderFloat("Cloud threshold", &clouds.cloudThreshold, 0.1, 0.8)) {
+    clouds.simulate();
+  }
+
+  if (ImGui::SliderFloat("Cloud Fade Out", &clouds.fadeOutRange, 0.0, 20.0)) {
+    clouds.simulate();
+  }
+
+
+  // finish creating window
   ImGui::End();
 }
 

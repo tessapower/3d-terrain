@@ -73,6 +73,15 @@ namespace cgra {
 			indices.insert(indices.end(), inds);
 		}
 
+		void append(mesh_builder builder) {
+			for (int i = 0; i < builder.indices.size(); i++) {
+				indices.push_back(vertices.size() + builder.indices[i]);
+			}
+			for (int i = 0; i < builder.vertices.size(); i++) {
+				vertices.push_back(builder.vertices[i]);
+			}
+		}
+
 		gl_mesh build() const;
 
 		void print() const {

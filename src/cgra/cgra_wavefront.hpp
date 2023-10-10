@@ -161,7 +161,7 @@ namespace cgra {
 			mb.push_vertex(mesh_vertex{
 				positions[wv_vertices[i].p],
 				normals[wv_vertices[i].n],
-				uvs[wv_vertices[i].t]
+				// Marshall removed texture mapping here
 			});
 		}
 
