@@ -17,7 +17,7 @@ constexpr float default_yaw = -89.0f;
 class camera {
   // Constants
   const float m_max_pitch_ = 89.0f;
-  const float m_speed_ = 100.0f;
+  const float m_speed_ = 1000.0f;
   const float m_sensitivity_ = 0.5f;
 
   // Vectors
