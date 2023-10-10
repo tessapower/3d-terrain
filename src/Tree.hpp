@@ -58,6 +58,11 @@ public:
     float process(float x);
     void drawTree(const glm::mat4& view, const glm::mat4 proj);
     void generateMesh();
+    cgra::gl_mesh mesh;
+    std::vector<leaf> leaves;
+    std::vector<glm::vec3> m_leafPositions;
+    std::vector<glm::vec3> reachedLeaves;
+    std::vector<branch> Branches;
     // Add other methods and member variables as needed
 
 private:
@@ -70,9 +75,6 @@ private:
     void calculateFoliage();
     int randomInt(int a, int b);
     float randomFloat(int a, int b);
-    std::vector<glm::vec3> m_leafPositions;
-    std::vector<glm::vec3> reachedLeaves;
-    std::vector<branch> Branches;
     glm::vec3 startPosition{0.0};
     float branchLength = 0.5;
     float m_attractionRange = 1.5;
@@ -81,13 +83,7 @@ private:
     float m_randomnessFactor = 0.1;
     float minimumLength = 5;
     float maximumLength = 15;
-
-
     int maxDepth = 10;
-
-    cgra::gl_mesh mesh;
-
-    std::vector<leaf> leaves;
 
     // Add other member variables like mesh, texture, etc. as needed
 };
