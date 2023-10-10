@@ -29,6 +29,9 @@ SET(sources
 
 	"terrain_model.hpp"
 	"terrain_model.cpp"
+  
+	"Tree.hpp"
+	"Tree.cpp"
 
 	"CMakeLists.txt"
 )
