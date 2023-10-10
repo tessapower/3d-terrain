@@ -36,6 +36,8 @@ application::application(GLFWwindow *window) : m_window_(window) {
                       CGRA_SRCDIR + std::string("/res//assets//teapot.obj"))
                       .build();
   m_model_.color = glm::vec3(1.0f, 0.0f, 0.f);
+
+  m_tree.m_shader = shader;
 }
 
 void application::render() {
@@ -65,7 +67,13 @@ void application::render() {
 
   // Draw the model
   glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
-  m_model_.draw(m_camera_.view_matrix(), projection);
+
+  if (genTree) {
+      m_tree.draw(m_camera_.view_matrix(), projection);
+  }
+  else {
+      m_model.draw(m_camera_.view_matrix(), projection);
+  }
 }
 
 void application::render_gui() {
@@ -82,6 +90,18 @@ void application::render_gui() {
   ImGui::Checkbox("Wireframe", &m_show_wireframe_);
   ImGui::SameLine();
   if (ImGui::Button("Screenshot")) cgra::rgba_image::screenshot(true);
+
+  ImGui::Separator();
+
+  ImGui::Checkbox("Toggle Tree", &genTree);
+  ImGui::Checkbox("SpookyMode", &m_tree.spookyMode);
+  if (ImGui::Button("New Tree")) {
+      m_tree.generateLeaves(5, 500);
+      m_tree.generateTree();
+  }
+  if (ImGui::Button("Print Tree")) {
+      m_tree.printTree();
+  }
 
   ImGui::End();
 }
