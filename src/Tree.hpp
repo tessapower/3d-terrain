@@ -46,7 +46,8 @@ class Tree {
 public:
     Tree() {}
     GLuint m_shader = 0;
-    glm::mat4 modelTransform{ 1.0 };
+    glm::mat4 modelTranslate{ 1.0 };
+    glm::vec3 modelScale{1.0f};
     bool spookyMode = false;
 
     // Function to draw the tree

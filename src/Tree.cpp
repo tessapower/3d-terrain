@@ -283,7 +283,7 @@ void Tree::generateMesh() {
 
         mesh_vertex vtex;
         vtex.pos = vec3(x, 0, z);
-        vtex.norm = vec3(x, 0, z);
+        vtex.norm = glm::normalize(vec3(x, 0, z));
         vtex.uv = vec2(0, 0);
 
         initialCircle.push_back(builder.vertices.size());
@@ -360,7 +360,7 @@ void Tree::generateMesh() {
 }
 
 void Tree::drawTree(const glm::mat4& view, const glm::mat4 proj) {
-    mat4 modelview = view * modelTransform;
+    mat4 modelview = view * (glm::scale(modelTranslate,modelScale));
     glUseProgram(m_shader); 
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "uProjectionMatrix"), 1, false, value_ptr(proj));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "uModelViewMatrix"), 1, false, value_ptr(modelview));
@@ -388,11 +388,10 @@ void Tree::calculateFoliage() {
 void Tree::drawFoliage(const glm::mat4& view, const glm::mat4 proj) {
     glUseProgram(m_shader);
     for (leaf le : leaves) {
-        mat4 positionMatrix = glm::translate(view, le._leafPos);
-        positionMatrix = positionMatrix * modelTransform;
-        mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), le._leafSize);
-
-        mat4 sphereModelMatrix = positionMatrix * scalingMatrix;
+        mat4 positionMatrix = glm::translate(view, le._leafPos * modelScale);
+        positionMatrix = positionMatrix * modelTranslate;
+        mat4 scalingMatrix = glm::scale(positionMatrix, le._leafSize);
+        mat4 sphereModelMatrix = glm::scale(scalingMatrix, modelScale);
 
         glUseProgram(m_shader);
 
