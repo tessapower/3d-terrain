@@ -12,9 +12,6 @@ SET(sources
 
 	"camera.hpp"
 
-	"Tree.hpp"
-	"Tree.cpp"
-
 	"CMakeLists.txt"
 )
 
