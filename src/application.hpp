@@ -38,9 +38,9 @@ class application {
   GLFWwindow *m_window_;
 
   // Flying Camera
-  const glm::vec3 m_camera_pos_   = glm::vec3(0.0f, 0.0f,  3.0f);
-  const glm::vec3 m_camera_front_ = glm::vec3(0.0f, 0.0f, -1.0f);
-  const glm::vec3 m_camera_up_    = glm::vec3(0.0f, 1.0f,  0.0f);
+  const glm::vec3 m_camera_pos_   = { -5.0f, 185.0f, 752.0f };
+  const glm::vec3 m_camera_front_ = {  0.0f,   0.0f,  -1.0f };
+  const glm::vec3 m_camera_up_    = {  0.0f,   1.0f,   0.0f };
   camera m_camera_{m_camera_pos_, m_camera_up_, m_camera_front_};
   glm::vec3 m_direction_ = glm::vec3(0.0f);
 

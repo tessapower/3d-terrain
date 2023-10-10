@@ -289,7 +289,6 @@ void application::mouse_button_cb(const int button, const int action, const int 
         }
         break;
     }
-                               
     case GLFW_MOUSE_BUTTON_MIDDLE: {
       m_middle_mouse_down_ = (action == GLFW_PRESS);
       break;
