@@ -9,6 +9,10 @@
 #include "cloud_model.hpp"
 #include "opengl.hpp"
 #include <simplified_mesh_debugging.hpp>
+#include "texture_loader.hpp"
+#include "mesh_deformation.hpp"
+#include <terrain_model.hpp>
+
 
 /**
  * \brief Basic model that holds the shader, mesh and transform for drawing.
@@ -65,6 +69,11 @@ class application {
   simplified_mesh_debugging debugging = simplified_mesh_debugging::result;
 
   // end Voxel Settings
+
+  // Mesh editing and texturing
+  terrain_model m_terrain;
+  mesh_deformation m_mesh_deform;
+
 
  public:
   explicit application(GLFWwindow *);
