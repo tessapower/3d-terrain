@@ -8,7 +8,6 @@
 #include <cgra/cgra_mesh.hpp>
 
 // Blender kdtree
-#include "KDTree.h"
 #include <simplified_mesh_debugging.hpp>
 
 
@@ -29,8 +28,6 @@ public:
 	// Bounding box
 	glm::vec3 topRight;
 	glm::vec3 bottomLeft;
-
-	jk::tree::KDTree<int, 3, 512> tree;
 
 	simplified_mesh() { }
 	void draw(const glm::mat4& view, const glm::mat4& proj);

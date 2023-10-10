@@ -13,11 +13,7 @@
 #include <chrono>
 #include <unordered_map>
 #include <array>
-#include "par_for.h"
-#include <queue> 
-
-// Blender kdtree
-#include "KDTree.h"
+#include <queue>
 
 using namespace std;
 using namespace glm;
@@ -357,19 +353,6 @@ vec3 edge_to_boundary_vertex(int edge, vec3 point, const float* f_eval, float vo
 
 void simplified_mesh::set_model(mesh_builder builder) {
 	this->builder = builder;
-
-	// Create kdtree
-	tree = jk::tree::KDTree<int, 3, 512>();
-
-	// Reserve proper space
-	tree.reserve(builder.vertices.size());
-
-	for (int i = 0; i < builder.vertices.size(); i++) {
-		tree.addPoint({ builder.vertices[i].pos.x, builder.vertices[i].pos.y, builder.vertices[i].pos.z }, i, false);
-	}
-
-	// Sort tree afterwards for faster performance
-	tree.splitOutstanding();
 
 	// Calculate bounding box
 	topRight = builder.vertices[0].pos;
