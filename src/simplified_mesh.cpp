@@ -332,17 +332,17 @@ void simplified_mesh::draw(const glm::mat4& view, const glm::mat4& proj) {
 	mesh.draw(); // draw
 }
 
-float adapt(float v0, float v1) {
+inline float adapt(float v0, float v1) {
 	return 0.5;
 }
 
 vec3 edge_to_boundary_vertex(int edge, vec3 point, const float* f_eval, float voxelEdgeLength) {
 
-	int v0 = EDGES[edge][0];
-	int v1 = EDGES[edge][1];
+	const int v0 = EDGES[edge][0];
+	const int v1 = EDGES[edge][1];
 	
-	float t0 = 1.0 - adapt(f_eval[v0], f_eval[v1]);
-	float t1 = 1.0 - t0;
+	const float t0 = 1.0 - adapt(f_eval[v0], f_eval[v1]);
+	const float t1 = 1.0 - t0;
 
 	vec3 vert_pos0 = vec3(VERTICES[v0][0], VERTICES[v0][1], VERTICES[v0][2]);
 	vec3 vert_pos1 = vec3(VERTICES[v1][0], VERTICES[v1][1], VERTICES[v1][2]);
@@ -472,6 +472,10 @@ void simplified_mesh::build_from_model() {
 	}
 
 	build();
+
+	// Print the duration
+	cout << "Time taken to finish whole process G: "
+		<< duration.count() << " microseconds" << endl;
 }
 
 /// <summary>
@@ -525,21 +529,21 @@ void simplified_mesh::build() {
 				if (values[6] < isolevel) cubeIndex |= 64;
 				if (values[7] < isolevel) cubeIndex |= 128;
 
-				vector<vector<int>> faces = TRI_TABLE[cubeIndex];
+				vector<vector<int>>* faces = &TRI_TABLE[cubeIndex];
 
 				const vec3 gridPoint = grid_to_world_position(topRight, bottomLeft, vec3(x, y, z), gridSize);
 
-				for (int face = 0; face < faces.size(); face++) {
+				for (int face = 0; face < faces->size(); face++) {
 
-					vector<int> faceEdges = faces[face];
+					vector<int>* faceEdges = &(*faces)[face];
 
 					int size = output.vertices.size();
 
 					// Calculate vertices
 					const vec3 vertices[3] = {
-						edge_to_boundary_vertex(faceEdges[0], gridPoint, values, voxelEdgeLength),
-						edge_to_boundary_vertex(faceEdges[1], gridPoint, values, voxelEdgeLength),
-						edge_to_boundary_vertex(faceEdges[2], gridPoint, values, voxelEdgeLength)
+						edge_to_boundary_vertex((*faceEdges)[0], gridPoint, values, voxelEdgeLength),
+						edge_to_boundary_vertex((*faceEdges)[1], gridPoint, values, voxelEdgeLength),
+						edge_to_boundary_vertex((*faceEdges)[2], gridPoint, values, voxelEdgeLength)
 					};
 
 					const vec3 v1 = vec3(vertices[1].x - vertices[0].x, vertices[1].y - vertices[0].y, vertices[1].z - vertices[0].z);
