@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/glm.hpp>
 
 namespace cgra {
   // creates a mesh for a unit sphere (radius of 1)
