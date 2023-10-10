@@ -6,7 +6,6 @@
 #include "camera.hpp"
 #include "cgra/cgra_mesh.hpp"
 #include "opengl.hpp"
-#include "Tree.hpp"
 
 /**
  * \brief Basic model that holds the shader, mesh and transform for drawing.
@@ -49,14 +48,6 @@ class application {
 
   bool m_show_wireframe_ = false;
   basic_model m_model_;
-
-  // geometry
-  basic_model m_model;
-  Tree m_tree;
-
-  bool genTree = true;
-
-  float m_depth = 5;
 
  public:
   explicit application(GLFWwindow *);
