@@ -3,6 +3,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+/// Code Author: Tessa Power
+///
+/// Created with the help of the Camera tutorial from:
+/// https://learnopengl.com/Getting-started/Camera
+
 /**
  * \brief Defines the different directions the camera can move in.
  */
