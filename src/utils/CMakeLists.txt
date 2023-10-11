@@ -2,6 +2,7 @@
 # Source files
 set(sources
 	"camera.hpp"
+	"intersections.hpp"
 	"opengl.hpp"
 	"perlin_noise.cpp"
 	"perlin_noise.hpp"

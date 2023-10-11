@@ -13,8 +13,6 @@ public:
     glm::vec3 calculateFaceNormal(const glm::vec3& vertex1, const glm::vec3& vertex2, const glm::vec3& vertex3);
     void computeVertexNormals();
     void mouseIntersectMesh(double xpos, double ypos, double windowsize_x, double windowsize_y);
-    bool rayIntersectsVertex(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, int vertex);
-    bool rayIntersectsTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, const glm::vec3& vertex0, const glm::vec3& vertex1, const glm::vec3& vertex2);
     void computeTBN();
     void calculateTBN(cgra::mesh_builder& mb, bool topLeft, int k1, int k2, int k3, int k4);
     terrain_model getModel();
