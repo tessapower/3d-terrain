@@ -118,6 +118,7 @@ void application::render() {
       m_trees[i].modelScale = vec3(m_treeSizes[i]);
   }
 
+  m_skybox_.draw(m_camera_.view_matrix(), projection);
 }
 
 void application::render_gui() {

@@ -1,4 +1,3 @@
-
 # Source files
 set(sources
 	"camera.hpp"
@@ -8,6 +7,8 @@ set(sources
 	"perlin_noise.hpp"
 	"texture_loader.cpp"
 	"texture_loader.hpp"
+	"skybox.hpp"
+	"skybox.cpp"
 	"CMakeLists.txt"
 )
 

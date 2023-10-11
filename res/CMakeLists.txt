@@ -4,6 +4,8 @@
 SET(SHADERS
 	"shaders/color_frag.glsl"
 	"shaders/color_vert.glsl"
+	"shaders/skybox.fs.glsl"
+	"shaders/skybox.vs.glsl"
 )
 
 add_custom_target(
