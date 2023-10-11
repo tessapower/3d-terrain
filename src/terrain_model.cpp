@@ -106,7 +106,7 @@ void terrain_model::createTerrain() {
 			// Calculate vertex position (x, y, z) with increased spacing and centered
 			float x = static_cast<float>(i) * spacing + xOffset;
 			float z = static_cast<float>(j) * spacing + zOffset;
-			float y = terrain.perlin(x, 0.0, z) * height;
+			float y = (terrain.perlin(x, 0.0, z) * height) - 100;
 
 			mv.pos = { x, y, z };
 
