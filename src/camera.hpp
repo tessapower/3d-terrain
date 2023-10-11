@@ -173,8 +173,6 @@ private:
 
             // Check if the ray intersects with the vertex
             if (rayIntersectsVertex(m_position_, delta, i, model)) {
-                // You've clicked on this vertex, store its index
-                model.selectedPoint = model.builder.vertices.at(i);
                 if (newPos.y <= vertex.pos.y) return true;
             }
         }
