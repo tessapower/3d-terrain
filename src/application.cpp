@@ -120,7 +120,7 @@ void application::render() {
   m_mesh_deform.m_proj = projection;
 
   // draw the model
-  m_model_bunny.draw(glm::scale(glm::translate(m_camera_.view_matrix(), vec3(15, 0, 0)), vec3(15)), projection);
+  m_model_bunny.draw(glm::scale(glm::translate(m_camera_.view_matrix(), vec3(15, 50, 0)), vec3(15)), projection);
   
   clouds.draw(m_camera_.view_matrix(), projection);
   m_model_.draw(m_camera_.view_matrix(), projection);
