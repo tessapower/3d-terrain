@@ -106,7 +106,7 @@ void application::render() {
   const auto current_frame = static_cast<float>(glfwGetTime());
   m_delta_time_ = current_frame - m_last_frame_;
   m_last_frame_ = current_frame;
-  m_camera_.update(m_delta_time_);
+  m_camera_.update(m_delta_time_, m_terrain);
 
   const glm::mat4 projection =
       glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 10000.f);
