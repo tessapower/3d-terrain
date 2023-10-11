@@ -15,7 +15,7 @@
 #include <stb_image_write.h>
 
 // project
-#include <opengl.hpp>
+#include <utils/opengl.hpp>
 
 
 namespace cgra {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cgra/cgra_mesh.hpp>
-#include <terrain_model.hpp>
+#include <terrain/terrain_model.hpp>
 
 class mesh_deformation {
 public:

@@ -5,35 +5,8 @@
 SET(sources
 	"application.hpp"
 	"application.cpp"
-
-	"simplified_mesh.hpp"
-	"simplified_mesh.cpp"
-	"simplified_mesh_debugging.hpp"
-	"cloud_model.hpp"
-	"cloud_model.cpp"
-	"../ext/PerlinNoise.hpp"
-	
-	"opengl.hpp"
-
 	"main.cpp"
-
-	"camera.hpp"
-
-	"mesh_deformation.hpp"
-	"mesh_deformation.cpp"
-
-	"texture_loader.hpp"
-	"texture_loader.cpp"
-
-	"terrain_model.hpp"
-	"terrain_model.cpp"
-  
-	"Tree.hpp"
-	"Tree.cpp"
-
-	"perlin_noise.hpp"
-	"perlin_noise.cpp"
-
+	"../ext/PerlinNoise.hpp"
 	"CMakeLists.txt"
 )
 
@@ -41,6 +14,11 @@ SET(sources
 add_executable(${CGRA_PROJECT} ${sources})
 
 add_subdirectory(cgra)
+add_subdirectory(clouds)
+add_subdirectory(mesh)
+add_subdirectory(terrain)
+add_subdirectory(trees)
+add_subdirectory(utils)
 
 #########################################################
 # Link and Build Executable

@@ -4,7 +4,7 @@
 
 #include "application.hpp"
 #include "cgra/cgra_gui.hpp"
-#include "opengl.hpp"
+#include "utils/opengl.hpp"
 
 namespace {
 void cursor_pos_cb(GLFWwindow *, double x_pos, double y_pos);

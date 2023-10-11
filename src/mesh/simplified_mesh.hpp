@@ -4,12 +4,11 @@
 #include <glm/glm.hpp>
 
 // project
-#include "opengl.hpp"
+#include "utils/opengl.hpp"
 #include <cgra/cgra_mesh.hpp>
 
 // Blender kdtree
-#include <simplified_mesh_debugging.hpp>
-
+#include "mesh/simplified_mesh_debugging.hpp"
 
 class simplified_mesh {
 public:

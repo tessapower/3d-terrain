@@ -1,0 +1,14 @@
+
+# Source files
+set(sources
+	"camera.hpp"
+	"opengl.hpp"
+	"perlin_noise.cpp"
+	"perlin_noise.hpp"
+	"texture_loader.cpp"
+	"texture_loader.hpp"
+	"CMakeLists.txt"
+)
+
+# Add these sources to the project target
+target_relative_sources(${CGRA_PROJECT} ${sources})

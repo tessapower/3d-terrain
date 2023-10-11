@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------
 //
 // OpenGL header
-// Set up to include eveything nessesary for OpenGL functionality in one place
+// Set up to include everything necessary for OpenGL functionality in one place
 //
 //----------------------------------------------------------------------------
 
@@ -11,8 +11,6 @@
 // glew.h replaces gl.h and sets up OpenGL functions in a cross-platform manner
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-
 
 namespace cgra {
 

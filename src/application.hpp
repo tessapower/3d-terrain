@@ -3,30 +3,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "camera.hpp"
-#include "cgra/cgra_mesh.hpp"
-#include "simplified_mesh.hpp"
-#include "cloud_model.hpp"
-#include "opengl.hpp"
-#include <simplified_mesh_debugging.hpp>
-#include "texture_loader.hpp"
-#include "mesh_deformation.hpp"
-#include <terrain_model.hpp>
-#include "Tree.hpp"
-
-
-/**
- * \brief Basic model that holds the shader, mesh and transform for drawing.
- */
-struct basic_model {
-  GLuint shader = 0;
-  cgra::gl_mesh mesh;
-  glm::vec3 color{0.7f};
-  glm::mat4 model_transform{1.0f};
-  GLuint texture{};
-
-  void draw(const glm::mat4 &view, const glm::mat4 &projection);
-};
+#include "utils/camera.hpp"
+#include "cgra/cgra_basic_model.hpp"
+#include "mesh/simplified_mesh.hpp"
+#include "clouds/cloud_model.hpp"
+#include "utils/opengl.hpp"
+#include "mesh/simplified_mesh_debugging.hpp"
+#include "mesh/mesh_deformation.hpp"
+#include "terrain/terrain_model.hpp"
+#include "trees/Tree.hpp"
 
 /**
  * \brief Represents the application which is responsible for rendering the scene and the

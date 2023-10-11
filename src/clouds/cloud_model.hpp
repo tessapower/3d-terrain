@@ -11,7 +11,7 @@
 #include "cgra/cgra_image.hpp"
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
-#include "simplified_mesh.hpp"
+#include "mesh/simplified_mesh.hpp"
 
 using namespace std;
 using namespace glm;

@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <terrain_model.hpp>
+#include <terrain/terrain_model.hpp>
 
 /// Code Author: Tessa Power
 ///

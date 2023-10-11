@@ -7,7 +7,7 @@
 #include <string>
 
 // project
-#include <opengl.hpp>
+#include <utils/opengl.hpp>
 
 
 namespace cgra {

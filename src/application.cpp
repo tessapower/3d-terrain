@@ -8,26 +8,11 @@
 #include "cgra/cgra_image.hpp"
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
-#include "simplified_mesh.hpp"
-#include "texture_loader.hpp"
-#include "mesh_deformation.hpp"
-#include <terrain_model.hpp>
+#include "mesh/simplified_mesh.hpp"
+#include "utils/texture_loader.hpp"
+#include "mesh/mesh_deformation.hpp"
+#include "terrain/terrain_model.hpp"
 #include <random>
-
-
-void basic_model::draw(const glm::mat4 &view, const glm::mat4 &projection) {
-  glm::mat4 model_view = view * model_transform;
-
-  // Load shader and variables into GPU
-  glUseProgram(shader);
-  glUniformMatrix4fv(glGetUniformLocation(shader, "uProjectionMatrix"), 1,
-                     false, value_ptr(projection));
-  glUniformMatrix4fv(glGetUniformLocation(shader, "uModelViewMatrix"), 1, false,
-                     glm::value_ptr(model_view));
-  glUniform3fv(glGetUniformLocation(shader, "uColor"), 1, value_ptr(color));
-
-  mesh.draw();
-}
 
 application::application(GLFWwindow *window) : m_window_(window) {
   cgra::shader_builder sb;

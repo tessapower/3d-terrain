@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 
 // project
-#include <opengl.hpp>
+#include <utils/opengl.hpp>
 
 
 

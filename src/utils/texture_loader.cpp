@@ -1,9 +1,6 @@
-#pragma once
-
 #include "texture_loader.hpp"
 #include "cgra/cgra_mesh.hpp"
 #include "cgra/cgra_image.hpp"
-
 
 void texture_loader::loadTextures(GLuint shader) {
 	// Load texture data
@@ -41,7 +38,6 @@ void texture_loader::loadTextures(GLuint shader) {
 	bindTexturesToShader(shader);
 }
 
-
 void texture_loader::bindTexturesToShader(GLuint shader) {
 	// Bind texture color uniforms
 	bindTextureUniform(shader, "uTexture1", GL_TEXTURE0, m_texture1);
@@ -65,7 +61,6 @@ void texture_loader::bindTexturesToShader(GLuint shader) {
 	// Bind bark texture uniform
 	bindTextureUniform(shader, "uBarkTexture", GL_TEXTURE11, m_barkTexture);
 }
-
 
 void texture_loader::bindTextureUniform(GLuint shader, const char* uniformName, GLenum textureUnit, GLuint textureHandle) {
 	glActiveTexture(textureUnit);
