@@ -31,6 +31,9 @@ SET(sources
 	"Tree.hpp"
 	"Tree.cpp"
 
+	"perlin_noise.hpp"
+	"perlin_noise.cpp"
+
 	"CMakeLists.txt"
 )
 

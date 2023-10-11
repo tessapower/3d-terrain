@@ -27,6 +27,14 @@ public:
 	float m_heightScale = 1;
 	int gridSize = 200;
 
+	// noise varaibles
+	unsigned int seed = 0;
+	unsigned int octaves = 5;
+	float lacunarity = 2.0f;
+	float persistence = 0.5f;
+	unsigned int repeat = 3;
+	float height = 200.0f;
+
 	terrain_model() { }
 	void draw(const glm::mat4& view, const glm::mat4& proj);
 	void createFlatGround();
