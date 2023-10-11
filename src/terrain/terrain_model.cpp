@@ -1,7 +1,7 @@
 #pragma once
 
-#include "terrain_model.hpp"
-#include "perlin_noise.hpp"
+#include "terrain/terrain_model.hpp"
+#include "utils/perlin_noise.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
 void terrain_model::createFlatGround() {

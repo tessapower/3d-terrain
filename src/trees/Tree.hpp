@@ -9,7 +9,7 @@
 #include <cmath>
 
 // project
-#include "opengl.hpp"
+#include "utils/opengl.hpp"
 #include "cgra/cgra_mesh.hpp"
 
 struct branch {

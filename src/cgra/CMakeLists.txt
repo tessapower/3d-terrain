@@ -1,12 +1,12 @@
 
 # Source files
-set(sources	
+set(sources
 	"cgra_geometry.hpp"
 	"cgra_geometry.cpp"
 
 	"cgra_gui.hpp"
 	"cgra_gui.cpp"
-	
+
 	"cgra_image.hpp"
 
 	"cgra_mesh.hpp"
@@ -16,6 +16,7 @@ set(sources
 	"cgra_shader.cpp"
 
 	"cgra_wavefront.hpp"
+	"cgra_basic_model.hpp"
 
 	"CMakeLists.txt"
 )

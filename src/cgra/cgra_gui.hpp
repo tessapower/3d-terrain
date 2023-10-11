@@ -5,7 +5,7 @@
 #include <imgui.h>
 
 // project
-#include <opengl.hpp>
+#include <utils/opengl.hpp>
 
 
 namespace cgra {

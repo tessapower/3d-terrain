@@ -8,7 +8,7 @@
 
 // project
 #include "cgra_shader.hpp"
-#include <opengl.hpp>
+#include <utils/opengl.hpp>
 
 
 // forward declaration

@@ -1,4 +1,3 @@
-
 #pragma once
 
 // std
@@ -9,7 +8,6 @@
 
 // project
 #include "cgra_mesh.hpp"
-
 
 namespace cgra {
 

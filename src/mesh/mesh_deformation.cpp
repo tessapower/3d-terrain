@@ -2,6 +2,8 @@
 
 #include "mesh_deformation.hpp"
 
+#include "utils/intersections.hpp"
+
 void mesh_deformation::setModel(terrain_model& m) {
 	model = m;
 }
@@ -57,7 +59,6 @@ void mesh_deformation::computeTBN() {
 		}
 	}
 }
-
 
 void mesh_deformation::calculateTBN(cgra::mesh_builder& mb, bool topLeft, int k1, int k2, int k3, int k4) {
 	// triangles positions
@@ -209,67 +210,10 @@ void mesh_deformation::mouseIntersectMesh(double xpos, double ypos, double windo
 		cgra::mesh_vertex vertex = model.builder.vertices[i];
 
 		// Check if the ray intersects with the vertex
-		if (rayIntersectsVertex(rayOriginWorld, rayDirection, i)) {
+		if (ray_intersects_vertex(rayOriginWorld, rayDirection, i, model)) {
 			// You've clicked on this vertex, store its index
 			model.selectedPoint = model.builder.vertices.at(i);
 			break; // Exit the loop since you've found the first intersection
 		}
 	}
-}
-
-bool mesh_deformation::rayIntersectsVertex(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, int vertex) {
-	// Iterate through the adjacent faces of the vertex
-	for (int i = 0; i < model.adjacent_faces[vertex].size(); i += 3) {
-		// Get the vertices of the triangle formed by the current adjacent faces
-		const glm::vec3& vertex0 = model.builder.vertices[model.adjacent_faces[vertex][i]].pos;
-		const glm::vec3& vertex1 = model.builder.vertices[model.adjacent_faces[vertex][i + 1]].pos;
-		const glm::vec3& vertex2 = model.builder.vertices[model.adjacent_faces[vertex][i + 2]].pos;
-
-		// Check if the ray intersects with the triangle
-		if (rayIntersectsTriangle(rayOrigin, rayDirection, vertex0, vertex1, vertex2)) {
-			return true; // Intersection found
-		}
-	}
-
-	return false; // No intersection
-}
-
-// Möller–Trumbore intersection algorithm
-bool mesh_deformation::rayIntersectsTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDirection,
-	const glm::vec3& vertex0, const glm::vec3& vertex1, const glm::vec3& vertex2) {
-	// Calculate edge vectors of the triangle
-	glm::vec3 edge1 = vertex1 - vertex0;
-	glm::vec3 edge2 = vertex2 - vertex0;
-
-	// Calculate the determinant of the matrix formed by the direction vector and edge vectors
-	glm::vec3 h = cross(rayDirection, edge2);
-	float a = dot(edge1, h);
-
-	// Check if the ray and triangle are parallel
-	if (a > -0.00001f && a < 0.00001f)
-		return false;
-
-	float f = 1.0f / a;
-	glm::vec3 s = rayOrigin - vertex0;
-	float u = f * dot(s, h);
-
-	if (u < 0.0f || u > 1.0f)
-		return false;
-
-	glm::vec3 q = cross(s, edge1);
-	float v = f * dot(rayDirection, q);
-
-	if (v < 0.0f || u + v > 1.0f)
-		return false;
-
-	// Calculate the intersection distance along the ray
-	float t = f * dot(edge2, q);
-
-	// Check if the intersection point is in front of the ray's origin
-	if (t > 0.00001f) {
-		// The ray intersects with the triangle, and t is the intersection distance
-		return true;
-	}
-
-	return false; // No intersection
 }

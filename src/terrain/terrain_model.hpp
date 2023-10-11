@@ -4,8 +4,8 @@
 #include <glm/glm.hpp>
 
 // project
-#include "opengl.hpp"
-#include <cgra/cgra_mesh.hpp>
+#include "utils/opengl.hpp"
+#include "cgra/cgra_mesh.hpp"
 
 
 class terrain_model {
@@ -27,7 +27,7 @@ public:
 	float m_heightScale = 1;
 	int gridSize = 200;
 
-	// noise varaibles
+	// noise variables
 	unsigned int seed = 0;
 	unsigned int octaves = 5;
 	float lacunarity = 2.0f;
