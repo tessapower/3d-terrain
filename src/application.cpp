@@ -43,7 +43,7 @@ application::application(GLFWwindow *window) : m_window_(window) {
   tl.loadTextures(shader);
 
   m_terrain.shader = shader;
-  m_terrain.createFlatGround();
+  m_terrain.createTerrain();
 
   m_mesh_deform.setModel(m_terrain);
   m_mesh_deform.deformMesh(m_terrain.selectedPoint, m_terrain.m_isBump, 0, 0); // initial computation of TBN, normals
