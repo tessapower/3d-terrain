@@ -12,6 +12,7 @@
 #include "mesh/mesh_deformation.hpp"
 #include "terrain/terrain_model.hpp"
 #include "trees/Tree.hpp"
+#include "utils/skybox.hpp"
 
 /**
  * \brief Represents the application which is responsible for rendering the scene and the
@@ -68,6 +69,8 @@ class application {
   vector<Tree> m_trees;
   vector<int> m_treePositions;
   vector<float> m_treeSizes;
+
+  skybox m_skybox_{};
 
  public:
   explicit application(GLFWwindow *);
