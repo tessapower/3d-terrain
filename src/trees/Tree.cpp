@@ -26,13 +26,19 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
+//Draws the tree by calling the appropriate draw functions. 
 void Tree::draw(const glm::mat4& view, const glm::mat4& proj) {
     glUseProgram(m_shader);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "uProjectionMatrix"), 1, false, value_ptr(proj));
+
+    //uncomment this for debugging
+    /*
     if(m_leafPositions.size() > 0) {
-       // drawLeaves(view, proj);
+       drawLeaves(view, proj);
     }
-    //drawBranchesNodes(0, view, proj);
+    drawBranchesNodes(0, view, proj);
+    */
+
     if (!spookyMode) {
         drawFoliage(view, proj);
     }
@@ -41,6 +47,7 @@ void Tree::draw(const glm::mat4& view, const glm::mat4& proj) {
     }
 }
 
+//finds a random positions within a sphere and returns a point within it
 glm::vec3 Tree::generateRandomLeafPosition(float radius) {
     float theta = randomFloat(0.0f, 2.0f * glm::pi<float>()); // Random angle
     float phi = randomFloat(0.0f, glm::pi<float>()); // Random inclination angle
@@ -50,6 +57,7 @@ glm::vec3 Tree::generateRandomLeafPosition(float radius) {
     return glm::vec3(x, y, z);
 }
 
+//creates a set of positions to be used as attractors or "leaves" 
 void Tree::generateLeaves(float radius, int leaves) {
     if (m_leafPositions.size() > 0) {
         m_leafPositions.clear();
@@ -61,10 +69,13 @@ void Tree::generateLeaves(float radius, int leaves) {
     }
 }
 
+//Helper function for processing leaf positions
+//Stops leaves from swarming the center position
 float Tree::process(float x) {
     return pow(sin(x * M_PI / 2.0), 0.8);
 }
 
+//creates a random int within a and b
 int Tree::randomInt(int a, int b)
 {
     if (a > b)
@@ -74,6 +85,7 @@ int Tree::randomInt(int a, int b)
     return a + (rand() % (b - a));
 }
 
+//creates a random float within a and b
 float Tree::randomFloat(int a, int b)
 {
     if (a > b)
@@ -83,6 +95,7 @@ float Tree::randomFloat(int a, int b)
     return (float)randomInt(a, b) + (float)(rand()) / (float)(RAND_MAX);
 }
 
+//goes through all leaf positions and draws a sphere at the location of the leaf. 
 void Tree::drawLeaves(const glm::mat4& view, const glm::mat4& proj) {
     for (int i = 0; i < m_leafPositions.size(); i++) {
         mat4 positionMatrix = glm::translate(view, m_leafPositions[i]);
@@ -101,27 +114,34 @@ void Tree::drawLeaves(const glm::mat4& view, const glm::mat4& proj) {
     }
 }
 
+//set up function for creating the tree.
 void Tree::generateTree() {
+    //returns if tree shouldn't be made
     if (killRange < branchLength || killRange > m_attractionRange) {
         return;
     }
+    //clears out branches in case tree already exists
     if (Branches.size() > 0) {
         Branches.clear();
     }
+    //generates and then grows branches
     generateBranches();
     bool growing = true;
     while (growing) {
         growing = grow();
     }
+    //calculates the leaf positions and then generates the mesh
     calculateFoliage();
     generateMesh();
 }
 
+//Generates Branches from the base position up to when attractors are found. 
 void Tree::generateBranches() {
     branch trunk(startPosition, startPosition + glm::vec3(0, branchLength, 0), glm::vec3(0, 1, 0), NULL, 0);
     Branches.push_back(trunk);
     int current = 0;
 
+    //generates new branches moving upwards until leaves enter branches attraction range
     branch b = Branches[current];
     bool foundLeaf = false;
     while (!foundLeaf) {
@@ -147,13 +167,15 @@ void Tree::generateBranches() {
     }
 }
 
+//Depth first creates branches towards the attractors.
 bool Tree::grow() {
     bool returnVal = false;
+    //iterates through all leaf positions
     for (auto i = 0; i < m_leafPositions.size(); i++) {
         auto currectPos = m_leafPositions[i];
         float record = FLT_MAX;
         int closestBranch = NULL;
-
+        //find the closest branch
         for (auto j = 0; j < Branches.size(); j++) {
             branch b = Branches[j];
             float distance = glm::distance(b._end, m_leafPositions[i]);
@@ -170,6 +192,7 @@ bool Tree::grow() {
                 record = distance;
             }
         }
+        //gives branch new direction based on its attractors
         if (closestBranch != NULL) {
             returnVal = true;
             branch b = Branches[closestBranch];
@@ -180,11 +203,13 @@ bool Tree::grow() {
             Branches[closestBranch] = b;
         }  
     }
+    //removes attractors that have entered a branches kill range
     for (int i = m_leafPositions.size() - 1; i >= 0; i--) {
         if (std::find(reachedLeaves.begin(), reachedLeaves.end(), m_leafPositions[i]) != reachedLeaves.end()) {
             m_leafPositions.erase(m_leafPositions.begin() + i);
         }
     }
+    //generates a new branch if a branch has detected an attractor. 
     for (int i = Branches.size() - 1; i >= 0; i--) {
 		auto currentBranch = Branches[i];
         if (currentBranch._count > 0) {
@@ -198,6 +223,7 @@ bool Tree::grow() {
 
             branch branchCheck = Branches[currentBranch._parent];
             bool reachedEnd = false;
+            //backwards interates to add child to parent branches
             while (!reachedEnd) {
                 branchCheck._children.push_back(Branches.size());
                 Branches[branchCheck._id] = branchCheck;
@@ -217,6 +243,8 @@ bool Tree::grow() {
     return returnVal;
 }
 
+//USED FOR DEBUGGING
+//Print Tree gives info on the tree by printing the information from every branch
 void Tree::printTree() {
     if (Branches.size() <= 0) {
         cout << "No Trees" << endl;
@@ -236,6 +264,7 @@ void Tree::printTree() {
     }
 }
 
+//Draws a node at the end position of ever branch to show tree. 
 void Tree::drawBranchesNodes(int currentBranch, const glm::mat4& view, const glm::mat4& proj) {
     for (branch b : Branches) {
         glm::vec3 start = b._start;
@@ -263,6 +292,7 @@ void Tree::drawBranchesNodes(int currentBranch, const glm::mat4& view, const glm
     }
 }
 
+//Generates Mesh for the tree.
 void Tree::generateMesh() {
     cgra::mesh_builder builder;
 	builder.vertices.clear();
@@ -273,6 +303,7 @@ void Tree::generateMesh() {
 
     float angleIncrement = 2 * glm::pi<float>() / numVertices;
 
+    //generates initial circle. This is the base of the tree
     for (int j = 0; j < numVertices; j++) {
         float branchRadius = Branches.size() * 0.0002;
         branchRadius = 0.9 * (pow(branchRadius - 1, 3)) + 1;
@@ -290,6 +321,7 @@ void Tree::generateMesh() {
         builder.push_vertex(vtex);
     }
 
+    //iterates through every branch finding the correct radius and then generating a rotated circle around it. 
     for (int i = 0; i < Branches.size(); i++) {
 
         float branchRadius = radius;
@@ -321,6 +353,7 @@ void Tree::generateMesh() {
             builder.push_vertex(vtex);
         }
     }
+    //Assigns indices for each of the branches and their parent branch. 
     for (int r = 1; r < Branches.size(); r++) {
         branch b = Branches[r];
 		branch parent = Branches[b._parent];
@@ -340,6 +373,7 @@ void Tree::generateMesh() {
         builder.push_indices({ k1_1,k2,k2_1 });
     }
 
+    //assigns indices for the initial branches. 
     branch b = Branches[1];
     for (int v = 0; v < numVertices - 1; v++) {
         unsigned int k1 = b.vertices[v];
@@ -359,6 +393,7 @@ void Tree::generateMesh() {
     mesh = builder.build();
 }
 
+//Draws the mesh
 void Tree::drawTree(const glm::mat4& view, const glm::mat4 proj) {
     mat4 modelview = view * (glm::scale(modelTranslate,modelScale));
     glUseProgram(m_shader); 
@@ -368,6 +403,7 @@ void Tree::drawTree(const glm::mat4& view, const glm::mat4 proj) {
     mesh.draw();
 }
 
+//calculates the positions of the foliage by getting a random size and colour and assigning its position to that of the very end of branches
 void Tree::calculateFoliage() {
     leaves.clear();
 
@@ -385,6 +421,7 @@ void Tree::calculateFoliage() {
     }
 }
 
+//Draws the Foliage for each of the leaves
 void Tree::drawFoliage(const glm::mat4& view, const glm::mat4 proj) {
     glUseProgram(m_shader);
     for (leaf le : leaves) {
