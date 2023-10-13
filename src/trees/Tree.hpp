@@ -12,6 +12,13 @@
 #include "utils/opengl.hpp"
 #include "cgra/cgra_mesh.hpp"
 
+/*
+Implementing the paper Modeling Trees with a Space Colonization Algorithm by Adam Runions, Brendan Lane, and Przemyslaw Prusinkiewicz
+http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf
+
+Code Author: Adam Goodyear
+*/
+
 //Branch structure for storing info on branches and generating/reseting them
 struct branch {
     int _id;

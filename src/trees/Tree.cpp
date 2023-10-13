@@ -26,6 +26,13 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
+/*
+Implementing the paper Modeling Trees with a Space Colonization Algorithm by Adam Runions, Brendan Lane, and Przemyslaw Prusinkiewicz
+http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf
+
+Code Author: Adam Goodyear
+*/
+
 //Draws the tree by calling the appropriate draw functions. 
 void Tree::draw(const glm::mat4& view, const glm::mat4& proj) {
     glUseProgram(m_shader);
