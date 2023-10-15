@@ -8,6 +8,14 @@
 #include "cgra/cgra_mesh.hpp"
 
 
+/*
+
+This is a C++ class for creating and rendering a terrain model.
+
+Code Author: Shekinah Pratap
+
+*/
+
 class terrain_model {
 public:
 	GLuint shader;
@@ -37,8 +45,7 @@ public:
 
 	terrain_model() { }
 	void draw(const glm::mat4& view, const glm::mat4& proj);
-	void createFlatGround();
-	void createTerrain();
+	void createTerrain(bool perlin);
 
 private:
 	float spacing = 5.0f;  // spacing between grid points

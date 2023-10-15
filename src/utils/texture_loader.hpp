@@ -2,6 +2,19 @@
 
 #include "opengl.hpp"
 
+/*
+
+Loads in the following textures:
+https://3dtextures.me/2018/01/05/grass-001-2/
+https://3dtextures.me/2020/01/31/mud-001/
+https://3dtextures.me/2022/03/03/rock-044/
+https://3dtextures.me/2020/09/08/stylized-leaves-002/
+https://3dtextures.me/2021/05/05/bark-006-2/
+
+Code Author: Shekinah Pratap
+
+*/
+
 class texture_loader {
 public:
 	texture_loader() { }
