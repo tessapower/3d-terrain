@@ -29,7 +29,7 @@ application::application(GLFWwindow *window) : m_window_(window) {
 
   // create terrain mesh
   m_terrain.shader = shader;
-  m_terrain.createTerrain(true);
+  m_terrain.createTerrain(m_usePerlin);
   m_mesh_deform.setModel(m_terrain);
   m_mesh_deform.deformMesh(m_terrain.selectedPoint, m_terrain.m_isBump, 0, 0); // initial computation of TBN, normals
   m_terrain = m_mesh_deform.getModel();
@@ -210,6 +210,22 @@ void application::render_gui() {
   ImGui::SameLine();
   if (ImGui::Button("Deform")) {
       m_mesh_deform.deformMesh(m_terrain.selectedPoint, m_terrain.m_isBump, m_terrain.m_radius, m_terrain.m_strength);
+      m_terrain = m_mesh_deform.getModel();
+  }
+
+  bool notFlat = !m_usePerlin;
+  if (ImGui::Checkbox("Perlin", &m_usePerlin)) {
+      notFlat = !m_usePerlin;
+  }
+  ImGui::SameLine();
+  if (ImGui::Checkbox("Flat", &notFlat)) {
+      m_usePerlin = !notFlat;
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Recreate Terrain")) {
+      m_terrain.createTerrain(m_usePerlin);
+      m_mesh_deform.setModel(m_terrain);
+      m_mesh_deform.deformMesh(m_terrain.selectedPoint, m_terrain.m_isBump, 0, 0); // initial computation of TBN, normals
       m_terrain = m_mesh_deform.getModel();
   }
 

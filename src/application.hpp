@@ -60,6 +60,7 @@ class application {
   // Mesh editing and texturing
   terrain_model m_terrain;
   mesh_deformation m_mesh_deform;
+  bool m_usePerlin = true;
 
   //Tree Values
   basic_model m_model;
