@@ -22,18 +22,17 @@ application::application(GLFWwindow *window) : m_window_(window) {
                 CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
   const GLuint shader = sb.build();
 
-  // shek
+  // load textures
   glUseProgram(shader);
   texture_loader tl{};
   tl.loadTextures(shader);
 
+  // create terrain mesh
   m_terrain.shader = shader;
-  m_terrain.createTerrain();
-
+  m_terrain.createTerrain(true);
   m_mesh_deform.setModel(m_terrain);
   m_mesh_deform.deformMesh(m_terrain.selectedPoint, m_terrain.m_isBump, 0, 0); // initial computation of TBN, normals
   m_terrain = m_mesh_deform.getModel();
-  // end shek
 
   m_model_bunny.shader = shader;
   m_model_bunny.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res/assets/bunny.obj")));

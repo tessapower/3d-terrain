@@ -3,6 +3,19 @@
 #include <cgra/cgra_mesh.hpp>
 #include <terrain/terrain_model.hpp>
 
+/*
+
+Based on SIGGRAPH 2004 Technical Paper:
+Mesh editing with poisson-based gradient field manipulation (Yizhou Yu, Kun Zhou, Dong Xu, Xiaohan Shi, Hujun Bao, Baining Guo, Heung-Yeung Shum)
+https://dl.acm.org/doi/10.1145/1015706.1015774
+
+Created with the help of the Normal Mapping tutorial from:
+https://learnopengl.com/Advanced-Lighting/Normal-Mapping
+
+Code Author: Shekinah Pratap
+
+*/
+
 class mesh_deformation {
 public:
     glm::mat4 m_view, m_proj;
