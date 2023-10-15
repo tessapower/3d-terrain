@@ -213,6 +213,8 @@ void application::render_gui() {
       m_terrain = m_mesh_deform.getModel();
   }
 
+  ImGui::SliderInt("Seed", (int*)&m_terrain.seed, 0, 100);
+
   bool notFlat = !m_usePerlin;
   if (ImGui::Checkbox("Perlin", &m_usePerlin)) {
       notFlat = !m_usePerlin;
