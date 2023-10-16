@@ -213,6 +213,11 @@ void application::render_gui() {
       m_terrain = m_mesh_deform.getModel();
   }
 
+  ImGui::SliderInt("Octaves", (int*)&m_terrain.octaves, 1, 10);
+  ImGui::SliderFloat("Lacunarity", (float*)&m_terrain.lacunarity, 0, 10);
+  ImGui::SliderFloat("Persistence", (float*)&m_terrain.persistence, 0, 10);
+  ImGui::SliderFloat("Height", (float*)&m_terrain.height, 0, 1000);
+  ImGui::SliderInt("Repeats", (int*)&m_terrain.repeat, 0, 10);
   ImGui::SliderInt("Seed", (int*)&m_terrain.seed, 0, 100);
 
   bool notFlat = !m_usePerlin;
