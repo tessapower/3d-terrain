@@ -28,7 +28,7 @@ void terrain_model::createTerrain(bool perlin) {
 			float x = static_cast<float>(i) * spacing + xOffset;
 			float z = static_cast<float>(j) * spacing + zOffset;
 			// whether to use perlin or not
-			float y = perlin ? (terrain.perlin(x, 0.0, z) * height) - 100 : 0.0f;
+			float y = perlin ? (terrain.perlin(x, 0.0, z) * height) - (height / 2) : 0.0f;
 
 			mv.pos = { x, y, z };
 
