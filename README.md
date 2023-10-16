@@ -152,3 +152,71 @@ Once you're setup, you can build your project with Xcode, but have to execute yo
 ```sh
 ./build/bin/base [args..]
 ```
+## How to Control
+
+### Simple Controls
+
+- W for Zoom In, or Forward 
+- S for Zoom Out or Backwards
+- A for Pan Left
+- D for Pan Right
+
+- Middle Mouse Click+Hold to rotate camera
+
+### ImGUI Controls
+
+#### Voxel Settings
+- Voxel Size
+    - changes the amount of points sampled of the original mesh
+- IsoLevel
+    - how far away from the mesh a voxel point must be for it to be considered "solid"
+- Smooth Normals
+    - Toggles Smoothed Normals on/off
+- Debugging (Menu)
+    - Allows for visualisation of different steps in the simplification process of the Bunny
+- Cloud Threshold
+    - The threshold the noise value needs to pass to become a solid cloud.
+- Cloud Fade out
+    - the distance from the edge of the voxel grid that the cloud starts to fade out on the Y axis to prevent hard edges
+
+#### Mesh Editing and Terrain
+- Radius
+    - Changes Radius of terrain manipulation
+- Strength
+    - Changes Strength of terrain manipulation
+- Grass/Mud Height
+    - Changes at what height the Grass/Mud Textures will appear
+- Mud/Rocks Height
+    - Changes at what height the Mud/Rocks Textures will appear
+- Heighmap Scale
+    - Changes intensity of heightmap
+- Normal Map (Toggle)
+    - Toggles on or off the normal map
+- Raise/Excavate (Toggles)
+    - Switches Mode to either Raise or Excavate Terrain
+- Deform
+    - Raises or Excavates the currently selected terrain
+- Octaves
+    - Number of times the noise values are iterated over
+- Lacunarity
+    - Affects the frequency of the noise
+- Persistence
+    - Affects the amplitude of the noise
+- Height
+    - Scales the height of the heightmap
+- Repeats
+    - Determines how many "tiles" the heightmap can repeat for
+- Seed
+    - Allows the permutation map to become seeded for deterministic randomness
+- Perlin/Flat (Toggles)
+    - Switches Mode to generate either flat or Perlin based Terrain
+- Recreate Terrain
+    - Regenerates Terrain with new values
+
+#### Tree Settings
+- Spooky Mode
+    - Turns spooky mode on or off (Disables or Enables showing of foliage)
+- New Tree
+    - Generates a new base tree
+- Print Tree
+    - Prints a list of every branch in the tree and the information about that branch
