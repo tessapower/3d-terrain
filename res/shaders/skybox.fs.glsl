@@ -8,6 +8,6 @@ uniform samplerCube skybox;
 in vec3 texture_coords;
 out vec4 fb_color;
 
-void main() {    
+void main() {
     fb_color = texture(skybox, texture_coords);
 }
