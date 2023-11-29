@@ -11,10 +11,10 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(CGRAFunctions)
 
 # Project Name
-set(CGRA_PROJECT "base" CACHE STRING "CGRA350 Group Project")
+set(CGRA_PROJECT "base" CACHE STRING "3D Terrain")
 
 # Project
-project("CGRA350_group_project" CXX C)
+project("3d_terrain" CXX C)
 
 # Enable IDE Project Folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
