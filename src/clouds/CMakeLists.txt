@@ -1,4 +1,3 @@
-
 # Source files
 set(sources
 	"cloud_model.cpp"
