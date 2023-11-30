@@ -1,8 +1,7 @@
-
 # Source files
 set(sources
-	"Tree.cpp"
-	"Tree.hpp"
+	"trees.cpp"
+	"trees.hpp"
 	"CMakeLists.txt"
 )
 
