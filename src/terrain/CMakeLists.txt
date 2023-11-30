@@ -1,4 +1,3 @@
-
 # Source files
 set(sources
 	"terrain_model.cpp"
