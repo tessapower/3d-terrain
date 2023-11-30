@@ -1,26 +1,21 @@
-
 #pragma once
 
-// imgui
-#include <imgui.h>
-
-// project
 #include <utils/opengl.hpp>
 
-
 namespace cgra {
-	namespace gui {
+namespace gui {
+// callback functions required to forward input to ImGui
+auto mouse_button_callback(GLFWwindow*, int button, int action, int mods)
+    -> void;
+auto scroll_callback(GLFWwindow*, double x_offset, double y_offset) -> void;
+auto key_callback(GLFWwindow*, int key, int scan_code, int action, int mods)
+    -> void;
+auto char_callback(GLFWwindow*, unsigned int c) -> void;
 
-		// callback functions required to forward input to ImGui
-		void mouseButtonCallback(GLFWwindow*, int button, int action, int /*mods*/);
-		void scrollCallback(GLFWwindow*, double /*xoffset*/, double yoffset);
-		void keyCallback(GLFWwindow*, int key, int /*scancode*/, int action, int mods);
-		void charCallback(GLFWwindow*, unsigned int c);
-
-		// helper functions to setup, run and shutdown ImGui
-		bool init(GLFWwindow* window, bool install_callbacks=false);
-		void newFrame();
-		void render();
-		void shutdown();
-	}
-}
+// helper functions to setup, run and shutdown ImGui
+auto init(GLFWwindow* window, bool install_callbacks = false) -> bool;
+auto new_frame() -> void;
+auto render() -> void;
+auto shutdown() -> void;
+}  // namespace gui
+}  // namespace cgra

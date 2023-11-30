@@ -1,168 +1,153 @@
 #pragma once
 
-// std
 #include <fstream>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
-// project
 #include "cgra_mesh.hpp"
 
 namespace cgra {
+inline mesh_builder load_wavefront_data(const std::string& file_name) {
+  using namespace std;
+  using namespace glm;
 
-	inline mesh_builder load_wavefront_data(const std::string &filename) {
-		using namespace std;
-		using namespace glm;
+  // struct for storing wavefront index data
+  struct wavefront_vertex {
+    unsigned int p, n, t;
+  };
 
-		// struct for storing wavefront index data
-		struct wavefront_vertex {
-			unsigned int p, n, t;
-		};
+  // create reading buffers
+  vector<vec3> positions;
+  vector<vec3> normals;
+  vector<vec2> uvs;
+  vector<wavefront_vertex> wv_vertices;
 
-		// create reading buffers
-		vector<vec3> positions;
-		vector<vec3> normals;
-		vector<vec2> uvs;
-		vector<wavefront_vertex> wv_vertices;
+  // open file
+  ifstream obj_file(file_name);
+  if (!obj_file.is_open()) {
+    cerr << "Error: could not open " << file_name << endl;
+    throw runtime_error("Error: could not open file " + file_name);
+  }
 
-		// open file
-		ifstream objFile(filename);
-		if (!objFile.is_open()) {
-			cerr << "Error: could not open " << filename << endl;
-			throw runtime_error("Error: could not open file " + filename);
-		}
+  // good() means that failbit, badbit and eofbit are all not set
+  while (obj_file.good()) {
+    // Pull out line from file
+    string line;
+    getline(obj_file, line);
+    istringstream obj_line(line);
 
-		// good() means that failbit, badbit and eofbit are all not set
-		while (objFile.good()) {
+    // Pull out mode from line
+    string mode;
+    obj_line >> mode;
 
-			// Pull out line from file
-			string line;
-			getline(objFile, line);
-			istringstream objLine(line);
+    // Reading like this means whitespace at the start of the line is fine
+    // attempting to read from an empty string/line will set the failbit
+    if (obj_line.good()) {
+      if (mode == "v") {
+        vec3 v;
+        obj_line >> v.x >> v.y >> v.z;
+        positions.push_back(v);
+      } else if (mode == "vn") {
+        vec3 vn;
+        obj_line >> vn.x >> vn.y >> vn.z;
+        normals.push_back(vn);
 
-			// Pull out mode from line
-			string mode;
-			objLine >> mode;
+      } else if (mode == "vt") {
+        vec2 vt;
+        obj_line >> vt.x >> vt.y;
+        uvs.push_back(vt);
 
-			// Reading like this means whitespace at the start of the line is fine
-			// attempting to read from an empty string/line will set the failbit
-			if (objLine.good()) {
+      } else if (mode == "f") {
+        std::vector<wavefront_vertex> face;
+        while (obj_line.good()) {
+          wavefront_vertex v;
 
+          // scan in position index
+          obj_line >> v.p;
+          if (obj_line.fail()) break;
 
-				if (mode == "v") {
-					vec3 v;
-					objLine >> v.x >> v.y >> v.z;
-					positions.push_back(v);
-				}
-				else if (mode == "vn") {
-					vec3 vn;
-					objLine >> vn.x >> vn.y >> vn.z;
-					normals.push_back(vn);
+          // look ahead for a match
+          if (obj_line.peek() == '/') {
+            // ignore the '/' character
+            obj_line.ignore(1);
 
-				}
-				else if (mode == "vt") {
-					vec2 vt;
-					objLine >> vt.x >> vt.y;
-					uvs.push_back(vt);
+            // scan in uv (texture coordinate) index (if it's there)
+            if (obj_line.peek() != '/') {
+              obj_line >> v.t;
+            }
 
-				}
-				else if (mode == "f") {
+            // scan in normal index (if it's there)
+            if (obj_line.peek() == '/') {
+              obj_line.ignore(1);
+              obj_line >> v.n;
+            }
+          }
 
-					std::vector<wavefront_vertex> face;
-					while (objLine.good()) {
-						wavefront_vertex v;
+          // subtract 1 because of wavefront indexing
+          v.p -= 1;
+          v.n -= 1;
+          v.t -= 1;
 
-						// scan in position index
-						objLine >> v.p;
-						if (objLine.fail()) break;
+          face.push_back(v);
+        }
 
-						// look ahead for a match
-						if (objLine.peek() == '/') {	
-							// ignore the '/' character
-							objLine.ignore(1);			
+        // IFF we have 3 vertices, construct a triangle
+        if (face.size() == 3) {
+          for (int i = 0; i < 3; ++i) {
+            wv_vertices.push_back(face[i]);
+          }
+        }
+      }
+    }
+  }
 
-							// scan in uv (texture coord) index (if it's there)
-							if (objLine.peek() != '/') {
-								objLine >> v.t;
-							}
+  // if we don't have any normals, create them naively
+  if (normals.empty()) {
+    // Create the normals as 3d vectors of 0
+    normals.resize(positions.size(), vec3(0));
 
-							// scan in normal index (if it's there)
-							if (objLine.peek() == '/') {
-								objLine.ignore(1);
-								objLine >> v.n;
-							}
-						}
+    // add the normal for every face to each vertex-normal
+    for (size_t i = 0; i < wv_vertices.size() / 3; i++) {
+      auto& [a_p, a_n, a_t] = wv_vertices[i * 3];
+      auto& [b_p, b_n, b_t] = wv_vertices[i * 3 + 1];
+      auto& [c_p, c_n, c_t] = wv_vertices[i * 3 + 2];
 
-						// subtract one because of wavefront indexing
-						v.p -= 1;
-						v.n -= 1;
-						v.t -= 1;
+      // set the normal index to be the same as position index
+      a_n = a_p;
+      b_n = b_p;
+      c_n = c_p;
 
-						face.push_back(v);
-					}
+      // calculate the face normal
+      vec3 a_b = positions[b_p] - positions[a_p];
+      vec3 a_c = positions[c_p] - positions[a_p];
+      vec3 face_norm = cross(a_b, a_c);
 
-					// IFF we have 3 verticies, construct a triangle
-					if (face.size() == 3) {
-						for (int i = 0; i < 3; ++i) {
-							wv_vertices.push_back(face[i]);
-						}
-					}
-				}
-			}
-		}
+      // contribute the face norm to each vertex
+      if (float l = length(face_norm); l > 0) {
+        normals[a_n] += face_norm;
+        normals[b_n] += face_norm;
+        normals[c_n] += face_norm;
+      }
+    }
 
-		// if we don't have any normals, create them naively
-		if (normals.empty()) {
-			// Create the normals as 3d vectors of 0
-			normals.resize(positions.size(), vec3(0));
+    // normalize the normals
+    for (auto& normal : normals) {
+      normal = normalize(normal);
+    }
+  }
 
-			// add the normal for every face to each vertex-normal
-			for (size_t i = 0; i < wv_vertices.size()/3; i++) {
-				wavefront_vertex &a = wv_vertices[i*3];
-				wavefront_vertex &b = wv_vertices[i*3+1];
-				wavefront_vertex &c = wv_vertices[i*3+2];
+  // create mesh data
+  mesh_builder mb;
 
-				// set the normal index to be the same as position index
-				a.n = a.p;
-				b.n = b.p;
-				c.n = c.p;
+  for (unsigned int i = 0; i < wv_vertices.size(); ++i) {
+    mb.push_index(i);
+    mb.push_vertex(mesh_vertex{
+        positions[wv_vertices[i].p], normals[wv_vertices[i].n],
+        // Marshall removed texture mapping here
+    });
+  }
 
-				// calculate the face normal
-				vec3 ab = positions[b.p] - positions[a.p];
-				vec3 ac = positions[c.p] - positions[a.p];
-				vec3 face_norm = cross(ab, ac);
-
-				// contribute the face norm to each vertex
-				float l = length(face_norm);
-				if (l > 0) {
-					face_norm / l;
-					normals[a.n] += face_norm;
-					normals[b.n] += face_norm;
-					normals[c.n] += face_norm;
-				}
-			}
-
-			// normalize the normals
-			for (size_t i = 0; i < normals.size(); i++) {
-				normals[i] = normalize(normals[i]);
-			}
-		}
-
-		// todo create spherical UV's if they don't exist
-
-		// create mesh data
-		mesh_builder mb;
-
-		for (unsigned int i = 0; i < wv_vertices.size(); ++i) {
-			mb.push_index(i);
-			mb.push_vertex(mesh_vertex{
-				positions[wv_vertices[i].p],
-				normals[wv_vertices[i].n],
-				// Marshall removed texture mapping here
-			});
-		}
-
-		return mb;
-	}
+  return mb;
 }
+}  // namespace cgra

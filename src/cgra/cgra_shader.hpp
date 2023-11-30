@@ -1,27 +1,19 @@
-
 #pragma once
 
-// std
 #include <map>
 #include <memory>
 #include <string>
-
-// project
 #include <utils/opengl.hpp>
 
-
 namespace cgra {
+class shader_builder {
+  std::map<GLenum, std::shared_ptr<gl_object>> m_shaders_;
 
-	class shader_builder {
-	private:
-		std::map<GLenum, std::shared_ptr<gl_object>> m_shaders;
+ public:
+  shader_builder() = default;
+  auto set_shader(GLenum type, const std::string& file_name) -> void;
+  auto set_shader_source(GLenum type, const std::string& shader_source) -> void;
 
-	public:
-		shader_builder() { }
-		void set_shader(GLenum type, const std::string &filename);
-		void set_shader_source(GLenum type, const std::string &shadersource);
-
-		GLuint build(GLuint program = 0);
-	};
-
-}
+  [[nodiscard]] auto build(GLuint program = 0) const -> GLuint;
+};
+}  // namespace cgra
