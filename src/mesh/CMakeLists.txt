@@ -1,4 +1,3 @@
-
 # Source files
 set(sources
 	"mesh_deformation.cpp"
