@@ -5,10 +5,13 @@
 
 #include <cassert>
 #include <chrono>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <utils/opengl.hpp>
 #include <vector>
+
+#include "glm/glm.hpp"
 
 namespace cgra {
 // 4-channel rgba image
@@ -95,5 +98,4 @@ struct rgba_image {
     return img;
   }
 };
-
 }  // namespace cgra

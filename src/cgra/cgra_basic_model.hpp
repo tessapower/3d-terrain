@@ -1,4 +1,6 @@
 #pragma once
+#include "GL/glew.h"
+#include "cgra_mesh.hpp"
 
 /**
  * \brief Basic model that holds the shader, mesh and transform for drawing.
