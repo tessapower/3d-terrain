@@ -1,4 +1,3 @@
-# Source files
 set(sources
 	"camera.hpp"
 	"intersections.hpp"

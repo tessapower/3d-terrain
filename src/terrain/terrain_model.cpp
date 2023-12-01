@@ -9,7 +9,7 @@ auto terrain_model::create_terrain(bool perlin) -> void {
   cgra::mesh_vertex mv;
 
   auto terrain =
-      Perlin(m_seed, m_octaves, m_lacunarity, m_persistence, m_repeat);
+      perlin(m_seed, m_octaves, m_lacunarity, m_persistence, m_repeat);
 
   // Calculate the total width and length of the grid
   float total_width = m_spacing_ * static_cast<float>(m_grid_size);
@@ -30,7 +30,8 @@ auto terrain_model::create_terrain(bool perlin) -> void {
       float x = static_cast<float>(i) * m_spacing_ + x_offset;
       float z = static_cast<float>(j) * m_spacing_ + z_offset;
       // whether to use perlin or not
-      float y = perlin ? (terrain.perlin(x, 0.0, z) * m_height) - (m_height / 2)
+      float y = perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
+                             (m_height / 2)
                        : 0.0f;
 
       mv.pos = {x, y, z};

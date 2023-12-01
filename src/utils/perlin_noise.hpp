@@ -1,38 +1,40 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
-class Perlin {
-public:
+class perlin {
+ public:
   // initialize with set or seeded permutation vector
-  Perlin(unsigned int seed, unsigned int octaves, float lacunarity, float persistence, unsigned int repeat);
+  perlin(unsigned int seed, unsigned int octaves, float lacunarity,
+         float persistence, unsigned int repeat);
 
-  [[nodiscard]] float perlin(float x, float y, float z) const;
+  [[nodiscard]] auto generate_perlin(float x, float y, float z) const -> float;
 
-private:
-  std::vector<int> p;
+ private:
+  std::vector<int> m_p_;
 
-  unsigned int repeat;
+  unsigned int m_repeat_;
 
   // octave params
-  unsigned int octaves;
-  float lacunarity;
-  float persistence;
+  unsigned int m_octaves_;
+  float m_lacunarity_;
+  float m_persistence_;
 
-  [[nodiscard]] float noise(float x, float y, float z) const;
+  [[nodiscard]] auto noise(float x, float y, float z) const -> float;
 
   // smooth transition between gradients with ease curve
-  static float fade(float t);
+  static auto fade(float t) -> float;
 
   // linearly interpolate between a and b
   // weight w should be a float between 0 and 1
-  static float lerp(float a, float b, float w);
+  static auto lerp(float a, float b, float w) -> float;
 
-  static float grad(int hash, float x, float y, float z);
+  static auto grad(int hash, float x, float y, float z) -> float;
 
   // increment number to ensure repetition
-  [[nodiscard]] int inc(int num) const;
+  [[nodiscard]] auto inc(int num) const -> int;
 
   // debug
-  static void debug(std::string const& str, auto val);
+  static auto debug(std::string const& str, auto val) -> void;
 };
