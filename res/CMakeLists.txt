@@ -1,9 +1,6 @@
-# add resources as targets so they show up in IDEs
-
-# list your shader source files here
 SET(SHADERS
-	"shaders/color_frag.glsl"
-	"shaders/color_vert.glsl"
+	"shaders/color_fs.glsl"
+	"shaders/color_vs.glsl"
 	"shaders/skybox.fs.glsl"
 	"shaders/skybox.vs.glsl"
 	"shaders/terrain.fs.glsl"
