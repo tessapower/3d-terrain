@@ -2,55 +2,62 @@
 
 #include <chrono>
 #include <glm/gtc/matrix_transform.hpp>
+#include <random>
 #include <string>
 
-#include "cgra/cgra_gui.hpp"
+#include "cgra/cgra_basic_model.hpp"
 #include "cgra/cgra_image.hpp"
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
-#include "mesh/simplified_mesh.hpp"
-#include "utils/texture_loader.hpp"
+#include "imgui.h"
 #include "mesh/mesh_deformation.hpp"
+#include "mesh/simplified_mesh.hpp"
 #include "terrain/terrain_model.hpp"
-#include <random>
+#include "trees/trees.hpp"
+#include "utils/texture_loader.hpp"
 
 application::application(GLFWwindow *window) : m_window_(window) {
   // Load shaders
   cgra::shader_builder shader_builder;
-  shader_builder.set_shader(GL_VERTEX_SHADER,
-                CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
-  shader_builder.set_shader(GL_FRAGMENT_SHADER,
-                CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
+  shader_builder.set_shader(
+      GL_VERTEX_SHADER,
+      CGRA_SRCDIR + std::string("//res//shaders//color_vs.glsl"));
+  shader_builder.set_shader(
+      GL_FRAGMENT_SHADER,
+      CGRA_SRCDIR + std::string("//res//shaders//color_fs.glsl"));
   const GLuint shader = shader_builder.build();
 
-
   cgra::shader_builder terrain_shader_builder;
-  terrain_shader_builder.set_shader(GL_VERTEX_SHADER ,
-          CGRA_SRCDIR + std::string("//res//shaders//terrain.vs.glsl"));
-  terrain_shader_builder.set_shader(GL_FRAGMENT_SHADER,
-         CGRA_SRCDIR + std::string("//res//shaders//terrain.fs.glsl"));
+  terrain_shader_builder.set_shader(
+      GL_VERTEX_SHADER,
+      CGRA_SRCDIR + std::string("//res//shaders//terrain.vs.glsl"));
+  terrain_shader_builder.set_shader(
+      GL_FRAGMENT_SHADER,
+      CGRA_SRCDIR + std::string("//res//shaders//terrain.fs.glsl"));
   const GLuint terrain_shader = terrain_shader_builder.build();
 
   // Load textures
   glUseProgram(terrain_shader);
   texture_loader tl{};
-  tl.loadTextures(terrain_shader);
+  tl.load_textures(terrain_shader);
 
   // create terrain mesh
-  m_terrain.shader = terrain_shader;
-  m_terrain.createTerrain(m_usePerlin);
-  m_mesh_deform.setModel(m_terrain);
-  m_mesh_deform.deformMesh(m_terrain.selectedPoint, m_terrain.m_isBump, 0, 0); // initial computation of TBN, normals
-  m_terrain = m_mesh_deform.getModel();
+  m_terrain_.m_shader = terrain_shader;
+  m_terrain_.create_terrain(m_use_perlin_);
+  m_mesh_deform_.set_model(m_terrain_);
+  m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump, 0,
+                            0);  // initial computation of TBN, normals
+  m_terrain_ = m_mesh_deform_.get_model();
 
   glUseProgram(shader);
-  m_model_bunny.shader = shader;
-  m_model_bunny.set_model(load_wavefront_data(CGRA_SRCDIR + std::string("/res/assets/bunny.obj")));
-  m_model_bunny.isolevel = 0.007;
-  m_model_bunny.build_from_model();
+  m_model_bunny_.m_shader = shader;
+  m_model_bunny_.set_model(cgra::load_wavefront_data(
+      CGRA_SRCDIR + std::string("/res/assets/bunny.obj")));
+  m_model_bunny_.m_iso_level = 0.007f;
+  m_model_bunny_.build_from_model();
 
-  clouds.shader = shader;
-  clouds.simulate();
+  m_clouds_.m_shader = shader;
+  m_clouds_.simulate();
 
   m_model_.shader = shader;
   m_model_.mesh = cgra::load_wavefront_data(
@@ -60,31 +67,33 @@ application::application(GLFWwindow *window) : m_window_(window) {
 
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<int> randVertices(0, m_terrain.builder.getVertices().size());
-  std::uniform_real_distribution<float> sizeTree(3, 7);
+  std::uniform_int_distribution<int> rand_vertices(
+      0, m_terrain_.m_builder.get_vertices().size());
+  std::uniform_real_distribution<float> size_tree(3, 7);
 
-  for (int i = 0; i < TreeAmount; i++) {
-      Tree T;
-      T.m_shader = shader;
-      m_treePositions.push_back(randVertices(gen));
-	  m_trees.push_back(T);
-      m_treeSizes.push_back(sizeTree(gen));
+  for (int i = 0; i < m_tree_amount_; i++) {
+    tree t;
+    t.m_shader = shader;
+    m_tree_positions_.push_back(rand_vertices(gen));
+    m_trees_.push_back(t);
+    m_tree_sizes_.push_back(size_tree(gen));
   }
-  m_trees[0].generateLeaves(5, 500);
-  m_trees[0].generateTree();
-  for (int i = 1; i < m_trees.size(); i++) {
-      m_trees[i].Branches = m_trees[0].Branches;
-      m_trees[i].mesh = m_trees[0].mesh;
-      m_trees[i].leaves = m_trees[0].leaves;
+  m_trees_[0].generate_leaves(5, 500);
+  m_trees_[0].generate_tree();
+  for (int i = 1; i < m_trees_.size(); i++) {
+    m_trees_[i].m_branches = m_trees_[0].m_branches;
+    m_trees_[i].m_mesh = m_trees_[0].m_mesh;
+    m_trees_[i].m_leaves = m_trees_[0].m_leaves;
   }
 }
 
-void application::render() {
+auto application::render() -> void {
   // Retrieve the window height
   int width, height;
   glfwGetFramebufferSize(m_window_, &width, &height);
 
-  // Set the window size (we do this every time we call render to support resizing)
+  // Set the window size (we do this every time we call render to support
+  // resizing)
   m_window_size_ = glm::vec2(width, height);
   glViewport(0, 0, width, height);
 
@@ -100,37 +109,42 @@ void application::render() {
   const auto current_frame = static_cast<float>(glfwGetTime());
   m_delta_time_ = current_frame - m_last_frame_;
   m_last_frame_ = current_frame;
-  m_camera_.update(m_delta_time_, m_terrain);
+  m_camera_.update(m_delta_time_, m_terrain_);
 
   const glm::mat4 projection =
       glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 10000.f);
 
   glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
 
-
   // draw the terrain first to not mess up the other objects!!!!
-  m_terrain.draw(m_camera_.view_matrix(), projection);
-  m_mesh_deform.m_view = m_camera_.view_matrix();
-  m_mesh_deform.m_proj = projection;
+  m_terrain_.draw(m_camera_.view_matrix(), projection);
+  m_mesh_deform_.m_view = m_camera_.view_matrix();
+  m_mesh_deform_.m_projection = projection;
 
   // draw the model
-  m_model_bunny.draw(glm::scale(glm::translate(m_camera_.view_matrix(), vec3(15, 50, 0)), vec3(15)), projection);
-  
-  clouds.draw(m_camera_.view_matrix(), projection);
+  m_model_bunny_.draw(
+      glm::scale(glm::translate(m_camera_.view_matrix(), glm::vec3(15, 50, 0)),
+                 glm::vec3(15)),
+      projection);
+
+  m_clouds_.draw(m_camera_.view_matrix(), projection);
   m_model_.draw(m_camera_.view_matrix(), projection);
 
-  for (int i = 0; i < m_trees.size(); i++) {
-      m_trees[i].draw(m_camera_.view_matrix(), projection);
-      mesh_vertex terrainVertices = m_terrain.builder.getVertex(m_treePositions[i]);
-      mat4 translationMatrix = glm::translate(mat4(1.0f), terrainVertices.pos);
-      m_trees[i].modelTranslate = translationMatrix;
-      m_trees[i].modelScale = vec3(m_treeSizes[i]);
+  for (int i = 0; i < m_trees_.size(); i++) {
+    m_trees_[i].draw(m_camera_.view_matrix(), projection);
+    cgra::mesh_vertex terrain_vertices =
+        m_terrain_.m_builder.get_vertex(m_tree_positions_[i]);
+
+    const glm::mat4 translation_matrix =
+        glm::translate(glm::mat4(1.0f), terrain_vertices.pos);
+    m_trees_[i].m_model_translate = translation_matrix;
+    m_trees_[i].m_model_scale = glm::vec3(m_tree_sizes_[i]);
   }
 
   m_skybox_.draw(m_camera_.view_matrix(), projection);
 }
 
-void application::render_gui() {
+auto application::render_gui() -> void {
   ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiSetCond_Once);
   ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
   ImGui::Begin("Options", nullptr);
@@ -152,38 +166,41 @@ void application::render_gui() {
   ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
   ImGui::Begin("Voxel Settings", nullptr);
 
-  if (ImGui::SliderFloat("Voxel Size", &voxelEdgeLength, 0.004, 0.03)) {
-    m_model_bunny.voxelEdgeLength = voxelEdgeLength;
-    m_model_bunny.build_from_model();
+  if (ImGui::SliderFloat("Voxel Size", &m_voxel_edge_length_, 0.004f, 0.03f)) {
+    m_model_bunny_.m_voxel_edge_length = m_voxel_edge_length_;
+    m_model_bunny_.build_from_model();
   }
 
-  if (ImGui::SliderFloat("Isolevel", &isolevel, 0.01, 0.1)) {
-    m_model_bunny.isolevel = isolevel;
-    m_model_bunny.build_from_model();
+  if (ImGui::SliderFloat("Iso Level", &m_iso_level_, 0.01f, 0.1f)) {
+    m_model_bunny_.m_iso_level = m_iso_level_;
+    m_model_bunny_.build_from_model();
   }
 
-  if (ImGui::Checkbox("Normal Smoothing", &smoothing)) {
-    m_model_bunny.smoothNormals = smoothing;
-    m_model_bunny.build_from_model();
-    clouds.mesh.smoothNormals = smoothing;
-    clouds.mesh.build();
+  if (ImGui::Checkbox("Normal Smoothing", &m_smoothing_)) {
+    m_model_bunny_.m_smooth_normals = m_smoothing_;
+    m_model_bunny_.build_from_model();
+    m_clouds_.mesh.m_smooth_normals = m_smoothing_;
+    m_clouds_.mesh.build();
   }
 
-  if (ImGui::Combo("Debugging", (int*)(&debugging), "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0", 5)) {
-    m_model_bunny.debugging = debugging;
-    m_model_bunny.build_from_model();
-    clouds.mesh.debugging = debugging;
-    clouds.mesh.build();
+  if (ImGui::Combo(
+          "Debugging", reinterpret_cast<int *>(&m_debugging_),
+          "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0", 5)) {
+    m_model_bunny_.m_debugging = m_debugging_;
+    m_model_bunny_.build_from_model();
+    m_clouds_.mesh.m_debugging = m_debugging_;
+    m_clouds_.mesh.build();
   }
 
-  if (ImGui::SliderFloat("Cloud threshold", &clouds.cloudThreshold, 0.1, 0.8)) {
-    clouds.simulate();
+  if (ImGui::SliderFloat("Cloud threshold", &m_clouds_.cloud_threshold, 0.1f,
+                         0.8f)) {
+    m_clouds_.simulate();
   }
 
-  if (ImGui::SliderFloat("Cloud Fade Out", &clouds.fadeOutRange, 0.0, 20.0)) {
-    clouds.simulate();
+  if (ImGui::SliderFloat("Cloud Fade Out", &m_clouds_.fade_out_range, 0.0f,
+                         20.0f)) {
+    m_clouds_.simulate();
   }
-
 
   // finish creating window
   ImGui::End();
@@ -194,56 +211,69 @@ void application::render_gui() {
   // setup window
   ImGui::SetNextWindowPos(ImVec2(width - 305, 5), ImGuiSetCond_Once);
   ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
-  ImGui::Begin("Mesh Editing & Texturing", 0);
+  ImGui::Begin("Mesh Editing & Texturing", nullptr);
 
-  if (ImGui::SliderFloat("Radius", &m_terrain.m_radius, 0, 100, "%.2f", 2.0f)) m_mesh_deform.setModel(m_terrain);
-  if (ImGui::SliderFloat("Strength", &m_terrain.m_strength, 0, 10, "%.2f", 2.0f)) m_mesh_deform.setModel(m_terrain);
-  if (ImGui::SliderFloat("Grass/Mud Height", &m_terrain.m_heightChange1, -5, 50, "%.2f", 2.0f)) m_mesh_deform.setModel(m_terrain);
-  if (ImGui::SliderFloat("Mud/Rocks Height", &m_terrain.m_heightChange2, -50, 5, "%.2f", 2.0f)) m_mesh_deform.setModel(m_terrain);
-  if (ImGui::SliderFloat("Heightmap Scale", &m_terrain.m_heightScale, 0, 1, "%.2f", 2.0f)) m_mesh_deform.setModel(m_terrain);
+  if (ImGui::SliderFloat("Radius", &m_terrain_.m_radius, 0, 100, "%.2f", 2.0f))
+    m_mesh_deform_.set_model(m_terrain_);
+  if (ImGui::SliderFloat("Strength", &m_terrain_.m_strength, 0, 10, "%.2f",
+                         2.0f))
+    m_mesh_deform_.set_model(m_terrain_);
+  if (ImGui::SliderFloat("Grass/Mud Height", &m_terrain_.m_height_change1, -5,
+                         50, "%.2f", 2.0f))
+    m_mesh_deform_.set_model(m_terrain_);
+  if (ImGui::SliderFloat("Mud/Rocks Height", &m_terrain_.m_height_change2, -50,
+                         5, "%.2f", 2.0f))
+    m_mesh_deform_.set_model(m_terrain_);
+  if (ImGui::SliderFloat("Height Map Scale", &m_terrain_.m_height_scale, 0, 1,
+                         "%.2f", 2.0f))
+    m_mesh_deform_.set_model(m_terrain_);
 
-  if (ImGui::RadioButton("Normal Map", (m_terrain.m_tex == 1) ? true : false)) {
-      m_terrain.m_tex = 1 - m_terrain.m_tex;
-      m_mesh_deform.setModel(m_terrain);
+  if (ImGui::RadioButton("Normal Map", (m_terrain_.m_tex == 1) ? true : false)) {
+    m_terrain_.m_tex = 1 - m_terrain_.m_tex;
+    m_mesh_deform_.set_model(m_terrain_);
   }
 
-  bool notBump = !m_terrain.m_isBump;
-  if (ImGui::Checkbox("Raise", &m_terrain.m_isBump)) {
-      notBump = !m_terrain.m_isBump;
-      m_mesh_deform.setModel(m_terrain);
+  bool not_bump = !m_terrain_.m_is_bump;
+  if (ImGui::Checkbox("Raise", &m_terrain_.m_is_bump)) {
+    not_bump = !m_terrain_.m_is_bump;
+    m_mesh_deform_.set_model(m_terrain_);
   }
   ImGui::SameLine();
-  if (ImGui::Checkbox("Excavate", &notBump)) {
-      m_terrain.m_isBump = !notBump;
-      m_mesh_deform.setModel(m_terrain);
+  if (ImGui::Checkbox("Excavate", &not_bump)) {
+    m_terrain_.m_is_bump = !not_bump;
+    m_mesh_deform_.set_model(m_terrain_);
   }
   ImGui::SameLine();
   if (ImGui::Button("Deform")) {
-      m_mesh_deform.deformMesh(m_terrain.selectedPoint, m_terrain.m_isBump, m_terrain.m_radius, m_terrain.m_strength);
-      m_terrain = m_mesh_deform.getModel();
+    m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump,
+                              m_terrain_.m_radius, m_terrain_.m_strength);
+    m_terrain_ = m_mesh_deform_.get_model();
   }
 
-  ImGui::SliderInt("Octaves", (int*)&m_terrain.octaves, 1, 10);
-  ImGui::SliderFloat("Lacunarity", (float*)&m_terrain.lacunarity, 0, 10);
-  ImGui::SliderFloat("Persistence", (float*)&m_terrain.persistence, 0, 10);
-  ImGui::SliderFloat("Height", (float*)&m_terrain.height, 0, 1000);
-  ImGui::SliderInt("Repeats", (int*)&m_terrain.repeat, 0, 10);
-  ImGui::SliderInt("Seed", (int*)&m_terrain.seed, 0, 100);
+  ImGui::SliderInt("Octaves", reinterpret_cast<int *>(&m_terrain_.m_octaves), 1,
+                   10);
+  ImGui::SliderFloat("Lacunarity", &m_terrain_.m_lacunarity, 0.0f, 10.0f);
+  ImGui::SliderFloat("Persistence", &m_terrain_.m_persistence, 0.0f, 10.0f);
+  ImGui::SliderFloat("Height", &m_terrain_.m_height, 0.0f, 1000.0f);
+  ImGui::SliderInt("Repeats", reinterpret_cast<int *>(&m_terrain_.m_repeat), 0,
+                   10);
+  ImGui::SliderInt("Seed", reinterpret_cast<int *>(&m_terrain_.m_seed), 0, 100);
 
-  bool notFlat = !m_usePerlin;
-  if (ImGui::Checkbox("Perlin", &m_usePerlin)) {
-      notFlat = !m_usePerlin;
+  bool notFlat = !m_use_perlin_;
+  if (ImGui::Checkbox("Perlin", &m_use_perlin_)) {
+    notFlat = !m_use_perlin_;
   }
   ImGui::SameLine();
   if (ImGui::Checkbox("Flat", &notFlat)) {
-      m_usePerlin = !notFlat;
+    m_use_perlin_ = !notFlat;
   }
   ImGui::SameLine();
   if (ImGui::Button("Recreate Terrain")) {
-      m_terrain.createTerrain(m_usePerlin);
-      m_mesh_deform.setModel(m_terrain);
-      m_mesh_deform.deformMesh(m_terrain.selectedPoint, m_terrain.m_isBump, 0, 0); // initial computation of TBN, normals
-      m_terrain = m_mesh_deform.getModel();
+    m_terrain_.create_terrain(m_use_perlin_);
+    m_mesh_deform_.set_model(m_terrain_);
+    m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump,
+                              0, 0);  // initial computation of TBN, normals
+    m_terrain_ = m_mesh_deform_.get_model();
   }
 
   // finish creating window
@@ -255,29 +285,31 @@ void application::render_gui() {
   ImGui::Begin("Tree Settings", nullptr);
 
   if (ImGui::Button("Spooky Mode")) {
-      for (int i = 0; i < m_trees.size(); i++) {
-          m_trees[i].spookyMode = !m_trees[i].spookyMode;
-      }
+    for (int i = 0; i < m_trees_.size(); i++) {
+      m_trees_[i].m_spooky_mode = !m_trees_[i].m_spooky_mode;
+    }
   }
   if (ImGui::Button("New Tree")) {
-      m_trees[0].generateLeaves(5, 500);
-      m_trees[0].generateTree();
-      for (int i = 1; i < m_trees.size(); i++) {
-          m_trees[i].Branches = m_trees[0].Branches;
-          m_trees[i].mesh = m_trees[0].mesh;
-          m_trees[i].leaves = m_trees[0].leaves;
-      }
+    m_trees_[0].generate_leaves(5, 500);
+    m_trees_[0].generate_tree();
+    for (int i = 1; i < m_trees_.size(); i++) {
+      m_trees_[i].m_branches = m_trees_[0].m_branches;
+      m_trees_[i].m_mesh = m_trees_[0].m_mesh;
+      m_trees_[i].m_leaves = m_trees_[0].m_leaves;
+    }
   }
   if (ImGui::Button("Print Tree")) {
-      m_trees[0].printTree();
+    m_trees_[0].print_tree();
   }
 
   ImGui::End();
 }
 
-void application::cursor_pos_cb(const double x_pos, const double y_pos) {
+auto application::cursor_pos_cb(const double x_pos, const double y_pos)
+    -> void {
   if (m_first_mouse_) {
-    m_mouse_position_ = glm::vec2(x_pos, y_pos);
+    m_mouse_position_ =
+        glm::vec2(static_cast<float>(x_pos), static_cast<float>(y_pos));
     m_first_mouse_ = false;
   }
 
@@ -289,38 +321,44 @@ void application::cursor_pos_cb(const double x_pos, const double y_pos) {
     m_camera_.update_angle(x_offset, y_offset);
   }
 
-  m_mouse_position_ = glm::vec2(x_pos, y_pos);
+  m_mouse_position_ =
+      glm::vec2(static_cast<float>(x_pos), static_cast<float>(y_pos));
 }
 
-void application::mouse_button_cb(const int button, const int action, const int mods) {
+auto application::mouse_button_cb(const int button, const int action,
+                                  const int mods) -> void {
   (void)mods;
 
-  switch(button) {
+  switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT: {
-        // Capture is left-mouse down
-        m_left_mouse_down_ = (action == GLFW_PRESS);
-        if (m_left_mouse_down_) {
-            double xpos, ypos;
-            glfwGetCursorPos(m_window_, &xpos, &ypos);
-            m_mesh_deform.mouseIntersectMesh(xpos, ypos, m_window_size_.x, m_window_size_.y);
-            m_terrain = m_mesh_deform.getModel();
-        }
-        break;
+      // Capture is left-mouse down
+      m_left_mouse_down_ = (action == GLFW_PRESS);
+      if (m_left_mouse_down_) {
+        double x_pos, y_pos;
+        glfwGetCursorPos(m_window_, &x_pos, &y_pos);
+        m_mesh_deform_.mouse_intersect_mesh(x_pos, y_pos, m_window_size_.x,
+                                           m_window_size_.y);
+        m_terrain_ = m_mesh_deform_.get_model();
+      }
+      break;
     }
     case GLFW_MOUSE_BUTTON_MIDDLE: {
       m_middle_mouse_down_ = (action == GLFW_PRESS);
       break;
     }
-    default: break;
+    default:
+      break;
   }
 }
 
-void application::scroll_cb(const double x_offset, const double y_offset) {
+auto application::scroll_cb(const double x_offset, const double y_offset)
+    -> void {
   (void)x_offset;
   (void)y_offset;
 }
 
-void application::key_cb(const int key, const int scan_code, const int action, const int mods) {
+auto application::key_cb(const int key, const int scan_code, const int action,
+                         const int mods) -> void {
   (void)scan_code, (void)mods;
 
   if (action == GLFW_PRESS) {
@@ -341,13 +379,12 @@ void application::key_cb(const int key, const int scan_code, const int action, c
         m_camera_.set_direction(camera_movement::right);
         break;
       }
-      default: break;
+      default:
+        break;
     }
   } else if (action == GLFW_RELEASE) {
     m_camera_.set_direction(camera_movement::rest);
   }
 }
 
-void application::char_cb(const unsigned int c) {
-  (void)c;
-}
+auto application::char_cb(const unsigned int c) -> void { (void)c; }

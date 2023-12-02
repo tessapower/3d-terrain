@@ -3,6 +3,7 @@
 #include <string>
 
 #include "application.hpp"
+#include "imgui.h"
 #include "cgra/cgra_gui.hpp"
 #include "utils/opengl.hpp"
 
@@ -112,7 +113,7 @@ int main() {
 
     // GUI Render on top
     // glDisable(GL_FRAMEBUFFER_SRGB); // use if you know about gamma correction
-    cgra::gui::newFrame();
+    cgra::gui::new_frame();
     application.render_gui();
     cgra::gui::render();
 
@@ -138,7 +139,7 @@ void cursor_pos_cb(GLFWwindow *, const double x_pos, const double y_pos) {
 void mouse_button_cb(GLFWwindow *win, const int button, const int action,
                      const int mods) {
   // forward callback to ImGui
-  cgra::gui::mouseButtonCallback(win, button, action, mods);
+  cgra::gui::mouse_button_callback(win, button, action, mods);
 
   // if not captured then forward to application
   if (const ImGuiIO &io = ImGui::GetIO(); io.WantCaptureMouse) return;
@@ -147,7 +148,7 @@ void mouse_button_cb(GLFWwindow *win, const int button, const int action,
 
 void scroll_cb(GLFWwindow *win, const double x_offset, const double y_offset) {
   // forward callback to ImGui
-  cgra::gui::scrollCallback(win, x_offset, y_offset);
+  cgra::gui::scroll_callback(win, x_offset, y_offset);
 
   // if not captured then forward to application
   if (const ImGuiIO &io = ImGui::GetIO(); io.WantCaptureMouse) return;
@@ -157,7 +158,7 @@ void scroll_cb(GLFWwindow *win, const double x_offset, const double y_offset) {
 void key_cb(GLFWwindow *win, const int key, const int scan_code,
             const int action, const int mods) {
   // forward callback to ImGui
-  cgra::gui::keyCallback(win, key, scan_code, action, mods);
+  cgra::gui::key_callback(win, key, scan_code, action, mods);
 
   // if not captured then forward to application
   if (const ImGuiIO &io = ImGui::GetIO(); io.WantCaptureKeyboard) return;
@@ -166,7 +167,7 @@ void key_cb(GLFWwindow *win, const int key, const int scan_code,
 
 void char_cb(GLFWwindow *win, const unsigned int c) {
   // forward callback to ImGui
-  cgra::gui::charCallback(win, c);
+  cgra::gui::char_callback(win, c);
 
   // if not captured then forward to application
   if (const ImGuiIO &io = ImGui::GetIO(); io.WantTextInput) return;
