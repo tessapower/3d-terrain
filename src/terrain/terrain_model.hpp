@@ -39,7 +39,7 @@ class terrain_model {
 
   terrain_model() = default;
   auto draw(const glm::mat4& view, const glm::mat4& projection) const -> void;
-  void create_terrain(bool perlin);
+  void create_terrain(bool use_perlin);
 
  private:
   float m_spacing_ = 5.0f;  // spacing between grid points

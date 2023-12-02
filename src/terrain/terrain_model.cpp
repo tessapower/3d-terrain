@@ -4,7 +4,7 @@
 
 #include "utils/perlin_noise.hpp"
 
-auto terrain_model::create_terrain(bool perlin) -> void {
+auto terrain_model::create_terrain(bool use_perlin) -> void {
   cgra::mesh_builder mb;
   cgra::mesh_vertex mv;
 
@@ -30,7 +30,7 @@ auto terrain_model::create_terrain(bool perlin) -> void {
       float x = static_cast<float>(i) * m_spacing_ + x_offset;
       float z = static_cast<float>(j) * m_spacing_ + z_offset;
       // whether to use perlin or not
-      float y = perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
+      float y = use_perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
                              (m_height / 2)
                        : 0.0f;
 
