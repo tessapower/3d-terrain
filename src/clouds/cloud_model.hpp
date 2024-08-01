@@ -1,8 +1,6 @@
-#pragma once
+#ifndef CLOUD_MODEL_HPP
+#define CLOUD_MODEL_HPP
 
-#include <glm/gtc/matrix_transform.hpp>
-
-#include "cgra/cgra_gui.hpp"
 #include "cgra/cgra_image.hpp"
 #include "mesh/simplified_mesh.hpp"
 
@@ -26,3 +24,5 @@ class cloud_model {
   auto simulate() -> void;
   auto draw(const glm::mat4& view, const glm::mat4& projection) -> void;
 };
+
+#endif  // CLOUD_MODEL_HPP

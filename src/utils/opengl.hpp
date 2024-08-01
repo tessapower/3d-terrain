@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CGRA_OPENGL_HPP
+#define CGRA_OPENGL_HPP
 
 /// OpenGL header
 /// Set up to include everything necessary for OpenGL functionality in one place
@@ -125,3 +126,5 @@ class gl_object {
   }
 };
 }  // namespace cgra
+
+#endif  // CGRA_OPENGL_HPP

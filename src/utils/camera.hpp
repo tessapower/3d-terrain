@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CAMERA_HPP
+#define CAMERA_HPP
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -210,3 +211,5 @@ class camera {
     return false;
   }
 };
+
+#endif // CAMERA_HPP

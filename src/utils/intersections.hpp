@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INTERSECTIONS_HPP
+#define INTERSECTIONS_HPP
 
 #include "cgra/cgra_mesh.hpp"
 #include "glm/glm.hpp"
@@ -80,3 +81,5 @@ inline auto ray_intersects_vertex(const glm::vec3& ray_origin,
 
   return false; // No intersection
 }
+
+#endif  // INTERSECTIONS_HPP

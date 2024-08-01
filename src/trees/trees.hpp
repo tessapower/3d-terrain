@@ -1,6 +1,6 @@
-#pragma once
+#ifndef TREES_HPP
+#define TREES_HPP
 
-#include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
@@ -105,3 +105,5 @@ class tree {
   static auto random_int(int a, int b) -> int;
   static auto random_float(int a, int b) -> float;
 };
+
+#endif  // TREES_HPP

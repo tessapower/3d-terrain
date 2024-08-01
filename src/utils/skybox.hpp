@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SKYBOX_HPP
+#define SKYBOX_HPP
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -87,3 +88,5 @@ class skybox {
   [[nodiscard]] auto load_cube_map() const noexcept -> GLuint;
   [[nodiscard]] auto load_mesh() const noexcept -> cgra::gl_mesh;
 };
+
+#endif  // SKYBOX_HPP

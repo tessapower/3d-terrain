@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CGRA_SHADER_HPP
+#define CGRA_SHADER_HPP
 
 #include <map>
 #include <memory>
@@ -17,3 +18,5 @@ class shader_builder {
   [[nodiscard]] auto build(GLuint program = 0) const -> GLuint;
 };
 }  // namespace cgra
+
+#endif  // CGRA_SHADER_HPP

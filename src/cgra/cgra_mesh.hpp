@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CGRA_MESH_HPP
+#define CGRA_MESH_HPP
 
 #include <glm/glm.hpp>
 #include <iostream>
@@ -102,3 +103,5 @@ struct mesh_builder {
 };
 
 }  // namespace cgra
+
+#endif  // CGRA_MESH_HPP

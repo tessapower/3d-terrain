@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CGRA_IMAGE_HPP
+#define CGRA_IMAGE_HPP
 
 #include <stb_image.h>
 #include <stb_image_write.h>
@@ -99,3 +100,5 @@ struct rgba_image {
   }
 };
 }  // namespace cgra
+
+#endif  // CGRA_IMAGE_HPP

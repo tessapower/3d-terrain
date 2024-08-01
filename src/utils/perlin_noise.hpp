@@ -1,6 +1,6 @@
-#pragma once
+#ifndef PERLIN_NOISE_HPP
+#define PERLIN_NOISE_HPP
 
-#include <string>
 #include <vector>
 
 class perlin {
@@ -38,3 +38,5 @@ class perlin {
   // debug
   static auto debug(std::string const& str, auto val) -> void;
 };
+
+#endif  // PERLIN_NOISE_HPP

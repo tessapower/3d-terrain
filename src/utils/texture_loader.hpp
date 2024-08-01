@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TEXTURE_LOADER_HPP
+#define TEXTURE_LOADER_HPP
 
 #include "opengl.hpp"
 
@@ -35,3 +36,5 @@ class texture_loader {
   GLuint m_leaves_height_;
   GLuint m_bark_texture_;
 };
+
+#endif  // TEXTURE_LOADER_HPP

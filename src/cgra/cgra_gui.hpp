@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CGRA_GUI_HPP
+#define CGRA_GUI_HPP
 
 #include <utils/opengl.hpp>
 
@@ -19,3 +20,5 @@ auto render() -> void;
 auto shutdown() -> void;
 }  // namespace gui
 }  // namespace cgra
+
+#endif  // CGRA_GUI_HPP

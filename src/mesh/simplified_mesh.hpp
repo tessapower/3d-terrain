@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SIMPLIFIED_MESH_HPP
+#define SIMPLIFIED_MESH_HPP
 
 #include <cgra/cgra_mesh.hpp>
 
@@ -33,3 +34,5 @@ class simplified_mesh {
   // Builds the unsigned distance field from the model, then runs build
   auto build_from_model() -> void;
 };
+
+#endif  // SIMPLIFIED_MESH_HPP

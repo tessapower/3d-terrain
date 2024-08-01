@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CGRA_WAVEFRONT_HPP
+#define CGRA_WAVEFRONT_HPP
 
 #include <fstream>
 #include <sstream>
@@ -151,3 +152,5 @@ inline mesh_builder load_wavefront_data(const std::string& file_name) {
   return mb;
 }
 }  // namespace cgra
+
+#endif  // CGRA_WAVEFRONT_HPP

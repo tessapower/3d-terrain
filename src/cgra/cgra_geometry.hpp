@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CGRA_GEOMETRY_HPP
+#define CGRA_GEOMETRY_HPP
+
 #include <glm/glm.hpp>
 
 namespace cgra {
@@ -20,3 +22,5 @@ auto draw_axis(const glm::mat4& view, const glm::mat4& proj) -> void;
 // sets up a shader and draws a grid straight to the current framebuffer
 auto draw_grid(const glm::mat4& view, const glm::mat4& proj) -> void;
 }  // namespace cgra
+
+#endif  // CGRA_GEOMETRY_HPP

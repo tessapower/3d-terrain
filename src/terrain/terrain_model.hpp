@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TERRAIN_MODEL_HPP
+#define TERRAIN_MODEL_HPP
 
 #include <glm/glm.hpp>
 
@@ -45,3 +46,5 @@ class terrain_model {
   float m_spacing_ = 5.0f;  // spacing between grid points
   int m_type_ = 0;
 };
+
+#endif  // TERRAIN_MODEL_HPP

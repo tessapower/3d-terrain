@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MESH_DEFORMATION_HPP
+#define MESH_DEFORMATION_HPP
 
 #include <cgra/cgra_mesh.hpp>
 #include <terrain/terrain_model.hpp>
@@ -47,3 +48,5 @@ class mesh_deformation {
  private:
   terrain_model m_model_;
 };
+
+#endif  // MESH_DEFORMATION_HPP

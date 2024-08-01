@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CGRA_BASIC_MODEL_HPP
+#define CGRA_BASIC_MODEL_HPP
+
 #include "GL/glew.h"
 #include "cgra_mesh.hpp"
 
@@ -26,3 +28,5 @@ struct basic_model {
     mesh.draw();
   }
 };
+
+#endif  // CGRA_BASIC_MODEL_HPP
