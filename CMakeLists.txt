@@ -1,10 +1,5 @@
-################################################################
-#                          Created by:                         #
-#                    Ben Allen & Joshua Scott                  #
-################################################################
-
-# require new behaviour of: CMP0054
-cmake_minimum_required(VERSION 3.1)
+# Require new behaviour of: CMP0054
+cmake_minimum_required(VERSION 3.2)
 
 # Include Extra CMake capabilities
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -62,7 +57,7 @@ include_directories("${PROJECT_SOURCE_DIR}/ext") # Add ext in order to access gl
 include_directories("${PROJECT_SOURCE_DIR}/src") # Add source to include directory
 
 #########################################################
-# Set Compiler Flags
+# Compiler Flags
 #########################################################
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
@@ -109,6 +104,6 @@ endif()
 # Source Files
 #########################################################
 
-add_subdirectory(src) # Primary source files
-add_subdirectory(res) # Resources like shaders (show up in IDE)
+add_subdirectory(src)
+add_subdirectory(res)
 set_property(TARGET ${CGRA_PROJECT} PROPERTY FOLDER "CGRA")
