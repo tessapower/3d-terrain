@@ -44,7 +44,7 @@ auto print_shader_info_log(const GLuint obj) -> void {
     glGetShaderInfoLog(obj, info_log_length, &chars_written, info_log.data());
     std::cout << "CGRA Shader : "
               << "SHADER :\n"
-              << info_log.data() << std::endl;
+              << info_log.data() << '\n';
   }
 }
 
@@ -57,7 +57,7 @@ auto print_program_info_log(const GLuint obj) -> void {
     glGetProgramInfoLog(obj, info_log_length, &chars_written, info_log.data());
     std::cout << "CGRA Shader : "
               << "PROGRAM :\n"
-              << info_log.data() << std::endl;
+              << info_log.data() << '\n';
   }
 }
 
@@ -68,7 +68,7 @@ auto shader_builder::set_shader(const GLenum type, const std::string &file_name)
 
   if (!file_stream) {
     std::cerr << "Error: Could not locate and open file " << file_name
-              << std::endl;
+              << '\n';
     throw std::runtime_error("Error: Could not locate and open file " +
                              file_name);
   }
@@ -79,7 +79,7 @@ auto shader_builder::set_shader(const GLenum type, const std::string &file_name)
   try {
     set_shader_source(type, buffer.str());
   } catch ([[maybe_unused]] shader_compile_error &e) {
-    std::cerr << "Error: Could not compile " << file_name << std::endl;
+    std::cerr << "Error: Could not compile " << file_name << '\n';
     throw;
   }
 }
@@ -114,10 +114,10 @@ auto shader_builder::set_shader_source(const GLenum type,
   while (iss) {
     std::string line;
     std::getline(iss, line);
-    oss << line << std::endl;
+    oss << line << '\n';
     if (line.find("#version") < line.find("//")) break;
   }
-  oss << "#define " << get_define(type) << std::endl;
+  oss << "#define " << get_define(type) << '\n';
   oss << iss.rdbuf();
   const std::string final_source = oss.str();
   // End of CGRA addition

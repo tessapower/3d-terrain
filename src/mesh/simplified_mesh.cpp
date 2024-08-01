@@ -444,7 +444,7 @@ auto simplified_mesh::build_from_model() -> void {
 
   // Print the duration
   std::cout << "Time taken to generate G: " << duration.count()
-            << " microseconds" << std::endl;
+            << " microseconds" << '\n';
 
   // Visualize unsigned distance field
   if (m_debugging == 2) {
@@ -476,7 +476,7 @@ auto simplified_mesh::build_from_model() -> void {
 
   // Print the duration
   std::cout << "Time taken to finish whole process G: " << duration.count()
-            << " microseconds" << std::endl;
+            << " microseconds" << '\n';
 }
 
 /// <summary>

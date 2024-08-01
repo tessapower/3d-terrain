@@ -261,24 +261,24 @@ auto tree::grow() -> bool {
 // branch
 auto tree::print_tree() const -> void {
   if (m_branches.empty()) {
-    std::cout << "No Trees" << std::endl;
+    std::cout << "No Trees" << '\n';
     return;
   }
   for (const branch& b : m_branches) {
-    std::cout << "Branch = " << b.m_id << std::endl
-              << "Children: (Count = " << b.children.size() << ")(";
+    std::cout << "Branch = " << b.m_id << '\n'
+      << "Children: (Count = " << b.children.size() << ")(";
 
     for (const int i : b.children) {
       std::cout << i << ",";
     }
 
-    std::cout << ")" << std::endl
-              << "Parent: " << b.m_parent << std::endl
-              << "branch start: (" << b.m_start.x << "," << b.m_start.y << ","
-              << b.m_start.z << ")" << std::endl
-              << "Current end: (" << b.m_end.x << "," << b.m_end.y << ","
-              << b.m_end.z << ")" << std::endl
-              << std::endl;
+    std::cout << ")" << '\n'
+      << "Parent: " << b.m_parent << '\n'
+      << "branch start: (" << b.m_start.x << "," << b.m_start.y << ","
+              << b.m_start.z << ")" << '\n'
+      << "Current end: (" << b.m_end.x << "," << b.m_end.y << ","
+              << b.m_end.z << ")" << '\n'
+      << '\n';
   }
 }
 

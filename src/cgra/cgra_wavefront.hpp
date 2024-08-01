@@ -26,7 +26,7 @@ inline mesh_builder load_wavefront_data(const std::string& file_name) {
   // open file
   ifstream obj_file(file_name);
   if (!obj_file.is_open()) {
-    cerr << "Error: could not open " << file_name << endl;
+    cerr << "Error: could not open " << file_name << '\n';
     throw runtime_error("Error: could not open file " + file_name);
   }
 

@@ -87,17 +87,17 @@ struct mesh_builder {
   [[nodiscard]] auto build() const -> gl_mesh;
 
   auto print() const -> void {
-    std::cout << "pos" << std::endl;
+    std::cout << "pos" << '\n';
     for (const auto [pos, norm, uv, tang, bitang] : m_vertices) {
       std::cout << pos.x << ", " << pos.y << ", " << pos.z << ", " << norm.x
                 << ", " << norm.y << ", " << norm.z << ", " << uv.x << ", "
-                << uv.y << ", " << std::endl;
+                << uv.y << ", " << '\n';
     }
-    std::cout << "idx" << std::endl;
+    std::cout << "idx" << '\n';
     for (const int i : m_indices) {
       std::cout << i << ", ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 };
 

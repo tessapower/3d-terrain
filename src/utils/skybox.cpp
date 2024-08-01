@@ -35,7 +35,7 @@ auto skybox::load_cube_map() const noexcept -> GLuint {
       stbi_image_free(data);
     } else {
       std::cout << "Cube map texture failed to load at path: " << m_textures_[i]
-                << std::endl;
+                << '\n';
       stbi_image_free(data);
     }
   }

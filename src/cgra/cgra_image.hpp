@@ -34,7 +34,7 @@ struct rgba_image {
     unsigned char *raw_stb_data =
         stbi_load(file_name.c_str(), &m_size.x, &m_size.y, nullptr, 4);
     if (!raw_stb_data) {
-      std::cerr << "Error: Failed to open image " << file_name << std::endl;
+      std::cerr << "Error: Failed to open image " << file_name << '\n';
       throw std::runtime_error("Error: Failed to open image " + file_name);
     }
     data.assign(raw_stb_data, raw_stb_data + m_size.x * m_size.y * 4);
@@ -71,9 +71,9 @@ struct rgba_image {
     if (stbi_write_png(ss.str().c_str(), m_size.x, m_size.y, 4,
                        data.data() + (m_size.y - 1) * m_size.x * 4,
                        -m_size.x * 4)) {
-      std::cout << "Wrote image " << ss.str() << std::endl;
+      std::cout << "Wrote image " << ss.str() << '\n';
     } else {
-      std::cerr << "Error: Failed to write image " << ss.str() << std::endl;
+      std::cerr << "Error: Failed to write image " << ss.str() << '\n';
     }
   }
 

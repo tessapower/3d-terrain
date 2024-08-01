@@ -25,7 +25,7 @@ int main() {
 
   // Initialize the GLFW library
   if (!glfwInit()) {
-    std::cerr << "Error: Could not initialize GLFW" << std::endl;
+    std::cerr << "Error: Could not initialize GLFW" << '\n';
     abort();  // unrecoverable error
   }
 
@@ -41,7 +41,7 @@ int main() {
   int glfw_major, glfw_minor, glfw_revision;
   glfwGetVersion(&glfw_major, &glfw_minor, &glfw_revision);
 
-  // Request a debug context so we get debug callbacks
+  // Request a debug context to get debug callbacks
   // Remove this for possible GL performance increases
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
@@ -49,7 +49,7 @@ int main() {
   GLFWwindow *window =
       glfwCreateWindow(1050, 750, "3D Terrain Simulation", nullptr, nullptr);
   if (!window) {
-    std::cerr << "Error: Could not create GLFW window" << std::endl;
+    std::cerr << "Error: Could not create GLFW window" << '\n';
     abort();  // unrecoverable error
   }
 
@@ -65,15 +65,15 @@ int main() {
   if (const GLenum err = glewInit();
       GLEW_OK !=
       err) {  // problem: glewInit failed, something is seriously wrong.
-    std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
+    std::cerr << "Error: " << glewGetErrorString(err) << '\n';
     abort();  // unrecoverable error
   }
 
   // print out our OpenGL versions
-  std::cout << "Using OpenGL " << glGetString(GL_VERSION) << std::endl;
-  std::cout << "Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
+  std::cout << "Using OpenGL " << glGetString(GL_VERSION) << '\n';
+  std::cout << "Using GLEW " << glewGetString(GLEW_VERSION) << '\n';
   std::cout << "Using GLFW " << glfw_major << "." << glfw_minor << "."
-            << glfw_revision << std::endl;
+            << glfw_revision << '\n';
 
   // enable GL_ARB_debug_output if available (not necessary, just helpful)
   if (glfwExtensionSupported("GL_ARB_debug_output")) {
@@ -83,14 +83,14 @@ int main() {
     glDebugMessageCallbackARB(debug_cb, nullptr);
     glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0,
                              nullptr, true);
-    std::cout << "GL_ARB_debug_output callback installed" << std::endl;
+    std::cout << "GL_ARB_debug_output callback installed" << '\n';
   } else {
-    std::cout << "GL_ARB_debug_output not available. No worries." << std::endl;
+    std::cout << "GL_ARB_debug_output not available. No worries." << '\n';
   }
 
   // initialize ImGui
   if (!cgra::gui::init(window)) {
-    std::cerr << "Error: Could not initialize ImGui" << std::endl;
+    std::cerr << "Error: Could not initialize ImGui" << '\n';
     abort();  // unrecoverable error
   }
 
@@ -242,7 +242,7 @@ void APIENTRY debug_cb(const GLenum source, const GLenum type, const GLuint id,
   std::cerr << "GL [" << get_string_for_source(source) << "] "
             << get_string_for_type(type) << ' ' << id << " : ";
   std::cerr << message << " (Severity: " << get_string_for_severity(severity)
-            << ')' << std::endl;
+            << ')' << '\n';
 
   if (type == GL_DEBUG_TYPE_ERROR_ARB)
     throw std::runtime_error(std::string{"GL Error: "} + message);

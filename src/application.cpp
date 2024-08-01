@@ -45,8 +45,9 @@ application::application(GLFWwindow *window) : m_window_(window) {
   m_terrain_.m_shader = terrain_shader;
   m_terrain_.create_terrain(m_use_perlin_);
   m_mesh_deform_.set_model(m_terrain_);
-  m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump, 0,
-                            0);  // initial computation of TBN, normals
+  m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump,
+                             0,
+                             0);  // initial computation of TBN, normals
   m_terrain_ = m_mesh_deform_.get_model();
 
   glUseProgram(shader);
@@ -71,16 +72,17 @@ application::application(GLFWwindow *window) : m_window_(window) {
       0, m_terrain_.m_builder.get_vertices().size());
   std::uniform_real_distribution<float> size_tree(3, 7);
 
-  for (int i = 0; i < m_tree_amount_; i++) {
+  for (auto i = 0; i < m_tree_amount_; ++i) {
     tree t;
     t.m_shader = shader;
     m_tree_positions_.push_back(rand_vertices(gen));
     m_trees_.push_back(t);
     m_tree_sizes_.push_back(size_tree(gen));
   }
+
   m_trees_[0].generate_leaves(5, 500);
   m_trees_[0].generate_tree();
-  for (int i = 1; i < m_trees_.size(); i++) {
+  for (auto i = 1; i < m_trees_.size(); ++i) {
     m_trees_[i].m_branches = m_trees_[0].m_branches;
     m_trees_[i].m_mesh = m_trees_[0].m_mesh;
     m_trees_[i].m_leaves = m_trees_[0].m_leaves;
@@ -130,9 +132,9 @@ auto application::render() -> void {
   m_clouds_.draw(m_camera_.view_matrix(), projection);
   m_model_.draw(m_camera_.view_matrix(), projection);
 
-  for (int i = 0; i < m_trees_.size(); i++) {
+  for (auto i = 0; i < m_trees_.size(); i++) {
     m_trees_[i].draw(m_camera_.view_matrix(), projection);
-    cgra::mesh_vertex terrain_vertices =
+    auto terrain_vertices =
         m_terrain_.m_builder.get_vertex(m_tree_positions_[i]);
 
     const glm::mat4 translation_matrix =
@@ -202,7 +204,6 @@ auto application::render_gui() -> void {
     m_clouds_.simulate();
   }
 
-  // finish creating window
   ImGui::End();
 
   // Mesh Editing & Texturing window
@@ -228,7 +229,8 @@ auto application::render_gui() -> void {
                          "%.2f", 2.0f))
     m_mesh_deform_.set_model(m_terrain_);
 
-  if (ImGui::RadioButton("Normal Map", (m_terrain_.m_tex == 1) ? true : false)) {
+  if (ImGui::RadioButton("Normal Map",
+                         (m_terrain_.m_tex == 1) ? true : false)) {
     m_terrain_.m_tex = 1 - m_terrain_.m_tex;
     m_mesh_deform_.set_model(m_terrain_);
   }
@@ -245,8 +247,9 @@ auto application::render_gui() -> void {
   }
   ImGui::SameLine();
   if (ImGui::Button("Deform")) {
-    m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump,
-                              m_terrain_.m_radius, m_terrain_.m_strength);
+    m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point,
+                               m_terrain_.m_is_bump, m_terrain_.m_radius,
+                               m_terrain_.m_strength);
     m_terrain_ = m_mesh_deform_.get_model();
   }
 
@@ -259,40 +262,39 @@ auto application::render_gui() -> void {
                    10);
   ImGui::SliderInt("Seed", reinterpret_cast<int *>(&m_terrain_.m_seed), 0, 100);
 
-  bool notFlat = !m_use_perlin_;
-  if (ImGui::Checkbox("Perlin", &m_use_perlin_)) {
-    notFlat = !m_use_perlin_;
-  }
+  bool not_flat = !m_use_perlin_;
+  if (ImGui::Checkbox("Perlin", &m_use_perlin_)) not_flat = !m_use_perlin_;
+  
   ImGui::SameLine();
-  if (ImGui::Checkbox("Flat", &notFlat)) {
-    m_use_perlin_ = !notFlat;
-  }
+  if (ImGui::Checkbox("Flat", &not_flat)) m_use_perlin_ = !not_flat;
+
   ImGui::SameLine();
   if (ImGui::Button("Recreate Terrain")) {
     m_terrain_.create_terrain(m_use_perlin_);
     m_mesh_deform_.set_model(m_terrain_);
-    m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump,
-                              0, 0);  // initial computation of TBN, normals
+    m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point,
+                               m_terrain_.m_is_bump, 0,
+                               0);  // initial computation of TBN, normals
     m_terrain_ = m_mesh_deform_.get_model();
   }
 
-  // finish creating window
   ImGui::End();
 
-  // Tree window
+  // Tree Settings window
   ImGui::SetNextWindowPos(ImVec2(width - 305, 215), ImGuiSetCond_Once);
   ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
   ImGui::Begin("Tree Settings", nullptr);
 
   if (ImGui::Button("Spooky Mode")) {
-    for (int i = 0; i < m_trees_.size(); i++) {
-      m_trees_[i].m_spooky_mode = !m_trees_[i].m_spooky_mode;
+    for (auto& tree : m_trees_) {
+      tree.m_spooky_mode = !tree.m_spooky_mode;
     }
   }
+
   if (ImGui::Button("New Tree")) {
     m_trees_[0].generate_leaves(5, 500);
     m_trees_[0].generate_tree();
-    for (int i = 1; i < m_trees_.size(); i++) {
+    for (auto i = 1; i < m_trees_.size(); i++) {
       m_trees_[i].m_branches = m_trees_[0].m_branches;
       m_trees_[i].m_mesh = m_trees_[0].m_mesh;
       m_trees_[i].m_leaves = m_trees_[0].m_leaves;
@@ -337,7 +339,7 @@ auto application::mouse_button_cb(const int button, const int action,
         double x_pos, y_pos;
         glfwGetCursorPos(m_window_, &x_pos, &y_pos);
         m_mesh_deform_.mouse_intersect_mesh(x_pos, y_pos, m_window_size_.x,
-                                           m_window_size_.y);
+                                            m_window_size_.y);
         m_terrain_ = m_mesh_deform_.get_model();
       }
       break;

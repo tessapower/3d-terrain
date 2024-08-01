@@ -53,7 +53,6 @@ class application {
   bool m_smoothing_ = true;
 
   simplified_mesh_debugging m_debugging_ = simplified_mesh_debugging::result;
-  // end Voxel Settings
 
   // Mesh editing and texturing
   terrain_model m_terrain_;
