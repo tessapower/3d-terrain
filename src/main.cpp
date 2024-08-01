@@ -23,31 +23,31 @@ application *application_ptr = nullptr;
 
 int main() {
 
-  // initialize the GLFW library
+  // Initialize the GLFW library
   if (!glfwInit()) {
     std::cerr << "Error: Could not initialize GLFW" << std::endl;
     abort();  // unrecoverable error
   }
 
-  // force OpenGL to create a 3.3 core context
+  // Force OpenGL to create a 3.3 core context
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  // disallow legacy functionality (helps OS X work)
+  // Disallow legacy functionality (helps OS X work)
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-  // get the version for GLFW for later
+  // Get the version for GLFW for later
   int glfw_major, glfw_minor, glfw_revision;
   glfwGetVersion(&glfw_major, &glfw_minor, &glfw_revision);
 
-  // request a debug context so we get debug callbacks
-  // remove this for possible GL performance increases
+  // Request a debug context so we get debug callbacks
+  // Remove this for possible GL performance increases
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
   // create a windowed mode window and its OpenGL context
   GLFWwindow *window =
-      glfwCreateWindow(800, 600, "Hello World!", nullptr, nullptr);
+      glfwCreateWindow(1050, 750, "3D Terrain Simulation", nullptr, nullptr);
   if (!window) {
     std::cerr << "Error: Could not create GLFW window" << std::endl;
     abort();  // unrecoverable error
