@@ -5,39 +5,39 @@
 auto texture_loader::load_textures(GLuint shader) -> void {
   // Load texture data
   cgra::rgba_image texture1_data(
-      CGRA_SRCDIR + std::string(R"(\res\textures\Grass_001_COLOR.jpg)"));
+      std::string(R"(res\textures\Grass_001_COLOR.jpg)"));
   cgra::rgba_image texture2_data(
-      CGRA_SRCDIR + std::string(R"(\res\textures\Mud_001_baseColor.jpg)"));
+      std::string(R"(res\textures\Mud_001_baseColor.jpg)"));
   cgra::rgba_image texture3_data(
-      CGRA_SRCDIR + std::string(R"(\res\textures\Rock_044_BaseColor.jpg)"));
+      std::string(R"(res\textures\Rock_044_BaseColor.jpg)"));
 
   // Load normal maps
   cgra::rgba_image norm_texture1_data(
-      CGRA_SRCDIR + std::string(R"(\res\textures\Grass_001_NORM.jpg)"));
+      std::string(R"(res\textures\Grass_001_NORM.jpg)"));
   cgra::rgba_image norm_texture2_data(
-      CGRA_SRCDIR + std::string(R"(\res\textures\Mud_001_normal.jpg)"));
+      std::string(R"(res\textures\Mud_001_normal.jpg)"));
   cgra::rgba_image norm_texture3_data(
-      CGRA_SRCDIR + std::string(R"(\res\textures\Rock_044_Normal.jpg)"));
+      std::string(R"(res\textures\Rock_044_Normal.jpg)"));
 
   // Load height maps
   cgra::rgba_image height_texture1_data(
-      CGRA_SRCDIR + std::string(R"(\res\textures\Grass_001_DISP.png)"));
+      std::string(R"(res\textures\Grass_001_DISP.png)"));
   cgra::rgba_image height_texture2_data(
-      CGRA_SRCDIR + std::string(R"(\res\textures\Mud_001_height.png)"));
+      std::string(R"(res\textures\Mud_001_height.png)"));
   cgra::rgba_image height_texture3_data(
-      CGRA_SRCDIR + std::string(R"(\res\textures\Rock_044_Height.png)"));
+      std::string(R"(res\textures\Rock_044_Height.png)"));
 
   // Load leaves textures
   cgra::rgba_image leaves_data(
-      CGRA_SRCDIR +
-      std::string(R"(\res\textures\Stylized_Leaves_002_basecolor.jpg)"));
+
+      std::string(R"(res\textures\Stylized_Leaves_002_basecolor.jpg)"));
   cgra::rgba_image height_leaves_data(
-      CGRA_SRCDIR +
-      std::string(R"(\res\textures\Stylized_Leaves_002_height.png)"));
+
+      std::string(R"(res\textures\Stylized_Leaves_002_height.png)"));
 
   // Load bark texture
   cgra::rgba_image bark_data(
-      CGRA_SRCDIR + std::string(R"(\res\textures\Bark_06_basecolor.jpg)"));
+      std::string(R"(res\textures\Bark_06_basecolor.jpg)"));
 
   // Upload textures and store handles
   m_texture_1_ = texture1_data.upload_texture();

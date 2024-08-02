@@ -14,9 +14,9 @@ skybox::skybox() noexcept {
 auto skybox::load_shaders() noexcept -> GLuint {
   cgra::shader_builder sb;
   sb.set_shader(GL_VERTEX_SHADER,
-                CGRA_SRCDIR + std::string("//res//shaders//skybox.vs.glsl"));
+                std::string("res//shaders//skybox.vs.glsl"));
   sb.set_shader(GL_FRAGMENT_SHADER,
-                CGRA_SRCDIR + std::string("//res//shaders//skybox.fs.glsl"));
+                std::string("res//shaders//skybox.fs.glsl"));
 
   return sb.build();
 }
