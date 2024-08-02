@@ -311,16 +311,14 @@ auto simplified_mesh::draw(const glm::mat4& view, const glm::mat4& proj) const
   m_mesh.draw();
 }
 
-inline auto adapt(float v0, float v1) -> float { return 0.5f; }
-
 auto edge_to_boundary_vertex(const int edge, const glm::vec3 point,
                              const float* f_eval, const float voxel_edge_length)
     -> glm::vec3 {
   const int v0 = cube_edges[edge][0];
   const int v1 = cube_edges[edge][1];
 
-  const float t0 = 1.0f - adapt(f_eval[v0], f_eval[v1]);
-  const float t1 = 1.0f - t0;
+  constexpr float t0 = 1.0f - 0.5f;
+  constexpr float t1 = 1.0f - t0;
 
   auto v_pos0 = glm::vec3(cube_vertices[v0][0], cube_vertices[v0][1],
                           cube_vertices[v0][2]);

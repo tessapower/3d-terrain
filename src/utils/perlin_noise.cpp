@@ -185,8 +185,3 @@ int perlin::inc(int num) const {
 
   return num;
 }
-
-// debug
-void perlin::debug(std::string const& str, auto val) {
-  std::cout << str << ": " << val << std::endl;
-}
