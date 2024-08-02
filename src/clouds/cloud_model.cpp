@@ -1,4 +1,4 @@
-#include "cloud_model.hpp"
+#include "clouds/cloud_model.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 

@@ -67,12 +67,12 @@ class skybox {
 
   // Texture files
   std::vector<std::string> m_textures_ = {
-      CGRA_SRCDIR + std::string{"/res/textures/skybox/right.jpg"},
-      CGRA_SRCDIR + std::string{"/res/textures/skybox/left.jpg"},
-      CGRA_SRCDIR + std::string{"/res/textures/skybox/top.jpg"},
-      CGRA_SRCDIR + std::string{"/res/textures/skybox/bottom.jpg"},
-      CGRA_SRCDIR + std::string{"/res/textures/skybox/back.jpg"},
-      CGRA_SRCDIR + std::string{"/res/textures/skybox/front.jpg"}};
+      std::string{"res/textures/skybox/right.jpg"},
+      std::string{"res/textures/skybox/left.jpg"},
+      std::string{"res/textures/skybox/top.jpg"},
+      std::string{"res/textures/skybox/bottom.jpg"},
+      std::string{"res/textures/skybox/back.jpg"},
+      std::string{"res/textures/skybox/front.jpg"}};
 
   GLuint m_shader_ = 0;
   GLuint m_texture_;

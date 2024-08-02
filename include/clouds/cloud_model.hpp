@@ -14,7 +14,7 @@ class cloud_model {
   glm::vec3 noise_scale{80.0f, 60.0f, 80.0f};
   float cloud_threshold = 0.66f;
   double voxel_edge_length = 1.0;
-  glm::vec3 size{300.f, 30.f, 300.f};
+  glm::vec3 size{300.0f, 30.0f, 300.0f};
   float fade_out_range = 6.0f;
 
   std::vector<std::vector<std::vector<float>>> cloud_data;

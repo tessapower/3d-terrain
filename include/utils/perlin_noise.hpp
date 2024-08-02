@@ -34,9 +34,6 @@ class perlin {
 
   // increment number to ensure repetition
   [[nodiscard]] auto inc(int num) const -> int;
-
-  // debug
-  static auto debug(std::string const& str, auto val) -> void;
 };
 
 #endif  // PERLIN_NOISE_HPP

@@ -1,4 +1,4 @@
-#include "cgra_gui.hpp"
+#include "cgra/cgra_gui.hpp"
 
 #include <iostream>
 

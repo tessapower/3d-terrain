@@ -1,4 +1,4 @@
-#include "cgra_shader.hpp"
+#include "cgra/cgra_shader.hpp"
 
 #include <fstream>
 #include <iostream>

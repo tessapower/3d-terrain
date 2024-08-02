@@ -1,6 +1,5 @@
-#include "perlin_noise.hpp"
+#include "utils/perlin_noise.hpp"
 
-#include <iostream>
 #include <numeric>
 #include <random>
 #include <vector>

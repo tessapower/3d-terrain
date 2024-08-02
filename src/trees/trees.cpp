@@ -1,5 +1,5 @@
 #define _USE_MATH_DEFINES
-#include "trees.hpp"
+#include "trees/trees.hpp"
 
 #include <chrono>
 #include <cmath>

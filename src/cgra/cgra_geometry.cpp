@@ -1,11 +1,11 @@
-#include "cgra_geometry.hpp"
+#include "cgra/cgra_geometry.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <utils/opengl.hpp>
 
-#include "cgra_shader.hpp"
+#include "cgra/cgra_shader.hpp"
 
 namespace cgra {
 namespace {

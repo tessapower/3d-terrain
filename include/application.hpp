@@ -1,7 +1,7 @@
-#pragma once
+#ifndef APPLICATION_HPP
+#define APPLICATION_HPP
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "cgra/cgra_basic_model.hpp"
 #include "clouds/cloud_model.hpp"
@@ -117,3 +117,5 @@ class application {
    */
   [[maybe_unused]] static auto char_cb(unsigned int c) -> void;
 };
+
+#endif // APPLICATION_HPP

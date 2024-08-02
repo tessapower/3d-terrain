@@ -1,4 +1,4 @@
-#include "cgra_mesh.hpp"
+#include "cgra/cgra_mesh.hpp"
 
 namespace cgra {
 auto gl_mesh::draw() const -> void {

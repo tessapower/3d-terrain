@@ -1,4 +1,4 @@
-#include "texture_loader.hpp"
+#include "utils/texture_loader.hpp"
 
 #include "cgra/cgra_image.hpp"
 

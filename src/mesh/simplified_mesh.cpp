@@ -1,6 +1,6 @@
 #define GLM_ENABLE_EXPERIMENTAL 1
 
-#include "simplified_mesh.hpp"
+#include "mesh/simplified_mesh.hpp"
 
 #include <chrono>
 #include <glm/gtc/type_ptr.hpp>
