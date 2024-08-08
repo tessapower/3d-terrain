@@ -21,6 +21,8 @@ add_subdirectory(utils)
 # Add executable target and link libraries
 add_executable(${CGRA_PROJECT} ${sources} ${headers})
 
+set_property(TARGET ${CGRA_PROJECT} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
+
 #########################################################
 # Link and Build Executable
 #########################################################
@@ -29,11 +31,15 @@ add_executable(${CGRA_PROJECT} ${sources} ${headers})
 target_source_group_tree(${CGRA_PROJECT})
 
 # Set working folder
-target_compile_definitions(${CGRA_PROJECT} PUBLIC "-DCGRA_SRCDIR=\"${PROJECT_SOURCE_DIR}\"")
+target_compile_definitions(${CGRA_PROJECT} PRIVATE "-DCGRA_SRCDIR=\"${PROJECT_SOURCE_DIR}\"")
 
-# Link usage requirements
-target_link_libraries(${CGRA_PROJECT} PRIVATE glew glfw ${GLFW_LIBRARIES})
-target_link_libraries(${CGRA_PROJECT} PRIVATE stb imgui)
+# Link external libraries
+target_link_libraries(${CGRA_PROJECT} PRIVATE glew)
+target_link_libraries(${CGRA_PROJECT} PRIVATE glfw ${GLFW_LIBRARIES})
+target_link_libraries(${CGRA_PROJECT} PRIVATE imgui)
+target_link_libraries(${CGRA_PROJECT} PRIVATE stb)
+
+# Link local libraries
 target_link_libraries(${CGRA_PROJECT} PRIVATE cgra_lib)
 target_link_libraries(${CGRA_PROJECT} PRIVATE cloud_lib)
 target_link_libraries(${CGRA_PROJECT} PRIVATE mesh_lib)

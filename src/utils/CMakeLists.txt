@@ -1,17 +1,17 @@
 set(UTIL_SOURCES
-	"perlin_noise.cpp"
-	"texture_loader.cpp"
-	"skybox.cpp"
-	"CMakeLists.txt"
+    "perlin_noise.cpp"
+    "texture_loader.cpp"
+    "skybox.cpp"
+    "CMakeLists.txt"
 )
 
 set(UTIL_HEADERS
-	"${PROJECT_SOURCE_DIR}/include/utils/texture_loader.hpp"
-	"${PROJECT_SOURCE_DIR}/include/utils/skybox.hpp"
-	"${PROJECT_SOURCE_DIR}/include/utils/perlin_noise.hpp"
-	"${PROJECT_SOURCE_DIR}/include/utils/camera.hpp"
-	"${PROJECT_SOURCE_DIR}/include/utils/intersections.hpp"
-	"${PROJECT_SOURCE_DIR}/include/utils/opengl.hpp"
+    "${PROJECT_SOURCE_DIR}/include/utils/texture_loader.hpp"
+    "${PROJECT_SOURCE_DIR}/include/utils/skybox.hpp"
+    "${PROJECT_SOURCE_DIR}/include/utils/perlin_noise.hpp"
+    "${PROJECT_SOURCE_DIR}/include/utils/camera.hpp"
+    "${PROJECT_SOURCE_DIR}/include/utils/intersections.hpp"
+    "${PROJECT_SOURCE_DIR}/include/utils/opengl.hpp"
 )
 
 add_library(utils_lib STATIC
@@ -19,8 +19,12 @@ add_library(utils_lib STATIC
     ${UTIL_HEADERS}
 )
 
-target_link_libraries(utils_lib PRIVATE glew glfw ${GLFW_LIBRARIES})
-target_link_libraries(utils_lib PRIVATE stb imgui)
+set_property(TARGET utils_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
+
+target_link_libraries(utils_lib PRIVATE glew)
+target_link_libraries(utils_lib PRIVATE glfw ${GLFW_LIBRARIES})
+target_link_libraries(utils_lib PRIVATE imgui)
+target_link_libraries(utils_lib PRIVATE stb)
 
 # Support <my_lib/my_lib.h> imports in public headers
 target_include_directories(utils_lib PUBLIC ../include)

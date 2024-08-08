@@ -21,8 +21,12 @@ add_library(cgra_lib STATIC
     ${CGRA_HEADERS}
 )
 
-target_link_libraries(cgra_lib PRIVATE glew glfw ${GLFW_LIBRARIES})
-target_link_libraries(cgra_lib PRIVATE stb imgui)
+set_property(TARGET cgra_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
+
+target_link_libraries(cgra_lib PRIVATE glew)
+target_link_libraries(cgra_lib PRIVATE glfw ${GLFW_LIBRARIES})
+target_link_libraries(cgra_lib PRIVATE imgui)
+target_link_libraries(cgra_lib PRIVATE stb)
 
 # Support <my_lib/my_lib.h> imports in public headers
 target_include_directories(cgra_lib PUBLIC ../include)
