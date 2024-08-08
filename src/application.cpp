@@ -1,5 +1,7 @@
 #include "application.hpp"
 
+#include <imgui.h>
+
 #include <chrono>
 #include <glm/gtc/matrix_transform.hpp>
 #include <random>
@@ -9,7 +11,6 @@
 #include "cgra/cgra_image.hpp"
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
-#include <imgui.h>
 #include "mesh/mesh_deformation.hpp"
 #include "mesh/simplified_mesh.hpp"
 #include "terrain/terrain_model.hpp"
@@ -46,8 +47,7 @@ application::application(GLFWwindow *window) : m_window_(window) {
   m_terrain_.create_terrain(m_use_perlin_);
   m_mesh_deform_.set_model(m_terrain_);
   m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump,
-                             0.0f,
-                             0.0f);
+                             0.0f, 0.0f);
   m_terrain_ = m_mesh_deform_.get_model();
 
   glUseProgram(shader);
@@ -114,8 +114,9 @@ auto application::render() -> void {
   m_last_frame_ = current_frame;
   m_camera_.update(m_delta_time_, m_terrain_);
 
-  const glm::mat4 projection =
-      glm::perspective(1.f, static_cast<float>(width) / static_cast<float>(height), 0.1f, 10000.f);
+  const glm::mat4 projection = glm::perspective(
+      1.f, static_cast<float>(width) / static_cast<float>(height), 0.1f,
+      10000.f);
 
   glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
 
@@ -125,10 +126,10 @@ auto application::render() -> void {
   m_mesh_deform_.m_projection = projection;
 
   // draw the model
-  m_model_bunny_.draw(
-      glm::scale(glm::translate(m_camera_.view_matrix(), glm::vec3(15, 50, 0)),
-                 glm::vec3(15)),
-      projection);
+  m_model_bunny_.draw(glm::scale(glm::translate(m_camera_.view_matrix(),
+                                                glm::vec3(15.0f, 50.0f, 0.0f)),
+                                 glm::vec3(15.0f)),
+                      projection);
 
   m_clouds_.draw(m_camera_.view_matrix(), projection);
   m_model_.draw(m_camera_.view_matrix(), projection);
@@ -149,8 +150,8 @@ auto application::render() -> void {
 }
 
 auto application::render_gui() -> void {
-  ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
+  ImGui::SetNextWindowPos(m_window_pos_, ImGuiSetCond_Once);
+  ImGui::SetNextWindowSize(m_option_window_dimensions_, ImGuiSetCond_Once);
   ImGui::Begin("Options", nullptr);
 
   ImGui::Text("Application %.3f ms/frame (%.1f FPS)",
@@ -166,8 +167,10 @@ auto application::render_gui() -> void {
   ImGui::End();
 
   // Voxel window
-  ImGui::SetNextWindowPos(ImVec2(5, 215), ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
+  m_window_pos_ = ImVec2(m_window_pos_.x,
+                         m_window_pos_.y + m_option_window_dimensions_.y + 5);
+  ImGui::SetNextWindowPos(m_window_pos_, ImGuiSetCond_Once);
+  ImGui::SetNextWindowSize(m_voxel_window_dimensions_, ImGuiSetCond_Once);
   ImGui::Begin("Voxel Settings", nullptr);
 
   if (ImGui::SliderFloat("Voxel Size", &m_voxel_edge_length_, 0.004f, 0.03f)) {
@@ -209,11 +212,12 @@ auto application::render_gui() -> void {
   ImGui::End();
 
   // Mesh Editing & Texturing window
-  int width, height;
-  glfwGetFramebufferSize(m_window_, &width, &height);
-  // setup window
-  ImGui::SetNextWindowPos(ImVec2(static_cast<float>(width) - 305.0f, 5.0f), ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f), ImGuiSetCond_Once);
+  // Setup window
+  m_window_pos_ = {
+      m_window_size_.x - m_mesh_window_dimensions_.x - m_starting_position_.x,
+      m_starting_position_.y};
+  ImGui::SetNextWindowPos(m_window_pos_, ImGuiSetCond_Once);
+  ImGui::SetNextWindowSize(m_mesh_window_dimensions_, ImGuiSetCond_Once);
   ImGui::Begin("Mesh Editing & Texturing", nullptr);
 
   if (ImGui::SliderFloat("Radius", &m_terrain_.m_radius, 0, 100, "%.2f", 2.0f))
@@ -231,8 +235,7 @@ auto application::render_gui() -> void {
                          "%.2f", 2.0f))
     m_mesh_deform_.set_model(m_terrain_);
 
-  if (ImGui::RadioButton("Normal Map",
-                         (m_terrain_.m_tex == 1))) {
+  if (ImGui::RadioButton("Normal Map", (m_terrain_.m_tex == 1))) {
     m_terrain_.m_tex = 1 - m_terrain_.m_tex;
     m_mesh_deform_.set_model(m_terrain_);
   }
@@ -266,7 +269,7 @@ auto application::render_gui() -> void {
 
   bool not_flat = !m_use_perlin_;
   if (ImGui::Checkbox("Perlin", &m_use_perlin_)) not_flat = !m_use_perlin_;
-  
+
   ImGui::SameLine();
   if (ImGui::Checkbox("Flat", &not_flat)) m_use_perlin_ = !not_flat;
 
@@ -283,15 +286,20 @@ auto application::render_gui() -> void {
   ImGui::End();
 
   // Tree Settings window
-  ImGui::SetNextWindowPos(ImVec2(static_cast<float>(width) - 305.0f, 215.0f), ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f), ImGuiSetCond_Once);
+  m_window_pos_ =
+      ImVec2(m_window_pos_.x, m_window_pos_.y + m_mesh_window_dimensions_.y +
+                                  m_starting_position_.y);
+  ImGui::SetNextWindowPos(m_window_pos_, ImGuiSetCond_Once);
+  ImGui::SetNextWindowSize(m_tree_window_dimensions_, ImGuiSetCond_Once);
   ImGui::Begin("Tree Settings", nullptr);
 
   if (ImGui::Button("Spooky Mode")) {
-    for (auto& tree : m_trees_) {
+    for (auto &tree : m_trees_) {
       tree.m_spooky_mode = !tree.m_spooky_mode;
     }
   }
+
+  ImGui::SameLine();
 
   if (ImGui::Button("New Tree")) {
     m_trees_[0].generate_leaves(5, 500);
@@ -304,6 +312,9 @@ auto application::render_gui() -> void {
       m_trees_[i].m_leaves = m_trees_[0].m_leaves;
     }
   }
+
+  ImGui::SameLine();
+
   if (ImGui::Button("Print Tree")) {
     m_trees_[0].print_tree();
   }

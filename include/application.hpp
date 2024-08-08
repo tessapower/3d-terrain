@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 
+#include "imgui.h"
 #include "cgra/cgra_basic_model.hpp"
 #include "clouds/cloud_model.hpp"
 #include "mesh/mesh_deformation.hpp"
@@ -21,6 +22,14 @@
 class application {
   glm::vec2 m_window_size_;
   GLFWwindow *m_window_;
+
+  // Window Constants
+  const ImVec2 m_starting_position_ = {5.0f, 5.0f};
+  const ImVec2 m_option_window_dimensions_ = {345.0f, 110.0f};
+  const ImVec2 m_voxel_window_dimensions_ = {345.0f, 170.0f};
+  const ImVec2 m_mesh_window_dimensions_ = {350.0f, 355.0f};
+  const ImVec2 m_tree_window_dimensions_ = {350.0f, 55.0f};
+  ImVec2 m_window_pos_ = m_starting_position_;
 
   // Flying Camera
   glm::vec3 m_camera_pos_ = {-5.0f, 185.0f, 752.0f};
