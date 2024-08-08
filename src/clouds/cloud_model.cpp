@@ -25,7 +25,7 @@ auto cloud_model::simulate() -> void {
 
         // Fade out at top and bottom
         if (y > size.y - fade_out_range) {
-          noise *= cloud_falloff(1.0 - (y - (size.y - fade_out_range)) /
+          noise *= cloud_falloff(1.0f - (y - (size.y - fade_out_range)) /
                                            fade_out_range);
         } else if (y < fade_out_range) {
           noise *= cloud_falloff(y / fade_out_range);

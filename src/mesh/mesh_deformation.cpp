@@ -203,8 +203,8 @@ void mesh_deformation::mouse_intersect_mesh(double x_pos, double y_pos,
   float ndc_x = 2.0f * x_pos / window_size_x - 1.0f;
   float ndc_y = 1.0f - (2.0f * y_pos) / window_size_y;
 
-  // Assume ndcX and ndcY are the NDC coordinates you want to convert to world
-  // coordinates
+  // Assume ndc_x and ndc_y are the NDC coordinates you want
+  // to convert to world coordinates
   // Near point in NDC space (z = -1)
   glm::vec4 near_point(ndc_x, ndc_y, -1.0f, 1.0f);
   // Far point in NDC space (z = 1)
@@ -234,7 +234,7 @@ void mesh_deformation::mouse_intersect_mesh(double x_pos, double y_pos,
     cgra::mesh_vertex vertex = m_model_.m_builder.m_vertices[i];
 
     // Check if the ray intersects with the vertex
-    if (ray_intersects_vertex(ray_origin_world, ray_direction, i, m_model_)) {
+    if (ray_intersects_vertex(ray_origin_world, ray_direction, static_cast<int>(i), m_model_)) {
       // You've clicked on this vertex, store its index
       m_model_.m_selected_point = m_model_.m_builder.m_vertices.at(i);
       break;  // Exit the loop since you've found the first intersection

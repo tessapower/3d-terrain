@@ -1,9 +1,10 @@
+#include <imgui.h>
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
 #include "application.hpp"
-#include "imgui.h"
 #include "cgra/cgra_gui.hpp"
 #include "utils/opengl.hpp"
 
@@ -22,7 +23,6 @@ application *application_ptr = nullptr;
 }  // namespace
 
 int main() {
-
   // Initialize the GLFW library
   if (!glfwInit()) {
     std::cerr << "Error: Could not initialize GLFW" << '\n';
@@ -152,7 +152,7 @@ void scroll_cb(GLFWwindow *win, const double x_offset, const double y_offset) {
 
   // if not captured then forward to application
   if (const ImGuiIO &io = ImGui::GetIO(); io.WantCaptureMouse) return;
-  application_ptr->scroll_cb(x_offset, y_offset);
+  application::scroll_cb(x_offset, y_offset);
 }
 
 void key_cb(GLFWwindow *win, const int key, const int scan_code,
@@ -171,7 +171,7 @@ void char_cb(GLFWwindow *win, const unsigned int c) {
 
   // if not captured then forward to application
   if (const ImGuiIO &io = ImGui::GetIO(); io.WantTextInput) return;
-  application_ptr->char_cb(c);
+  application::char_cb(c);
 }
 
 // function to translate source to string

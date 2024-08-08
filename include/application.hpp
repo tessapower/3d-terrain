@@ -60,7 +60,7 @@ class application {
   bool m_use_perlin_ = true;
 
   // Tree Values
-  int m_tree_amount_ = 35;
+  int m_num_trees_ = 35;
 
   std::pmr::vector<tree> m_trees_;
   std::pmr::vector<int> m_tree_positions_;

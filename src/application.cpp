@@ -9,7 +9,7 @@
 #include "cgra/cgra_image.hpp"
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
-#include "imgui.h"
+#include <imgui.h>
 #include "mesh/mesh_deformation.hpp"
 #include "mesh/simplified_mesh.hpp"
 #include "terrain/terrain_model.hpp"
@@ -46,8 +46,8 @@ application::application(GLFWwindow *window) : m_window_(window) {
   m_terrain_.create_terrain(m_use_perlin_);
   m_mesh_deform_.set_model(m_terrain_);
   m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump,
-                             0,
-                             0);  // initial computation of TBN, normals
+                             0.0f,
+                             0.0f);
   m_terrain_ = m_mesh_deform_.get_model();
 
   glUseProgram(shader);
@@ -69,10 +69,10 @@ application::application(GLFWwindow *window) : m_window_(window) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<int> rand_vertices(
-      0, m_terrain_.m_builder.get_vertices().size());
-  std::uniform_real_distribution<float> size_tree(3, 7);
+      0, static_cast<int>(m_terrain_.m_builder.get_vertices().size()));
+  std::uniform_real_distribution<float> size_tree(3.0f, 7.0f);
 
-  for (auto i = 0; i < m_tree_amount_; ++i) {
+  for (auto i = 0; i < m_num_trees_; ++i) {
     tree t;
     t.m_shader = shader;
     m_tree_positions_.push_back(rand_vertices(gen));
@@ -82,7 +82,8 @@ application::application(GLFWwindow *window) : m_window_(window) {
 
   m_trees_[0].generate_leaves(5, 500);
   m_trees_[0].generate_tree();
-  for (auto i = 1; i < m_trees_.size(); ++i) {
+  const auto size = static_cast<int>(m_trees_.size());
+  for (auto i = 1; i < size; ++i) {
     m_trees_[i].m_branches = m_trees_[0].m_branches;
     m_trees_[i].m_mesh = m_trees_[0].m_mesh;
     m_trees_[i].m_leaves = m_trees_[0].m_leaves;
@@ -114,7 +115,7 @@ auto application::render() -> void {
   m_camera_.update(m_delta_time_, m_terrain_);
 
   const glm::mat4 projection =
-      glm::perspective(1.f, static_cast<float>(width) / height, 0.1f, 10000.f);
+      glm::perspective(1.f, static_cast<float>(width) / static_cast<float>(height), 0.1f, 10000.f);
 
   glPolygonMode(GL_FRONT_AND_BACK, (m_show_wireframe_) ? GL_LINE : GL_FILL);
 
@@ -132,7 +133,8 @@ auto application::render() -> void {
   m_clouds_.draw(m_camera_.view_matrix(), projection);
   m_model_.draw(m_camera_.view_matrix(), projection);
 
-  for (auto i = 0; i < m_trees_.size(); i++) {
+  const auto size = static_cast<int>(m_trees_.size());
+  for (auto i = 0; i < size; i++) {
     m_trees_[i].draw(m_camera_.view_matrix(), projection);
     auto terrain_vertices =
         m_terrain_.m_builder.get_vertex(m_tree_positions_[i]);
@@ -210,8 +212,8 @@ auto application::render_gui() -> void {
   int width, height;
   glfwGetFramebufferSize(m_window_, &width, &height);
   // setup window
-  ImGui::SetNextWindowPos(ImVec2(width - 305, 5), ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
+  ImGui::SetNextWindowPos(ImVec2(static_cast<float>(width) - 305.0f, 5.0f), ImGuiSetCond_Once);
+  ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f), ImGuiSetCond_Once);
   ImGui::Begin("Mesh Editing & Texturing", nullptr);
 
   if (ImGui::SliderFloat("Radius", &m_terrain_.m_radius, 0, 100, "%.2f", 2.0f))
@@ -230,7 +232,7 @@ auto application::render_gui() -> void {
     m_mesh_deform_.set_model(m_terrain_);
 
   if (ImGui::RadioButton("Normal Map",
-                         (m_terrain_.m_tex == 1) ? true : false)) {
+                         (m_terrain_.m_tex == 1))) {
     m_terrain_.m_tex = 1 - m_terrain_.m_tex;
     m_mesh_deform_.set_model(m_terrain_);
   }
@@ -281,8 +283,8 @@ auto application::render_gui() -> void {
   ImGui::End();
 
   // Tree Settings window
-  ImGui::SetNextWindowPos(ImVec2(width - 305, 215), ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
+  ImGui::SetNextWindowPos(ImVec2(static_cast<float>(width) - 305.0f, 215.0f), ImGuiSetCond_Once);
+  ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f), ImGuiSetCond_Once);
   ImGui::Begin("Tree Settings", nullptr);
 
   if (ImGui::Button("Spooky Mode")) {
@@ -294,7 +296,9 @@ auto application::render_gui() -> void {
   if (ImGui::Button("New Tree")) {
     m_trees_[0].generate_leaves(5, 500);
     m_trees_[0].generate_tree();
-    for (auto i = 1; i < m_trees_.size(); i++) {
+
+    const auto size = static_cast<int>(m_trees_.size());
+    for (auto i = 1; i < size; i++) {
       m_trees_[i].m_branches = m_trees_[0].m_branches;
       m_trees_[i].m_mesh = m_trees_[0].m_mesh;
       m_trees_[i].m_leaves = m_trees_[0].m_leaves;

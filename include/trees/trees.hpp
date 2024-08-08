@@ -2,7 +2,6 @@
 #define TREES_HPP
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 
 #include "cgra/cgra_mesh.hpp"
@@ -75,35 +74,31 @@ class tree {
   std::vector<branch> m_branches;
 
   // Functions
-  auto draw(const glm::mat4& view, const glm::mat4& projection) -> void;
+  auto draw(const glm::mat4& view, const glm::mat4& projection) const -> void;
   auto generate_leaves(float radius, int leaves) -> void;
   auto generate_tree() -> void;
   auto print_tree() const -> void;
   auto draw_branches_nodes(int current_branch, const glm::mat4& view,
                            const glm::mat4& projection) const -> void;
   static auto process(float x) -> float;
-  auto draw_tree(const glm::mat4& view, const glm::mat4& projection) const -> void;
+  auto draw_tree(const glm::mat4& view, const glm::mat4& projection) const
+      -> void;
   auto generate_mesh() -> void;
 
  private:
   glm::vec3 start_position_{0.0f};
   float m_branch_length_ = 0.5f;
   float m_attraction_range_ = 1.5f;
-  float m_repulsion_range_ = 1.0f;
   float m_kill_range_ = 0.5f;
   float m_randomness_factor_ = 0.1f;
-  float m_min_length_ = 5.0f;
-  float m_max_length_ = 15.0f;
-  int max_depth_ = 10;
 
   auto generate_branches() -> void;
   auto grow() -> bool;
-  auto generate_random_leaf_position(float radius) -> glm::vec3;
-  auto draw_leaves(const glm::mat4& view, const glm::mat4& projection) const -> void;
+  static auto generate_random_leaf_position(float radius) noexcept -> glm::vec3;
+  auto draw_leaves(const glm::mat4& view, const glm::mat4& projection) const
+      -> void;
   auto draw_foliage(const glm::mat4& view) const -> void;
   auto calculate_foliage() -> void;
-  static auto random_int(int a, int b) -> int;
-  static auto random_float(int a, int b) -> float;
 };
 
 #endif  // TREES_HPP

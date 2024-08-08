@@ -1,6 +1,8 @@
 #ifndef CGRA_BASIC_MODEL_HPP
 #define CGRA_BASIC_MODEL_HPP
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "GL/glew.h"
 #include "cgra_mesh.hpp"
 
@@ -14,6 +16,10 @@ struct basic_model {
   glm::mat4 model_transform{1.0f};
   GLuint texture{};
 
+  /**
+   * \brief Draws this model to the screen with the given view and projection
+   * matrices.
+   */
   auto draw(const glm::mat4& view, const glm::mat4& projection) -> void {
     glm::mat4 model_view = view * model_transform;
 

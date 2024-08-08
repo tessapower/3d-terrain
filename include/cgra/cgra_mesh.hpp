@@ -77,7 +77,7 @@ struct mesh_builder {
 
   auto append(const mesh_builder& builder) -> void {
     for (const unsigned int i : builder.m_indices) {
-      m_indices.push_back(m_vertices.size() + i);
+      m_indices.push_back(static_cast<int>(m_vertices.size()) + i);
     }
 
     for (const auto& v : builder.m_vertices) {
@@ -95,7 +95,7 @@ struct mesh_builder {
                 << uv.y << ", " << '\n';
     }
     std::cout << "idx" << '\n';
-    for (const int i : m_indices) {
+    for (const auto i : m_indices) {
       std::cout << i << ", ";
     }
     std::cout << '\n';

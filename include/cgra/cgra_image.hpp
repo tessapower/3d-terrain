@@ -24,10 +24,10 @@ struct rgba_image {
   rgba_image() : m_size(0, 0) {}
 
   explicit rgba_image(const int w, const int h)
-      : m_size(w, h), data(m_size.x * m_size.y * 4, 0) {}
+      : m_size(w, h), data(static_cast<unsigned char>(m_size.x * m_size.y * 4), 0) {}
 
   explicit rgba_image(const glm::ivec2 size)
-      : m_size(size), data(m_size.x * m_size.y * 4, 0) {}
+      : m_size(size), data(static_cast<unsigned char>(m_size.x * m_size.y * 4), 0) {}
 
   explicit rgba_image(const std::string &file_name) {
     // gl expects image origin at lower left

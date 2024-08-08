@@ -385,7 +385,7 @@ auto simplified_mesh::build_from_model() -> void {
       std::ceil((m_bb_top_right.y - m_bb_bottom_left.y) / m_voxel_edge_length),
       std::ceil((m_bb_top_right.z - m_bb_bottom_left.z) / m_voxel_edge_length));
 
-  printf("Size: %f %f %f\n", grid_size.x, grid_size.y, grid_size.z);
+  std::println(std::cout, "Size: %f %f %f\n", grid_size.x, grid_size.y, grid_size.z);
 
   const auto start = std::chrono::high_resolution_clock::now();
 
@@ -396,7 +396,7 @@ auto simplified_mesh::build_from_model() -> void {
   // Grid discretization (Mi,d)
   // Calculate unsigned distance field
 
-  std::vector<std::vector<std::vector<glm::vec3>>> cached_world_positions =
+  auto cached_world_positions =
       std::vector(
           grid_size.x,
           std::vector(grid_size.y, std::vector(grid_size.z, glm::vec3(0))));
@@ -449,9 +449,9 @@ auto simplified_mesh::build_from_model() -> void {
     cgra::mesh_builder debugging;
 
     // Loop over and create squares the size of the value
-    for (int x = 0; x < grid_size.x; x++) {
-      for (int y = 0; y < grid_size.y; y++) {
-        for (int z = 0; z < grid_size.z; z++) {
+    for (auto x = 0; x < grid_size.x; x++) {
+      for (auto y = 0; y < grid_size.y; y++) {
+        for (auto z = 0; z < grid_size.z; z++) {
           const glm::vec3 grid_point = grid_to_world_position(
               m_bb_top_right, m_bb_bottom_left, glm::vec3(x, y, z), grid_size);
 
@@ -500,9 +500,9 @@ auto simplified_mesh::build() -> void {
   std::unordered_map<glm::vec3, int> positions;
 
   // Convert into mesh
-  for (int x = 0; x < grid_size.x - 1; x++) {
-    for (int y = 0; y < grid_size.y - 1; y++) {
-      for (int z = 0; z < grid_size.z - 1; z++) {
+  for (auto x = 0; x < static_cast<int>(grid_size.x - 1); x++) {
+    for (auto y = 0; y < static_cast<int>(grid_size.y - 1); y++) {
+      for (auto z = 0; z < static_cast<int>(grid_size.z - 1); z++) {
         const float values[8] = {
             m_grid[x][y][z],
             m_grid[x + 1][y][z],
@@ -563,10 +563,10 @@ auto simplified_mesh::build() -> void {
               // a running total for smoothing
               output.push_vertex(
                   cgra::mesh_vertex{v, surface_normal, glm::vec2(1.0f, 0.0f)});
-              output.push_index(size);
+              output.push_index(static_cast<GLuint>(size));
 
               // Store vertex
-              positions[v] = size;
+              positions[v] = static_cast<int>(size);
 
               size++;
             } else {
