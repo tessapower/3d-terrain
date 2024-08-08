@@ -3,9 +3,9 @@
 
 #include <glm/glm.hpp>
 
-#include "imgui.h"
 #include "cgra/cgra_basic_model.hpp"
 #include "clouds/cloud_model.hpp"
+#include "imgui.h"
 #include "mesh/mesh_deformation.hpp"
 #include "mesh/simplified_mesh.hpp"
 #include "mesh/simplified_mesh_debugging.hpp"
@@ -127,4 +127,4 @@ class application {
   [[maybe_unused]] static auto char_cb(unsigned int c) -> void;
 };
 
-#endif // APPLICATION_HPP
+#endif  // APPLICATION_HPP
