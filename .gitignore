@@ -442,3 +442,6 @@ out/
 
 # ImGui
 *.ini
+
+# Build Directory
+/build
