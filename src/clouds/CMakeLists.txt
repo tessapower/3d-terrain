@@ -12,7 +12,7 @@ add_library(cloud_lib STATIC
     ${CLOUD_HEADERS}
 )
 
-set_property(TARGET cloud_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
+set_property(TARGET cloud_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../")
 
 target_link_libraries(cloud_lib PRIVATE GLEW::GLEW)
 target_link_libraries(cloud_lib PRIVATE glfw ${GLFW_LIBRARIES})

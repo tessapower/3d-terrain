@@ -12,7 +12,7 @@ add_library(terrain_lib STATIC
     ${TERRAIN_HEADERS}
 )
 
-set_property(TARGET terrain_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
+set_property(TARGET terrain_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../")
 
 target_link_libraries(terrain_lib PRIVATE GLEW::GLEW)
 target_link_libraries(terrain_lib PRIVATE glfw ${GLFW_LIBRARIES})

@@ -12,7 +12,7 @@ add_library(tree_lib STATIC
     ${TREE_HEADERS}
 )
 
-set_property(TARGET tree_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
+set_property(TARGET tree_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../")
 
 target_link_libraries(tree_lib PRIVATE GLEW::GLEW)
 target_link_libraries(tree_lib PRIVATE glfw ${GLFW_LIBRARIES})

@@ -21,7 +21,7 @@ add_subdirectory(utils)
 # Add executable target and link libraries
 add_executable(${CGRA_PROJECT} ${sources} ${headers})
 
-set_property(TARGET ${CGRA_PROJECT} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
+set_property(TARGET ${CGRA_PROJECT} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)..")
 
 #########################################################
 # Link and Build Executable

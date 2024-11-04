@@ -19,7 +19,7 @@ add_library(utils_lib STATIC
     ${UTIL_HEADERS}
 )
 
-set_property(TARGET utils_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
+set_property(TARGET utils_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../")
 
 target_link_libraries(utils_lib PRIVATE GLEW::GLEW)
 target_link_libraries(utils_lib PRIVATE glfw ${GLFW_LIBRARIES})

@@ -16,7 +16,7 @@ add_library(mesh_lib STATIC
     ${MESH_HEADERS}
 )
 
-set_property(TARGET mesh_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
+set_property(TARGET mesh_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../")
 
 target_link_libraries(mesh_lib PRIVATE GLEW::GLEW)
 target_link_libraries(mesh_lib PRIVATE glfw ${GLFW_LIBRARIES})

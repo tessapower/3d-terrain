@@ -22,7 +22,7 @@ add_library(cgra_lib STATIC
     ${CGRA_HEADERS}
 )
 
-set_property(TARGET cgra_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
+set_property(TARGET cgra_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../")
 
 target_link_libraries(cgra_lib PRIVATE GLEW::GLEW)
 target_link_libraries(cgra_lib PRIVATE glfw ${GLFW_LIBRARIES})
