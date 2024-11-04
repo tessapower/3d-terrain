@@ -385,7 +385,8 @@ auto simplified_mesh::build_from_model() -> void {
       std::ceil((m_bb_top_right.y - m_bb_bottom_left.y) / m_voxel_edge_length),
       std::ceil((m_bb_top_right.z - m_bb_bottom_left.z) / m_voxel_edge_length));
 
-  std::println(std::cout, "Size: %f %f %f\n", grid_size.x, grid_size.y, grid_size.z);
+  std::cout << "Size: " << grid_size.x << " " << grid_size.y << " "
+            << grid_size.z << "\n";
 
   const auto start = std::chrono::high_resolution_clock::now();
 
@@ -396,10 +397,9 @@ auto simplified_mesh::build_from_model() -> void {
   // Grid discretization (Mi,d)
   // Calculate unsigned distance field
 
-  auto cached_world_positions =
-      std::vector(
-          grid_size.x,
-          std::vector(grid_size.y, std::vector(grid_size.z, glm::vec3(0))));
+  auto cached_world_positions = std::vector(
+      grid_size.x,
+      std::vector(grid_size.y, std::vector(grid_size.z, glm::vec3(0))));
 
   // After
   for (cgra::mesh_vertex vertex : m_builder.m_vertices) {

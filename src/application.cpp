@@ -17,7 +17,8 @@
 #include "trees/trees.hpp"
 #include "utils/texture_loader.hpp"
 
-application::application(GLFWwindow *window) : m_window_(window) {
+application::application(GLFWwindow *window)
+    : m_window_size_(0, 0), m_window_(window), m_mouse_position_(0, 0) {
   // Load shaders
   cgra::shader_builder shader_builder;
   shader_builder.set_shader(
@@ -198,13 +199,11 @@ auto application::render_gui() -> void {
     m_clouds_.mesh.build();
   }
 
-  if (ImGui::SliderFloat("Cloud threshold", &m_clouds_.cloud_threshold, 0.1f,
-                         0.8f)) {
+  if (ImGui::SliderFloat("Cloud threshold", &m_clouds_.cloud_threshold, 0.1f, 0.8f)) {
     m_clouds_.simulate();
   }
 
-  if (ImGui::SliderFloat("Cloud Fade Out", &m_clouds_.fade_out_range, 0.0f,
-                         20.0f)) {
+  if (ImGui::SliderFloat("Cloud Fade Out", &m_clouds_.fade_out_range, 0.0f, 20.0f)) {
     m_clouds_.simulate();
   }
 
@@ -212,9 +211,7 @@ auto application::render_gui() -> void {
 
   // Mesh Editing & Texturing window
   // Setup window
-  m_window_pos_ = {
-      m_window_size_.x - m_mesh_window_dimensions_.x - m_starting_position_.x,
-      m_starting_position_.y};
+  m_window_pos_ = { m_window_size_.x - m_mesh_window_dimensions_.x - m_starting_position_.x, m_starting_position_.y };
   ImGui::SetNextWindowPos(m_window_pos_);
   ImGui::SetNextWindowSize(m_mesh_window_dimensions_);
   ImGui::Begin("Mesh Editing & Texturing", nullptr);
@@ -253,13 +250,11 @@ auto application::render_gui() -> void {
     m_terrain_ = m_mesh_deform_.get_model();
   }
 
-  ImGui::SliderInt("Octaves", reinterpret_cast<int *>(&m_terrain_.m_octaves), 1,
-                   10);
+  ImGui::SliderInt("Octaves", reinterpret_cast<int *>(&m_terrain_.m_octaves), 1, 10);
   ImGui::SliderFloat("Lacunarity", &m_terrain_.m_lacunarity, 0.0f, 10.0f);
   ImGui::SliderFloat("Persistence", &m_terrain_.m_persistence, 0.0f, 10.0f);
   ImGui::SliderFloat("Height", &m_terrain_.m_height, 0.0f, 1000.0f);
-  ImGui::SliderInt("Repeats", reinterpret_cast<int *>(&m_terrain_.m_repeat), 0,
-                   10);
+  ImGui::SliderInt("Repeats", reinterpret_cast<int *>(&m_terrain_.m_repeat), 0, 10);
   ImGui::SliderInt("Seed", reinterpret_cast<int *>(&m_terrain_.m_seed), 0, 100);
 
   bool not_flat = !m_use_perlin_;

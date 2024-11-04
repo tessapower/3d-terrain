@@ -1,9 +1,10 @@
-#include "utils/skybox.hpp"
-
+#include <utils/skybox.hpp>
 #include <stb_image.h>
 
-#include "cgra/cgra_shader.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include <cgra/cgra_image.hpp>
+
+#include <cgra/cgra_shader.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 skybox::skybox() noexcept {
   m_shader_ = load_shaders();

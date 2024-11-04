@@ -56,7 +56,7 @@ bool create_device_objects() {
   glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
   glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
 
-  auto vertex_shader =
+  const auto vertex_shader =
       "#version 330\n"
       "uniform mat4 uProjectionMatrix;\n"
       "in vec2 vPosition;\n"
@@ -70,7 +70,7 @@ bool create_device_objects() {
       "   gl_Position = uProjectionMatrix * vec4(vPosition.xy,0,1);\n"
       "}\n";
 
-  auto fragment_shader =
+  const auto fragment_shader =
       "#version 330\n"
       "uniform sampler2D Texture;\n"
       "in vec2 Frag_UV;\n"
@@ -317,18 +317,18 @@ auto set_clipboard_text(void* user_data, const char* text) -> void {
 
 namespace gui {
 auto mouse_button_callback(GLFWwindow*, const int button, const int action,
-                           int /*mods*/) -> void {
+                           int mods) -> void {
   if (action == GLFW_PRESS && button >= 0 && button < 3)
     g_mouse_pressed[button] = true;
 }
 
-auto scroll_callback(GLFWwindow*, double /*x_offset*/, const double y_offset)
+auto scroll_callback(GLFWwindow*, double x_offset, const double y_offset)
     -> void {
   g_mouse_wheel += static_cast<float>(
       y_offset);  // use fractional mouse wheel, 1.0 unit 5 lines.
 }
 
-auto key_callback(GLFWwindow*, const int key, int /*scan_code*/,
+auto key_callback(GLFWwindow*, const int key, int scan_code,
                   const int action, const int mods) -> void {
   ImGuiIO& io = ImGui::GetIO();
   if (action == GLFW_PRESS) io.KeysDown[key] = true;
@@ -417,7 +417,7 @@ auto new_frame() -> void {
       g_window, GLFW_CURSOR,
       io.MouseDrawCursor ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
 
-  // start the frame
+  // Start the frame
   ImGui::NewFrame();
 }
 
