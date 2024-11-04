@@ -2,6 +2,7 @@
 set(CGRA_SOURCES
     "cgra_geometry.cpp"
     "cgra_gui.cpp"
+    "cgra_image.cpp"
     "cgra_mesh.cpp"
     "cgra_shader.cpp"
 )
