@@ -353,35 +353,8 @@ auto char_callback(GLFWwindow*, const unsigned int c) -> void {
 auto init(GLFWwindow* window, const bool install_callbacks) -> bool {
   g_window = window;
 
-  ImGuiIO& io = ImGui::GetIO();
-  // keyboard mapping. ImGui will use those indices to peek into the
-  // io.KeyDown[] array.
-  io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;
-  io.KeyMap[ImGuiKey_LeftArrow] = GLFW_KEY_LEFT;
-  io.KeyMap[ImGuiKey_RightArrow] = GLFW_KEY_RIGHT;
-  io.KeyMap[ImGuiKey_UpArrow] = GLFW_KEY_UP;
-  io.KeyMap[ImGuiKey_DownArrow] = GLFW_KEY_DOWN;
-  io.KeyMap[ImGuiKey_PageUp] = GLFW_KEY_PAGE_UP;
-  io.KeyMap[ImGuiKey_PageDown] = GLFW_KEY_PAGE_DOWN;
-  io.KeyMap[ImGuiKey_Home] = GLFW_KEY_HOME;
-  io.KeyMap[ImGuiKey_End] = GLFW_KEY_END;
-  io.KeyMap[ImGuiKey_Delete] = GLFW_KEY_DELETE;
-  io.KeyMap[ImGuiKey_Backspace] = GLFW_KEY_BACKSPACE;
-  io.KeyMap[ImGuiKey_Enter] = GLFW_KEY_ENTER;
-  io.KeyMap[ImGuiKey_Escape] = GLFW_KEY_ESCAPE;
-  io.KeyMap[ImGuiKey_A] = GLFW_KEY_A;
-  io.KeyMap[ImGuiKey_C] = GLFW_KEY_C;
-  io.KeyMap[ImGuiKey_V] = GLFW_KEY_V;
-  io.KeyMap[ImGuiKey_X] = GLFW_KEY_X;
-  io.KeyMap[ImGuiKey_Y] = GLFW_KEY_Y;
-  io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
-
-  // alternatively you can set this to NULL and call ImGui::GetDrawData()
-  // after ImGui::Render() to get the same ImDrawData pointer.
-  io.RenderDrawListsFn = render_draw_lists;
-  io.SetClipboardTextFn = set_clipboard_text;
-  io.GetClipboardTextFn = get_clipboard_text;
-  io.ClipboardUserData = g_window;
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
 
   if (install_callbacks) {
     glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -452,7 +425,7 @@ auto render() -> void { ImGui::Render(); }
 
 auto shutdown() -> void {
   invalidate_device_objects();
-  ImGui::Shutdown();
+  ImGui::DestroyContext();
 }
 }  // namespace gui
 }  // namespace cgra

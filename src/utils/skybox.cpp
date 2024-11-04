@@ -28,8 +28,8 @@ auto skybox::load_cube_map() const noexcept -> GLuint {
 
   int width, height, nr_channels;
   for (unsigned i = 0; i < m_textures_.size(); i++) {
-    if (unsigned char* data = stbi_load(m_textures_[i].c_str(), &width, &height,
-                                        &nr_channels, 0)) {
+    if (const unsigned char* data = stbi_load(m_textures_[i].c_str(), &width, &height,
+                                              &nr_channels, 0)) {
       glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height,
                    0, GL_RGB, GL_UNSIGNED_BYTE, data);
       stbi_image_free(data);

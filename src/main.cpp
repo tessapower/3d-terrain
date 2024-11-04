@@ -15,7 +15,7 @@ void scroll_cb(GLFWwindow *win, double x_offset, double y_offset);
 void key_cb(GLFWwindow *win, int key, int scan_code, int action, int mods);
 void char_cb(GLFWwindow *win, unsigned int c);
 void APIENTRY debug_cb(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar *,
-                       GLvoid *);
+                       const void *);
 
 // global static pointer to application once we create it
 // necessary for interfacing with the GLFW callbacks
@@ -232,7 +232,7 @@ const char *get_string_for_type(const GLenum type) {
 
 void APIENTRY debug_cb(const GLenum source, const GLenum type, const GLuint id,
                        const GLenum severity, GLsizei, const GLchar *message,
-                       GLvoid *) {
+                       const void *) {
   // Don't report notification messages
   if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
 

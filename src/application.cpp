@@ -150,8 +150,8 @@ auto application::render() -> void {
 }
 
 auto application::render_gui() -> void {
-  ImGui::SetNextWindowPos(m_window_pos_, ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(m_option_window_dimensions_, ImGuiSetCond_Once);
+  ImGui::SetNextWindowPos(m_window_pos_);
+  ImGui::SetNextWindowSize(m_option_window_dimensions_);
   ImGui::Begin("Options", nullptr);
 
   ImGui::Text("Application %.3f ms/frame (%.1f FPS)",
@@ -167,10 +167,9 @@ auto application::render_gui() -> void {
   ImGui::End();
 
   // Voxel window
-  m_window_pos_ = ImVec2(m_window_pos_.x,
-                         m_window_pos_.y + m_option_window_dimensions_.y + 5);
-  ImGui::SetNextWindowPos(m_window_pos_, ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(m_voxel_window_dimensions_, ImGuiSetCond_Once);
+  m_window_pos_ = ImVec2(m_window_pos_.x, m_window_pos_.y + m_option_window_dimensions_.y + 5);
+  ImGui::SetNextWindowPos(m_window_pos_);
+  ImGui::SetNextWindowSize(m_voxel_window_dimensions_);
   ImGui::Begin("Voxel Settings", nullptr);
 
   if (ImGui::SliderFloat("Voxel Size", &m_voxel_edge_length_, 0.004f, 0.03f)) {
@@ -216,23 +215,19 @@ auto application::render_gui() -> void {
   m_window_pos_ = {
       m_window_size_.x - m_mesh_window_dimensions_.x - m_starting_position_.x,
       m_starting_position_.y};
-  ImGui::SetNextWindowPos(m_window_pos_, ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(m_mesh_window_dimensions_, ImGuiSetCond_Once);
+  ImGui::SetNextWindowPos(m_window_pos_);
+  ImGui::SetNextWindowSize(m_mesh_window_dimensions_);
   ImGui::Begin("Mesh Editing & Texturing", nullptr);
 
-  if (ImGui::SliderFloat("Radius", &m_terrain_.m_radius, 0, 100, "%.2f", 2.0f))
+  if (ImGui::SliderFloat("Radius", &m_terrain_.m_radius, 0, 100, "%.2f"))
     m_mesh_deform_.set_model(m_terrain_);
-  if (ImGui::SliderFloat("Strength", &m_terrain_.m_strength, 0, 10, "%.2f",
-                         2.0f))
+  if (ImGui::SliderFloat("Strength", &m_terrain_.m_strength, 0, 10, "%.2f"))
     m_mesh_deform_.set_model(m_terrain_);
-  if (ImGui::SliderFloat("Grass/Mud Height", &m_terrain_.m_height_change1, -5,
-                         50, "%.2f", 2.0f))
+  if (ImGui::SliderFloat("Grass/Mud Height", &m_terrain_.m_height_change1, -5, 50, "%.2f"))
     m_mesh_deform_.set_model(m_terrain_);
-  if (ImGui::SliderFloat("Mud/Rocks Height", &m_terrain_.m_height_change2, -50,
-                         5, "%.2f", 2.0f))
+  if (ImGui::SliderFloat("Mud/Rocks Height", &m_terrain_.m_height_change2, -50, 5, "%.2f"))
     m_mesh_deform_.set_model(m_terrain_);
-  if (ImGui::SliderFloat("Height Map Scale", &m_terrain_.m_height_scale, 0, 1,
-                         "%.2f", 2.0f))
+  if (ImGui::SliderFloat("Height Map Scale", &m_terrain_.m_height_scale, 0, 1, "%.2f"))
     m_mesh_deform_.set_model(m_terrain_);
 
   if (ImGui::RadioButton("Normal Map", (m_terrain_.m_tex == 1))) {
@@ -289,8 +284,8 @@ auto application::render_gui() -> void {
   m_window_pos_ =
       ImVec2(m_window_pos_.x, m_window_pos_.y + m_mesh_window_dimensions_.y +
                                   m_starting_position_.y);
-  ImGui::SetNextWindowPos(m_window_pos_, ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(m_tree_window_dimensions_, ImGuiSetCond_Once);
+  ImGui::SetNextWindowPos(m_window_pos_);
+  ImGui::SetNextWindowSize(m_tree_window_dimensions_);
   ImGui::Begin("Tree Settings", nullptr);
 
   if (ImGui::Button("Spooky Mode")) {
