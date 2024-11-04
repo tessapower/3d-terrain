@@ -34,6 +34,3 @@ target_include_directories(cgra_lib PRIVATE ${Stb_INCLUDE_DIR})
 target_include_directories(cgra_lib PUBLIC ../include)
 # Support "my_lib.h" imports in private headers and source files
 target_include_directories(cgra_lib PRIVATE ../include/cgra)
-
-# Add these sources to the project target
-source_group("src" FILES ${CGRA_SOURCES})

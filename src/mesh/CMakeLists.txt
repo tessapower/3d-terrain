@@ -28,6 +28,3 @@ target_include_directories(mesh_lib PRIVATE ${Stb_INCLUDE_DIR})
 target_include_directories(mesh_lib PUBLIC ../include)
 # Support "my_lib.h" imports in private headers and source files
 target_include_directories(mesh_lib PRIVATE ../include/mesh)
-
-# Add these sources to the project target
-source_group("src" FILES ${MESH_SOURCES})

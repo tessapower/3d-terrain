@@ -24,5 +24,3 @@ target_include_directories(tree_lib PRIVATE ${Stb_INCLUDE_DIR})
 target_include_directories(tree_lib PUBLIC ../include)
 # Support "my_lib.h" imports in private headers and source files
 target_include_directories(tree_lib PRIVATE ../include/trees)
-
-source_group("src" FILES ${TREE_SOURCES})

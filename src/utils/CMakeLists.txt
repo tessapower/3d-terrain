@@ -31,5 +31,3 @@ target_include_directories(utils_lib PRIVATE ${Stb_INCLUDE_DIR})
 target_include_directories(utils_lib PUBLIC ../include)
 # Support "my_lib.h" imports in private headers and source files
 target_include_directories(utils_lib PRIVATE ../include/utils)
-
-source_group("src" FILES ${UTIL_SOURCES})

@@ -12,5 +12,3 @@ add_custom_target(
 	SOURCES
 	${SHADERS}
 )
-
-source_group("shader" FILES ${SHADERS})

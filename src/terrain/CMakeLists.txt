@@ -24,5 +24,3 @@ target_include_directories(terrain_lib PRIVATE ${Stb_INCLUDE_DIR})
 target_include_directories(terrain_lib PUBLIC ../include)
 # Support "my_lib.h" imports in private headers and source files
 target_include_directories(terrain_lib PRIVATE ../include/terrain)
-
-source_group("src" FILES ${TERRAIN_SOURCES})
