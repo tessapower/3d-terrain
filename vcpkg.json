@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "3d-terrain",
+  "version": "0.0.1",
+  "maintainers": "Tessa Power <hello@tessapower.xyz>",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "glew",
+      "version>=": "2.2.0#4"
+    },
+    {
+      "name": "glfw3",
+      "version>=": "3.4"
+    },
+    {
+      "name": "glm",
+      "version>=": "1.0.1#3"
+    },
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "opengl3-binding"
+      ],
+      "version>=": "1.91.0"
+    },
+    {
+      "name": "stb",
+      "version>=": "2023-04-11#1"
+    }
+  ]
+}

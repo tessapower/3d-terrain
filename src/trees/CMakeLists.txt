@@ -14,10 +14,11 @@ add_library(tree_lib STATIC
 
 set_property(TARGET tree_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
 
-target_link_libraries(tree_lib PRIVATE glew)
+target_link_libraries(tree_lib PRIVATE GLEW::GLEW)
 target_link_libraries(tree_lib PRIVATE glfw ${GLFW_LIBRARIES})
-target_link_libraries(tree_lib PRIVATE imgui)
-target_link_libraries(tree_lib PRIVATE stb)
+target_link_libraries(tree_lib PRIVATE imgui::imgui)
+
+target_include_directories(tree_lib PRIVATE ${Stb_INCLUDE_DIR})
 
 # Support <my_lib/my_lib.h> imports in public headers
 target_include_directories(tree_lib PUBLIC ../include)

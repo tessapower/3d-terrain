@@ -445,3 +445,6 @@ out/
 
 # Build Directory
 /build
+
+# vcpkg
+/vcpkg_installed

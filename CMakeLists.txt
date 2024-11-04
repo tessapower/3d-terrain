@@ -8,6 +8,9 @@ include(CGRAFunctions)
 # Set C++ Standard
 set(CMAKE_CXX_STANDARD 20)
 
+# Set CMake Toolchain to use vcpkg
+set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}//scripts//buildsystems//vcpkg.cmake")
+
 # Project Name
 set(CGRA_PROJECT "base" CACHE STRING "3D Terrain")
 
@@ -30,10 +33,15 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 #########################################################
-# Find OpenGL
+# External Libraries
 #########################################################
 
 find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
+find_package(Stb REQUIRED)
 
 #########################################################
 # Find OpenMP

@@ -18,10 +18,11 @@ add_library(mesh_lib STATIC
 
 set_property(TARGET mesh_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
 
-target_link_libraries(mesh_lib PRIVATE glew)
-target_link_libraries(mesh_lib PRIVATE glfw)
-target_link_libraries(mesh_lib PRIVATE imgui)
-target_link_libraries(mesh_lib PRIVATE stb)
+target_link_libraries(mesh_lib PRIVATE GLEW::GLEW)
+target_link_libraries(mesh_lib PRIVATE glfw ${GLFW_LIBRARIES})
+target_link_libraries(mesh_lib PRIVATE imgui::imgui)
+
+target_include_directories(mesh_lib PRIVATE ${Stb_INCLUDE_DIR})
 
 # Support <my_lib/my_lib.h> imports in public headers
 target_include_directories(mesh_lib PUBLIC ../include)

@@ -34,10 +34,12 @@ target_source_group_tree(${CGRA_PROJECT})
 target_compile_definitions(${CGRA_PROJECT} PRIVATE "-DCGRA_SRCDIR=\"${PROJECT_SOURCE_DIR}\"")
 
 # Link external libraries
-target_link_libraries(${CGRA_PROJECT} PRIVATE glew)
+target_link_libraries(${CGRA_PROJECT} PRIVATE GLEW::GLEW)
 target_link_libraries(${CGRA_PROJECT} PRIVATE glfw ${GLFW_LIBRARIES})
-target_link_libraries(${CGRA_PROJECT} PRIVATE imgui)
-target_link_libraries(${CGRA_PROJECT} PRIVATE stb)
+target_link_libraries(${CGRA_PROJECT} PRIVATE glm::glm)
+target_link_libraries(${CGRA_PROJECT} PRIVATE imgui::imgui)
+
+target_include_directories(${CGRA_PROJECT} PRIVATE ${Stb_INCLUDE_DIR})
 
 # Link local libraries
 target_link_libraries(${CGRA_PROJECT} PRIVATE cgra_lib)

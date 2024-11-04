@@ -14,10 +14,11 @@ add_library(terrain_lib STATIC
 
 set_property(TARGET terrain_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(SolutionDir)../work")
 
-target_link_libraries(terrain_lib PRIVATE glew)
+target_link_libraries(terrain_lib PRIVATE GLEW::GLEW)
 target_link_libraries(terrain_lib PRIVATE glfw ${GLFW_LIBRARIES})
-target_link_libraries(terrain_lib PRIVATE imgui)
-target_link_libraries(terrain_lib PRIVATE stb)
+target_link_libraries(terrain_lib PRIVATE imgui::imgui)
+
+target_include_directories(terrain_lib PRIVATE ${Stb_INCLUDE_DIR})
 
 # Support <my_lib/my_lib.h> imports in public headers
 target_include_directories(terrain_lib PUBLIC ../include)
