@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(CGRAFunctions)
 
 # Set C++ Standard
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 # Set CMake Toolchain to use vcpkg
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}//scripts//buildsystems//vcpkg.cmake")
