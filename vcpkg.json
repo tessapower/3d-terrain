@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "3d-terrain",
   "version": "0.0.1",
-  "maintainers": "Tessa Power <hello@tessapower.xyz>",
+  "maintainers": ["Adam Goodyear", "Marshall Scott", "Shekinah Pratap", "Tessa Power <hello@tessapower.xyz>", "Timothy Green"],
   "license": "MIT",
   "dependencies": [
     {
