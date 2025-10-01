@@ -113,11 +113,3 @@ After following the above instructions, the directory structure will look like t
 | Spooky Mode | Toggles showing tree foliage |
 | New Tree | Generates a new base tree |
 | Print Tree | Prints a list to stdout of every branch in the tree and the information about that branch |
-
-### Contributors
-
-- Adam Goodyear [@ZedXC](https://github.com/ZedXC)
-- Marshall Scott [@DarkZek](https://github.com/DarkZek)
-- Shekinah Pratap [@Shekpro](https://github.com/Shekpro)
-- Tessa Power [@tessapower](https://github.com/tessapower)
-- Timothy Green [@TFLGamer](https://github.com/TFLGamer)
