@@ -1,6 +1,12 @@
 # 3D Terrain Simulation
 
-A 3D terrain simulation that features the ability for the user to move around the scene and edit the terrain mesh in real-time. Some interesting aspects of this project include:
+An interactive 3D terrain simulation, featuring user controls to move around the scene and an editable terrain mesh that updates in real-time.
+
+| Real-Time Mesh Editing | Perlin Noise Terrain Generation | Mesh Simplification using Varying Voxel Resolutions |
+|:---:|:---:|:---:|
+| ![terrain-editing](https://github.com/user-attachments/assets/5a9a353c-fbb8-4825-abf9-dbdc9e239025) | ![terrain-generation](https://github.com/user-attachments/assets/48bcc307-e780-49d1-abf5-2cdf6ddafba1) | ![standford-bunny-voxel](https://github.com/user-attachments/assets/4430cf54-a253-4f05-a04b-be7570e8add0) |
+
+Technical aspects of this implementation include:
 
 - Terrain mesh generation using Perlin Noise with varying Level of Detail (L.O.D)
 - Procedurally generated trees that flow with the terrain as it is edited.
