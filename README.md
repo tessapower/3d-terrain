@@ -2,9 +2,22 @@
 
 An interactive 3D terrain simulation, featuring user controls to move around the scene and an editable terrain mesh that updates in real-time.
 
-| Real-Time Mesh Editing | Perlin Noise Terrain Generation | Mesh Simplification using Varying Voxel Resolutions |
-|:---:|:---:|:---:|
-| ![terrain-editing](https://github.com/user-attachments/assets/5a9a353c-fbb8-4825-abf9-dbdc9e239025) | ![terrain-generation](https://github.com/user-attachments/assets/48bcc307-e780-49d1-abf5-2cdf6ddafba1) | ![standford-bunny-voxel](https://github.com/user-attachments/assets/4430cf54-a253-4f05-a04b-be7570e8add0) |
+<div align="center">
+
+| Real-Time Mesh Editing |
+|:---:|
+| ![terrain-editing](https://github.com/user-attachments/assets/5a9a353c-fbb8-4825-abf9-dbdc9e239025) |
+
+| Perlin Noise Terrain Generation |
+|:---:|
+| ![terrain-generation](https://github.com/user-attachments/assets/48bcc307-e780-49d1-abf5-2cdf6ddafba1) |
+
+| Mesh Simplification using Varying Voxel Resolutions |
+|:---:|
+| ![standford-bunny-voxel](https://github.com/user-attachments/assets/4430cf54-a253-4f05-a04b-be7570e8add0) |
+
+</div>
+
 
 Technical aspects of this implementation include:
 
