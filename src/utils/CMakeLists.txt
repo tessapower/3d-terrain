@@ -1,4 +1,5 @@
 set(UTIL_SOURCES
+    "aabb_tree.cpp"
     "perlin_noise.cpp"
     "texture_loader.cpp"
     "skybox.cpp"
@@ -6,6 +7,7 @@ set(UTIL_SOURCES
 )
 
 set(UTIL_HEADERS
+    "${PROJECT_SOURCE_DIR}/include/utils/aabb_tree.hpp"
     "${PROJECT_SOURCE_DIR}/include/utils/camera.hpp"
     "${PROJECT_SOURCE_DIR}/include/utils/intersections.hpp"
     "${PROJECT_SOURCE_DIR}/include/utils/opengl.hpp"
@@ -24,6 +26,7 @@ set_property(TARGET utils_lib PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(Solution
 target_link_libraries(utils_lib PRIVATE GLEW::GLEW)
 target_link_libraries(utils_lib PRIVATE glfw ${GLFW_LIBRARIES})
 target_link_libraries(utils_lib PRIVATE imgui::imgui)
+target_link_libraries(utils_lib PRIVATE glm::glm)
 
 target_include_directories(utils_lib PRIVATE ${Stb_INCLUDE_DIR})
 
