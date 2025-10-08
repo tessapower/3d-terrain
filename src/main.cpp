@@ -107,6 +107,12 @@ int main() {
 
   // loop until the user closes the window
   while (!glfwWindowShouldClose(window)) {
+    // Pause rendering if window is minimized
+    if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+      glfwWaitEvents(); // Wait until window is restored or an event occurs
+      continue;
+    }
+
     // main Render
     // glEnable(GL_FRAMEBUFFER_SRGB); // use if you know about gamma correction
     application.render();
