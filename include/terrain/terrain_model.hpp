@@ -5,8 +5,9 @@
 
 #include "cgra/cgra_mesh.hpp"
 #include "utils/opengl.hpp"
+#include "utils/aabb_tree.hpp"
 
-/// Code Author: Shekinah Pratap
+/// Code Author(s): Shekinah Pratap, Tessa Power
 
 /**
  * \brief Class for creating and rendering a terrain model
@@ -37,6 +38,8 @@ class terrain_model {
   float m_persistence = 0.5f;
   unsigned int m_repeat = 3;
   float m_height = 200.0f;
+
+  aabb_tree m_aabb_tree;
 
   terrain_model() = default;
   auto draw(const glm::mat4& view, const glm::mat4& projection) const -> void;
