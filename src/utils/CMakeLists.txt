@@ -6,12 +6,12 @@ set(UTIL_SOURCES
 )
 
 set(UTIL_HEADERS
-    "${PROJECT_SOURCE_DIR}/include/utils/texture_loader.hpp"
-    "${PROJECT_SOURCE_DIR}/include/utils/skybox.hpp"
-    "${PROJECT_SOURCE_DIR}/include/utils/perlin_noise.hpp"
     "${PROJECT_SOURCE_DIR}/include/utils/camera.hpp"
     "${PROJECT_SOURCE_DIR}/include/utils/intersections.hpp"
     "${PROJECT_SOURCE_DIR}/include/utils/opengl.hpp"
+    "${PROJECT_SOURCE_DIR}/include/utils/perlin_noise.hpp"
+    "${PROJECT_SOURCE_DIR}/include/utils/skybox.hpp"
+    "${PROJECT_SOURCE_DIR}/include/utils/texture_loader.hpp"
 )
 
 add_library(utils_lib STATIC
