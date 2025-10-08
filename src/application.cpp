@@ -52,20 +52,22 @@ application::application(GLFWwindow *window)
   m_terrain_ = m_mesh_deform_.get_model();
 
   glUseProgram(shader);
-  m_model_bunny_.m_shader = shader;
-  m_model_bunny_.set_model(cgra::load_wavefront_data(
-      CGRA_SRCDIR + std::string("/res/assets/bunny.obj")));
-  m_model_bunny_.m_iso_level = 0.007f;
-  m_model_bunny_.build_from_model();
+  // Uncomment to include a voxelized bunny model
+  //m_model_bunny_.m_shader = shader;
+  //m_model_bunny_.set_model(cgra::load_wavefront_data(
+  //    CGRA_SRCDIR + std::string("/res/assets/bunny.obj")));
+  //m_model_bunny_.m_iso_level = 0.007f;
+  //m_model_bunny_.build_from_model();
 
   m_clouds_.m_shader = shader;
   m_clouds_.simulate();
 
-  m_model_.shader = shader;
-  m_model_.mesh = cgra::load_wavefront_data(
-                      CGRA_SRCDIR + std::string("/res//assets//teapot.obj"))
-                      .build();
-  m_model_.color = glm::vec3(1.0f, 0.0f, 0.f);
+  // Uncomment to include a teapot model
+  //m_model_.shader = shader;
+  //m_model_.mesh = cgra::load_wavefront_data(
+  //                    CGRA_SRCDIR + std::string("/res//assets//teapot.obj"))
+  //                    .build();
+  //m_model_.color = glm::vec3(1.0f, 0.0f, 0.f);
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -127,13 +129,13 @@ auto application::render() -> void {
   m_mesh_deform_.m_projection = projection;
 
   // draw the model
-  m_model_bunny_.draw(glm::scale(glm::translate(m_camera_.view_matrix(),
-                                                glm::vec3(15.0f, 50.0f, 0.0f)),
-                                 glm::vec3(15.0f)),
-                      projection);
+  //m_model_bunny_.draw(glm::scale(glm::translate(m_camera_.view_matrix(),
+  //                                              glm::vec3(15.0f, 50.0f, 0.0f)),
+  //                               glm::vec3(15.0f)),
+  //                    projection);
 
   m_clouds_.draw(m_camera_.view_matrix(), projection);
-  m_model_.draw(m_camera_.view_matrix(), projection);
+  //m_model_.draw(m_camera_.view_matrix(), projection);
 
   const auto size = static_cast<int>(m_trees_.size());
   for (auto i = 0; i < size; i++) {
@@ -174,18 +176,18 @@ auto application::render_gui() -> void {
   ImGui::Begin("Voxel Settings", nullptr);
 
   if (ImGui::SliderFloat("Voxel Size", &m_voxel_edge_length_, 0.004f, 0.03f)) {
-    m_model_bunny_.m_voxel_edge_length = m_voxel_edge_length_;
-    m_model_bunny_.build_from_model();
+    //m_model_bunny_.m_voxel_edge_length = m_voxel_edge_length_;
+    //m_model_bunny_.build_from_model();
   }
 
   if (ImGui::SliderFloat("Iso Level", &m_iso_level_, 0.01f, 0.1f)) {
-    m_model_bunny_.m_iso_level = m_iso_level_;
-    m_model_bunny_.build_from_model();
+    //m_model_bunny_.m_iso_level = m_iso_level_;
+    //m_model_bunny_.build_from_model();
   }
 
   if (ImGui::Checkbox("Normal Smoothing", &m_smoothing_)) {
-    m_model_bunny_.m_smooth_normals = m_smoothing_;
-    m_model_bunny_.build_from_model();
+    //m_model_bunny_.m_smooth_normals = m_smoothing_;
+    //m_model_bunny_.build_from_model();
     m_clouds_.mesh.m_smooth_normals = m_smoothing_;
     m_clouds_.mesh.build();
   }
@@ -193,8 +195,8 @@ auto application::render_gui() -> void {
   if (ImGui::Combo(
           "Debugging", reinterpret_cast<int *>(&m_debugging_),
           "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0", 5)) {
-    m_model_bunny_.m_debugging = m_debugging_;
-    m_model_bunny_.build_from_model();
+    //m_model_bunny_.m_debugging = m_debugging_;
+    //m_model_bunny_.build_from_model();
     m_clouds_.mesh.m_debugging = m_debugging_;
     m_clouds_.mesh.build();
   }

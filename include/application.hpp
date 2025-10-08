@@ -49,14 +49,18 @@ class application {
   float m_last_frame_ = 0.0f;
 
   bool m_show_wireframe_ = false;
-  basic_model m_model_;
 
-  // Voxel settings
   // geometry
-  simplified_mesh m_model_bunny_;
+  // 
+  // Uncomment to show the teapot model
+  //basic_model m_model_;
+  
+  // Uncomment to show the Stanford Bunny model
+  //simplified_mesh m_model_bunny_;
 
   cloud_model m_clouds_;
 
+  // Voxel settings
   float m_voxel_edge_length_ = 0.01f;
   float m_iso_level_ = 0.007f;
   bool m_smoothing_ = true;
