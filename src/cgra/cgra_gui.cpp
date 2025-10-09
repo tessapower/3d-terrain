@@ -421,7 +421,10 @@ auto new_frame() -> void {
   ImGui::NewFrame();
 }
 
-auto render() -> void { ImGui::Render(); }
+auto render() -> void {
+    ImGui::Render();
+    render_draw_lists(ImGui::GetDrawData());
+}
 
 auto shutdown() -> void {
   invalidate_device_objects();

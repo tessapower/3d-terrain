@@ -150,167 +150,160 @@ auto application::render() -> void {
   }
 
   m_skybox_.draw(m_camera_.view_matrix(), projection);
+
+
+  // Reset OpenGL state for ImGui
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_CULL_FACE);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 auto application::render_gui() -> void {
-  ImGui::SetNextWindowPos(m_window_pos_);
-  ImGui::SetNextWindowSize(m_option_window_dimensions_);
-  ImGui::Begin("Options", nullptr);
+  // Single window with auto-sizing - position set once, then user can move it
+  ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+  ImGui::Begin("Controls");
 
-  ImGui::Text("Application %.3f ms/frame (%.1f FPS)",
-              1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+  // === OPTIONS SECTION ===
+  if (ImGui::CollapsingHeader("Options", ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Text("Application %.3f ms/frame (%.1f FPS)",
+        1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-  ImGui::Text("Camera Pitch %.1f", static_cast<double>(m_camera_.m_pitch));
-  ImGui::Text("Camera Yaw %.1f", static_cast<double>(m_camera_.m_yaw));
-
-  ImGui::Checkbox("Wireframe", &m_show_wireframe_);
-  ImGui::SameLine();
-  if (ImGui::Button("Screenshot")) cgra::rgba_image::screenshot(true);
-
-  ImGui::End();
-
-  // Voxel window
-  m_window_pos_ = ImVec2(m_window_pos_.x, m_window_pos_.y + m_option_window_dimensions_.y + 5);
-  ImGui::SetNextWindowPos(m_window_pos_);
-  ImGui::SetNextWindowSize(m_voxel_window_dimensions_);
-  ImGui::Begin("Voxel Settings", nullptr);
-
-  if (ImGui::SliderFloat("Voxel Size", &m_voxel_edge_length_, 0.004f, 0.03f)) {
-    //m_model_bunny_.m_voxel_edge_length = m_voxel_edge_length_;
-    //m_model_bunny_.build_from_model();
+    ImGui::Text("Camera Pitch %.1f", static_cast<double>(m_camera_.m_pitch));
+    ImGui::Text("Camera Yaw %.1f", static_cast<double>(m_camera_.m_yaw));
+  
+    ImGui::Checkbox("Wireframe", &m_show_wireframe_);
+    ImGui::SameLine();
+    if (ImGui::Button("Screenshot")) cgra::rgba_image::screenshot(true);
   }
 
-  if (ImGui::SliderFloat("Iso Level", &m_iso_level_, 0.01f, 0.1f)) {
-    //m_model_bunny_.m_iso_level = m_iso_level_;
-    //m_model_bunny_.build_from_model();
-  }
+    // === VOXEL SETTINGS SECTION ===
+  if (ImGui::CollapsingHeader("Voxel Settings")) {
+    if (ImGui::SliderFloat("Voxel Size", &m_voxel_edge_length_, 0.004f,
+                           0.03f)) {
+      // m_model_bunny_.m_voxel_edge_length = m_voxel_edge_length_;
+      // m_model_bunny_.build_from_model();
+    }
 
-  if (ImGui::Checkbox("Normal Smoothing", &m_smoothing_)) {
-    //m_model_bunny_.m_smooth_normals = m_smoothing_;
-    //m_model_bunny_.build_from_model();
-    m_clouds_.mesh.m_smooth_normals = m_smoothing_;
-    m_clouds_.mesh.build();
-  }
+    if (ImGui::SliderFloat("Iso Level", &m_iso_level_, 0.01f, 0.1f)) {
+      // m_model_bunny_.m_iso_level = m_iso_level_;
+      // m_model_bunny_.build_from_model();
+    }
 
-  if (ImGui::Combo(
-          "Debugging", reinterpret_cast<int *>(&m_debugging_),
-          "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0", 5)) {
-    //m_model_bunny_.m_debugging = m_debugging_;
-    //m_model_bunny_.build_from_model();
-    m_clouds_.mesh.m_debugging = m_debugging_;
-    m_clouds_.mesh.build();
-  }
+    if (ImGui::Checkbox("Normal Smoothing", &m_smoothing_)) {
+      // m_model_bunny_.m_smooth_normals = m_smoothing_;
+      // m_model_bunny_.build_from_model();
+      m_clouds_.mesh.m_smooth_normals = m_smoothing_;
+      m_clouds_.mesh.build();
+    }
 
-  if (ImGui::SliderFloat("Cloud threshold", &m_clouds_.cloud_threshold, 0.1f, 0.8f)) {
-    m_clouds_.simulate();
-  }
+    if (ImGui::Combo(
+            "Debugging", reinterpret_cast<int*>(&m_debugging_),
+            "None\0Bounding Box\0Voxel Collisions\0Marching Cubes\0Final\0",
+            5)) {
+      // m_model_bunny_.m_debugging = m_debugging_;
+      // m_model_bunny_.build_from_model();
+      m_clouds_.mesh.m_debugging = m_debugging_;
+      m_clouds_.mesh.build();
+    }
 
-  if (ImGui::SliderFloat("Cloud Fade Out", &m_clouds_.fade_out_range, 0.0f, 20.0f)) {
-    m_clouds_.simulate();
-  }
+    if (ImGui::SliderFloat("Cloud threshold", &m_clouds_.cloud_threshold, 0.1f,
+                           0.8f)) {
+      m_clouds_.simulate();
+    }
 
-  ImGui::End();
-
-  // Mesh Editing & Texturing window
-  // Setup window
-  m_window_pos_ = { m_window_size_.x - m_mesh_window_dimensions_.x - m_starting_position_.x, m_starting_position_.y };
-  ImGui::SetNextWindowPos(m_window_pos_);
-  ImGui::SetNextWindowSize(m_mesh_window_dimensions_);
-  ImGui::Begin("Mesh Editing & Texturing", nullptr);
-
-  if (ImGui::SliderFloat("Radius", &m_terrain_.m_radius, 0, 100, "%.2f"))
-    m_mesh_deform_.set_model(m_terrain_);
-  if (ImGui::SliderFloat("Strength", &m_terrain_.m_strength, 0, 10, "%.2f"))
-    m_mesh_deform_.set_model(m_terrain_);
-  if (ImGui::SliderFloat("Grass/Mud Height", &m_terrain_.m_height_change1, -5, 50, "%.2f"))
-    m_mesh_deform_.set_model(m_terrain_);
-  if (ImGui::SliderFloat("Mud/Rocks Height", &m_terrain_.m_height_change2, -50, 5, "%.2f"))
-    m_mesh_deform_.set_model(m_terrain_);
-  if (ImGui::SliderFloat("Height Map Scale", &m_terrain_.m_height_scale, 0, 1, "%.2f"))
-    m_mesh_deform_.set_model(m_terrain_);
-
-  if (ImGui::RadioButton("Normal Map", (m_terrain_.m_tex == 1))) {
-    m_terrain_.m_tex = 1 - m_terrain_.m_tex;
-    m_mesh_deform_.set_model(m_terrain_);
-  }
-
-  bool not_bump = !m_terrain_.m_is_bump;
-  if (ImGui::Checkbox("Raise", &m_terrain_.m_is_bump)) {
-    not_bump = !m_terrain_.m_is_bump;
-    m_mesh_deform_.set_model(m_terrain_);
-  }
-  ImGui::SameLine();
-  if (ImGui::Checkbox("Excavate", &not_bump)) {
-    m_terrain_.m_is_bump = !not_bump;
-    m_mesh_deform_.set_model(m_terrain_);
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("Deform")) {
-    m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point,
-                               m_terrain_.m_is_bump, m_terrain_.m_radius,
-                               m_terrain_.m_strength);
-    m_terrain_ = m_mesh_deform_.get_model();
-  }
-
-  ImGui::SliderInt("Octaves", reinterpret_cast<int *>(&m_terrain_.m_octaves), 1, 10);
-  ImGui::SliderFloat("Lacunarity", &m_terrain_.m_lacunarity, 0.0f, 10.0f);
-  ImGui::SliderFloat("Persistence", &m_terrain_.m_persistence, 0.0f, 10.0f);
-  ImGui::SliderFloat("Height", &m_terrain_.m_height, 0.0f, 1000.0f);
-  ImGui::SliderInt("Repeats", reinterpret_cast<int *>(&m_terrain_.m_repeat), 0, 10);
-  ImGui::SliderInt("Seed", reinterpret_cast<int *>(&m_terrain_.m_seed), 0, 100);
-
-  bool not_flat = !m_use_perlin_;
-  if (ImGui::Checkbox("Perlin", &m_use_perlin_)) not_flat = !m_use_perlin_;
-
-  ImGui::SameLine();
-  if (ImGui::Checkbox("Flat", &not_flat)) m_use_perlin_ = !not_flat;
-
-  ImGui::SameLine();
-  if (ImGui::Button("Recreate Terrain")) {
-    m_terrain_.create_terrain(m_use_perlin_);
-    m_mesh_deform_.set_model(m_terrain_);
-    m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point,
-                               m_terrain_.m_is_bump, 0,
-                               0);  // initial computation of TBN, normals
-    m_terrain_ = m_mesh_deform_.get_model();
-  }
-
-  ImGui::End();
-
-  // Tree Settings window
-  m_window_pos_ =
-      ImVec2(m_window_pos_.x, m_window_pos_.y + m_mesh_window_dimensions_.y +
-                                  m_starting_position_.y);
-  ImGui::SetNextWindowPos(m_window_pos_);
-  ImGui::SetNextWindowSize(m_tree_window_dimensions_);
-  ImGui::Begin("Tree Settings", nullptr);
-
-  if (ImGui::Button("Spooky Mode")) {
-    for (auto &tree : m_trees_) {
-      tree.m_spooky_mode = !tree.m_spooky_mode;
+    if (ImGui::SliderFloat("Cloud Fade Out", &m_clouds_.fade_out_range, 0.0f,
+                           20.0f)) {
+      m_clouds_.simulate();
     }
   }
 
-  ImGui::SameLine();
+// === MESH EDITING & TEXTURING SECTION ===
+  if (ImGui::CollapsingHeader("Mesh Editing & Texturing",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
+    // Just modify the values directly - no set_model needed!
+    ImGui::SliderFloat("Radius", &m_terrain_.m_radius, 0, 100, "%.2f");
+    ImGui::SliderFloat("Strength", &m_terrain_.m_strength, 0, 10, "%.2f");
+    ImGui::SliderFloat("Grass/Mud Height", &m_terrain_.m_height_change1, -5, 50,
+                       "%.2f");
+    ImGui::SliderFloat("Mud/Rocks Height", &m_terrain_.m_height_change2, -50, 5,
+                       "%.2f");
+    ImGui::SliderFloat("Height Map Scale", &m_terrain_.m_height_scale, 0, 1,
+                       "%.2f");
 
-  if (ImGui::Button("New Tree")) {
-    m_trees_[0].generate_leaves(5, 500);
-    m_trees_[0].generate_tree();
+    if (ImGui::RadioButton("Normal Map", (m_terrain_.m_tex == 1))) {
+      m_terrain_.m_tex = 1 - m_terrain_.m_tex;
+    }
 
-    const auto size = static_cast<int>(m_trees_.size());
-    for (auto i = 1; i < size; i++) {
-      m_trees_[i].m_branches = m_trees_[0].m_branches;
-      m_trees_[i].m_mesh = m_trees_[0].m_mesh;
-      m_trees_[i].m_leaves = m_trees_[0].m_leaves;
+    bool not_bump = !m_terrain_.m_is_bump;
+    if (ImGui::Checkbox("Raise", &m_terrain_.m_is_bump)) {
+      not_bump = !m_terrain_.m_is_bump;
+    }
+    ImGui::SameLine();
+    if (ImGui::Checkbox("Excavate", &not_bump)) {
+      m_terrain_.m_is_bump = !not_bump;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Deform")) {
+      m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point,
+                                 m_terrain_.m_is_bump, m_terrain_.m_radius,
+                                 m_terrain_.m_strength);
+    }
+
+    ImGui::SliderInt("Octaves", reinterpret_cast<int *>(&m_terrain_.m_octaves),
+                     1, 10);
+    ImGui::SliderFloat("Lacunarity", &m_terrain_.m_lacunarity, 0.0f, 10.0f);
+    ImGui::SliderFloat("Persistence", &m_terrain_.m_persistence, 0.0f, 10.0f);
+    ImGui::SliderFloat("Height", &m_terrain_.m_height, 0.0f, 1000.0f);
+    ImGui::SliderInt("Repeats", reinterpret_cast<int *>(&m_terrain_.m_repeat),
+                     0, 10);
+    ImGui::SliderInt("Seed", reinterpret_cast<int *>(&m_terrain_.m_seed), 0,
+                     100);
+
+    bool not_flat = !m_use_perlin_;
+    if (ImGui::Checkbox("Perlin", &m_use_perlin_)) not_flat = !m_use_perlin_;
+
+    ImGui::SameLine();
+    if (ImGui::Checkbox("Flat", &not_flat)) m_use_perlin_ = !not_flat;
+
+    ImGui::SameLine();
+    if (ImGui::Button("Recreate Terrain")) {
+      m_terrain_.create_terrain(m_use_perlin_);
+      m_terrain_.build_aabb_tree();
+      m_mesh_deform_.set_model(m_terrain_);
+      m_mesh_deform_.initialize();
     }
   }
 
-  ImGui::SameLine();
+  // === TREE SETTINGS SECTION ===
+  if (ImGui::CollapsingHeader("Tree Settings")) {
+    if (ImGui::Button("Spooky Mode")) {
+      for (auto& tree : m_trees_) {
+        tree.m_spooky_mode = !tree.m_spooky_mode;
+      }
+    }
 
-  if (ImGui::Button("Print Tree")) {
-    m_trees_[0].print_tree();
+    ImGui::SameLine();
+
+    if (ImGui::Button("New Tree")) {
+      m_trees_[0].generate_leaves(5, 500);
+      m_trees_[0].generate_tree();
+
+      const auto size = static_cast<int>(m_trees_.size());
+      for (auto i = 1; i < size; i++) {
+        m_trees_[i].m_branches = m_trees_[0].m_branches;
+        m_trees_[i].m_mesh = m_trees_[0].m_mesh;
+        m_trees_[i].m_leaves = m_trees_[0].m_leaves;
+      }
+    }
+
+    // Uncomment to enable tree debugging
+    // ImGui::SameLine();
+    // if (ImGui::Button("Print Tree")) {
+    //  m_trees_[0].print_tree();
+    //}
   }
-
   ImGui::End();
 }
 
