@@ -63,15 +63,14 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
   compute_vertex_normals();
 
   // Recompute TBN
-  compute_tbn();
+  recompute_tbn();
 
   m_model_.m_mesh = m_model_.m_builder.build();
 }
 
-auto mesh_deformation::compute_tbn() -> void {
-  // Recompute TBN
-  for (int i = 0; i < m_model_->m_grid_size; ++i) {
-    for (int j = 0; j < m_model_->m_grid_size; ++j) {
+auto mesh_deformation::recompute_tbn() -> void {
+  for (auto i = 0; i < m_model_->m_grid_size; ++i) {
+    for (auto j = 0; j < m_model_->m_grid_size; ++j) {
       const int k1 = i * (m_model_->m_grid_size + 1) + j;
       const int k2 = k1 + 1;
       const int k3 = (i + 1) * (m_model_->m_grid_size + 1) + j;
