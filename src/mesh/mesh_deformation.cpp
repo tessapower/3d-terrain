@@ -1,9 +1,8 @@
 #include "mesh/mesh_deformation.hpp"
-
 #include "utils/intersections.hpp"
 
 auto mesh_deformation::set_model(const terrain_model& m) -> void {
-  m_model_ = m;
+  m_model_ = const_cast<terrain_model*>(&m);
 }
 
 auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
@@ -53,15 +52,15 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
 
 auto mesh_deformation::compute_tbn() -> void {
   // Recompute TBN
-  for (int i = 0; i < m_model_.m_grid_size; ++i) {
-    for (int j = 0; j < m_model_.m_grid_size; ++j) {
-      const int k1 = i * (m_model_.m_grid_size + 1) + j;
+  for (int i = 0; i < m_model_->m_grid_size; ++i) {
+    for (int j = 0; j < m_model_->m_grid_size; ++j) {
+      const int k1 = i * (m_model_->m_grid_size + 1) + j;
       const int k2 = k1 + 1;
-      const int k3 = (i + 1) * (m_model_.m_grid_size + 1) + j;
+      const int k3 = (i + 1) * (m_model_->m_grid_size + 1) + j;
       const int k4 = k3 + 1;
 
-      calculate_tbn(m_model_.m_builder, true, k1, k2, k3, k4);
-      calculate_tbn(m_model_.m_builder, false, k1, k2, k3, k4);
+      calculate_tbn(m_model_->m_builder, true, k1, k2, k3, k4);
+      calculate_tbn(m_model_->m_builder, false, k1, k2, k3, k4);
     }
   }
 }
@@ -137,8 +136,6 @@ auto mesh_deformation::calculate_tbn(cgra::mesh_builder& mb, bool top_left,
   }
 }
 
-auto mesh_deformation::get_model() -> terrain_model { return m_model_; }
-
 auto mesh_deformation::calculate_face_normal(const glm::vec3& vertex1,
                                              const glm::vec3& vertex2,
                                              const glm::vec3& vertex3)
@@ -157,26 +154,26 @@ auto mesh_deformation::calculate_face_normal(const glm::vec3& vertex1,
 }
 
 auto mesh_deformation::compute_vertex_normals() -> void {
-  for (size_t v_idx = 0; v_idx < m_model_.m_builder.m_vertices.size();
+  for (size_t v_idx = 0; v_idx < m_model_->m_builder.m_vertices.size();
        ++v_idx) {
-    if (m_model_.m_adjacent_faces[v_idx].empty()) continue;
+    if (m_model_->m_adjacent_faces[v_idx].empty()) continue;
 
     glm::vec3 new_normal = {0.0f, 0.0f, 0.0f};
 
     // Iterate through adjacent faces of the current vertex
-    for (size_t i = 0; i < m_model_.m_adjacent_faces[v_idx].size(); i += 3) {
+    for (size_t i = 0; i < m_model_->m_adjacent_faces[v_idx].size(); i += 3) {
       // Get the vertices of the adjacent face (assuming that each face stores
       // its vertex indices)
       const glm::vec3& vertex1 =
-          m_model_.m_builder.m_vertices[m_model_.m_adjacent_faces[v_idx].at(i)]
+          m_model_->m_builder.m_vertices[m_model_->m_adjacent_faces[v_idx].at(i)]
               .pos;
       const glm::vec3& vertex2 =
-          m_model_.m_builder
-              .m_vertices[m_model_.m_adjacent_faces[v_idx].at(i + 1)]
+          m_model_->m_builder
+              .m_vertices[m_model_->m_adjacent_faces[v_idx].at(i + 1)]
               .pos;
       const glm::vec3& vertex3 =
-          m_model_.m_builder
-              .m_vertices[m_model_.m_adjacent_faces[v_idx].at(i + 2)]
+          m_model_->m_builder
+              .m_vertices[m_model_->m_adjacent_faces[v_idx].at(i + 2)]
               .pos;
 
       // Calculate the face normal using the vertices
@@ -191,7 +188,7 @@ auto mesh_deformation::compute_vertex_normals() -> void {
     new_normal = normalize(new_normal);
 
     // Update the vertex normal
-    m_model_.m_builder.m_vertices[v_idx].norm = new_normal;
+    m_model_->m_builder.m_vertices[v_idx].norm = new_normal;
   }
 }
 

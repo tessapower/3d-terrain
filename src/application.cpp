@@ -49,7 +49,6 @@ application::application(GLFWwindow *window)
   m_mesh_deform_.set_model(m_terrain_);
   m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump,
                              0.0f, 0.0f);
-  m_terrain_ = m_mesh_deform_.get_model();
 
   glUseProgram(shader);
   // Uncomment to include a voxelized bunny model
@@ -340,7 +339,6 @@ auto application::mouse_button_cb(const int button, const int action,
         glfwGetCursorPos(m_window_, &x_pos, &y_pos);
         m_mesh_deform_.mouse_intersect_mesh(x_pos, y_pos, m_window_size_.x,
                                             m_window_size_.y);
-        m_terrain_ = m_mesh_deform_.get_model();
       }
       break;
     }

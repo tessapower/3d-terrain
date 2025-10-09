@@ -43,10 +43,8 @@ class mesh_deformation {
   static auto calculate_tbn(cgra::mesh_builder& mb, bool top_left, int k1, int k2,
                             int k3, int k4) -> void;
 
-  auto get_model() -> terrain_model;
-
  private:
-  terrain_model m_model_;
+  terrain_model* m_model_ = nullptr;
 };
 
 #endif  // MESH_DEFORMATION_HPP
