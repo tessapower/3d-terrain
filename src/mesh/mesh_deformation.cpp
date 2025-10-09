@@ -100,8 +100,8 @@ auto mesh_deformation::calculate_tbn(cgra::mesh_builder& mb, bool top_left,
     delta_uv2 = uv2 - uv4;
   }
 
-  glm::vec3 tangent;
-  glm::vec3 bitangent;
+  glm::vec3 tangent{};
+  glm::vec3 bitangent{};
   float f = 1.0f / (delta_uv1.x * delta_uv2.y - delta_uv2.x * delta_uv1.y);
 
   tangent.x = f * (delta_uv2.y * edge1.x - delta_uv1.y * edge2.x);
@@ -206,13 +206,13 @@ void mesh_deformation::mouse_intersect_mesh(double x_pos, double y_pos,
   // Assume ndc_x and ndc_y are the NDC coordinates you want
   // to convert to world coordinates
   // Near point in NDC space (z = -1)
-  glm::vec4 near_point(ndc_x, ndc_y, -1.0f, 1.0f);
+  const glm::vec4 near_point(ndc_x, ndc_y, -1.0f, 1.0f);
   // Far point in NDC space (z = 1)
-  glm::vec4 far_point(ndc_x, ndc_y, 1.0f, 1.0f);
+  const glm::vec4 far_point(ndc_x, ndc_y, 1.0f, 1.0f);
 
   // Inverse transformations to get ray origin and direction in world space
-  glm::mat4 inv_projection = glm::inverse(m_projection);
-  glm::mat4 inv_view = glm::inverse(m_view);
+  const glm::mat4 inv_projection = glm::inverse(m_projection);
+  const glm::mat4 inv_view = glm::inverse(m_view);
 
   // Undo projection of NDC coordinates to view coordinates
   glm::vec4 near_point_in_view = inv_projection * near_point;
@@ -223,11 +223,11 @@ void mesh_deformation::mouse_intersect_mesh(double x_pos, double y_pos,
   far_point_in_view /= far_point_in_view.w;
 
   // Undo projection of view coordinates to world coordinates
-  auto ray_origin_world = glm::vec3(inv_view * near_point_in_view);
-  auto ray_end_world = glm::vec3(inv_view * far_point_in_view);
+  const auto ray_origin_world = glm::vec3(inv_view * near_point_in_view);
+  const auto ray_end_world = glm::vec3(inv_view * far_point_in_view);
 
   // Calculate ray direction
-  glm::vec3 ray_direction = glm::normalize(ray_end_world - ray_origin_world);
+  const glm::vec3 ray_direction = glm::normalize(ray_end_world - ray_origin_world);
 
   // Iterate through your mesh vertices and test for intersection
   for (size_t i = 0; i < m_model_.m_builder.m_vertices.size(); ++i) {

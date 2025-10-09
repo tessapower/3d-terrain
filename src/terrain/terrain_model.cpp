@@ -12,20 +12,20 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
       perlin(m_seed, m_octaves, m_lacunarity, m_persistence, m_repeat);
 
   // Calculate the total width and length of the grid
-  float total_width = m_spacing_ * static_cast<float>(m_grid_size);
-  float total_length = m_spacing_ * static_cast<float>(m_grid_size);
+  const float total_width = m_spacing_ * static_cast<float>(m_grid_size);
+  const float total_length = m_spacing_ * static_cast<float>(m_grid_size);
 
   // Calculate the offset to center the grid
-  float x_offset = -total_width / 2.0f;
-  float z_offset = -total_length / 2.0f;
+  const float x_offset = -total_width / 2.0f;
+  const float z_offset = -total_length / 2.0f;
 
   // Create a 2D array to store adjacent faces for each vertex
   m_adjacent_faces =
       std::vector<std::vector<int>>((m_grid_size + 1) * (m_grid_size + 1));
 
   // Generate the grid vertices
-  for (int i = 0; i <= m_grid_size; ++i) {
-    for (int j = 0; j <= m_grid_size; ++j) {
+  for (auto i = 0; i <= m_grid_size; ++i) {
+    for (auto j = 0; j <= m_grid_size; ++j) {
       // Calculate vertex position (x, y, z) with increased spacing and centered
       float x = static_cast<float>(i) * m_spacing_ + x_offset;
       float z = static_cast<float>(j) * m_spacing_ + z_offset;
@@ -48,42 +48,25 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
   }
 
   // Generate triangle indices to create the grid
-  for (int i = 0; i < m_grid_size; ++i) {
-    for (int j = 0; j < m_grid_size; ++j) {
-      int k1 = i * (m_grid_size + 1) + j;
-      int k2 = k1 + 1;
-      int k3 = (i + 1) * (m_grid_size + 1) + j;
-      int k4 = k3 + 1;
+  for (auto i = 0; i < m_grid_size; ++i) {
+    for (auto j = 0; j < m_grid_size; ++j) {
+      const GLuint k1 = i * (m_grid_size + 1) + j;
+      const GLuint k2 = k1 + 1;
+      const GLuint k3 = (i + 1) * (m_grid_size + 1) + j;
+      const GLuint k4 = k3 + 1;
 
-      // First triangle
-      mb.push_index(k1);
-      mb.push_index(k2);
-      mb.push_index(k3);
+      mb.push_indices({k1, k2, k3});  // First triangle
+      mb.push_indices({k2, k4, k3}); // Second triangle
 
-      // Second triangle
-      mb.push_index(k2);
-      mb.push_index(k4);
-      mb.push_index(k3);
+      // Helper lambda to add triangle to adjacent faces
+      auto add_triangle = [&](int v1, int v2, int v3) {
+        m_adjacent_faces[v1].insert(m_adjacent_faces[v1].end(), {v1, v2, v3});
+        m_adjacent_faces[v2].insert(m_adjacent_faces[v2].end(), {v1, v2, v3});
+        m_adjacent_faces[v3].insert(m_adjacent_faces[v3].end(), {v1, v2, v3});
+      };
 
-      m_adjacent_faces[k1].push_back(k1);
-      m_adjacent_faces[k1].push_back(k2);
-      m_adjacent_faces[k1].push_back(k3);
-      m_adjacent_faces[k2].push_back(k1);
-      m_adjacent_faces[k2].push_back(k2);
-      m_adjacent_faces[k2].push_back(k3);
-      m_adjacent_faces[k3].push_back(k1);
-      m_adjacent_faces[k3].push_back(k2);
-      m_adjacent_faces[k3].push_back(k3);
-
-      m_adjacent_faces[k2].push_back(k2);
-      m_adjacent_faces[k2].push_back(k4);
-      m_adjacent_faces[k2].push_back(k3);
-      m_adjacent_faces[k4].push_back(k2);
-      m_adjacent_faces[k4].push_back(k4);
-      m_adjacent_faces[k4].push_back(k3);
-      m_adjacent_faces[k3].push_back(k2);
-      m_adjacent_faces[k3].push_back(k4);
-      m_adjacent_faces[k3].push_back(k3);
+      add_triangle(k1, k2, k3);
+      add_triangle(k2, k4, k3);
     }
   }
 

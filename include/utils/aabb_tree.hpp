@@ -48,21 +48,23 @@ struct triangle {
 
 class aabb_tree {
 public:
-    auto build(const std::vector<glm::vec3>& vertices,
-        const std::vector<unsigned int>& indices) -> void;
+  auto build(const std::vector<glm::vec3>& vertices,
+             const std::vector<unsigned int>& indices) -> void;
 
-    // Returns list of triangle indices that might intersect the ray
-    auto query_ray(const glm::vec3& origin,
-        const glm::vec3& direction) const -> std::vector<unsigned int>;
+  // Returns list of triangle indices that might intersect the ray
+  auto query_ray(const glm::vec3& origin, const glm::vec3& direction) const
+      -> std::vector<unsigned int>;
+
+  auto get_triangles() const -> const std::vector<triangle>& { return triangles; }
 
 private:
-    struct node {
+  struct node {
         aabb bounds;
         std::unique_ptr<node> left;
         std::unique_ptr<node> right;
         std::vector<unsigned int> triangle_indices;  // Only populated in leaves
         bool is_leaf;
-    };
+  };
 
     std::unique_ptr<node> root;
     std::vector<triangle> triangles;

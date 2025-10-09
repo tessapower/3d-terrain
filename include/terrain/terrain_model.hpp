@@ -14,7 +14,7 @@
  */
 class terrain_model {
  public:
-  GLuint m_shader;
+  GLuint m_shader{};
   cgra::gl_mesh m_mesh;
   cgra::mesh_builder m_builder;
 

@@ -13,14 +13,14 @@
  * Created with the help of the Normal Mapping tutorial from:
  * https://learnopengl.com/Advanced-Lighting/Normal-Mapping
  *
- * Code Author: Shekinah Pratap
+ * Code Author(s): Shekinah Pratap, Tessa Power
  *
  */
 
 class mesh_deformation {
  public:
-  glm::mat4 m_view;
-  glm::mat4 m_projection;
+  glm::mat4 m_view{};
+  glm::mat4 m_projection{};
 
   mesh_deformation() = default;
 
@@ -37,7 +37,7 @@ class mesh_deformation {
 
   auto mouse_intersect_mesh(double x_pos, double y_pos, double window_size_x,
                             double window_size_y) -> void;
-
+  
   auto compute_tbn() -> void;
 
   static auto calculate_tbn(cgra::mesh_builder& mb, bool top_left, int k1, int k2,
