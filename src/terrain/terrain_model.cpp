@@ -101,3 +101,84 @@ auto terrain_model::draw(const glm::mat4& view,
   constexpr int reset = -1;
   glUniform1iv(glGetUniformLocation(m_shader, "uType"), 1, &reset);
 }
+
+void terrain_model::build_aabb_tree() {
+  // Collect all vertex positions
+  std::vector<glm::vec3> positions;
+  positions.reserve(m_builder.m_vertices.size());
+
+  for (const auto& vertex : m_builder.m_vertices) {
+    positions.push_back(vertex.pos);
+  }
+
+  // Flatten m_adjacent_faces into a single index list
+  std::vector<unsigned int> flat_indices;
+
+  for (const auto& vertex_faces : m_adjacent_faces) {
+    for (unsigned int idx : vertex_faces) {
+      flat_indices.push_back(idx);
+    }
+  }
+
+  // Build the AABB tree with flat indices
+  m_aabb_tree.build(positions, flat_indices);
+
+  std::cout << "Built AABB tree with " << flat_indices.size() / 3
+            << " triangles" << std::endl;
+}
+
+void terrain_model::build_aabb_tree_async() {
+  // If already rebuilding, don't start another
+  if (aabb_rebuilding.load()) {
+    return;
+  }
+
+  // Join previous thread if it exists
+  if (aabb_rebuild_thread.joinable()) {
+    aabb_rebuild_thread.join();
+  }
+
+  // Start background rebuild
+  aabb_rebuilding.store(true);
+
+  aabb_rebuild_thread = std::thread([this]() {
+    std::cout << "Starting async AABB tree rebuild..." << std::endl;
+
+    // Collect vertex positions
+    std::vector<glm::vec3> positions;
+    positions.reserve(m_builder.m_vertices.size());
+
+    for (const auto& vertex : m_builder.m_vertices) {
+      positions.push_back(vertex.pos);
+    }
+
+    // Flatten indices
+    std::vector<unsigned int> flat_indices;
+    for (const auto& vertex_faces : m_adjacent_faces) {
+      for (unsigned int idx : vertex_faces) {
+        flat_indices.push_back(idx);
+      }
+    }
+
+    // Build new tree (this is the slow part, happens in background)
+    aabb_tree new_tree;
+    new_tree.build(positions, flat_indices);
+
+    // Swap in the new tree (fast, lock protected)
+    {
+      std::lock_guard<std::mutex> lock(aabb_mutex);
+      m_aabb_tree = std::move(new_tree);
+    }
+
+    std::cout << "Async AABB tree rebuild complete! ("
+              << flat_indices.size() / 3 << " triangles)" << std::endl;
+
+    aabb_rebuilding.store(false);
+  });
+}
+
+void terrain_model::wait_for_aabb_rebuild() {
+  if (aabb_rebuild_thread.joinable()) {
+    aabb_rebuild_thread.join();
+  }
+}

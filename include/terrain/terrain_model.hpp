@@ -2,6 +2,9 @@
 #define TERRAIN_MODEL_HPP
 
 #include <glm/glm.hpp>
+#include <atomic>
+#include <thread>
+#include <mutex>
 
 #include "cgra/cgra_mesh.hpp"
 #include "utils/opengl.hpp"
@@ -17,6 +20,11 @@ class terrain_model {
   GLuint m_shader{};
   cgra::gl_mesh m_mesh;
   cgra::mesh_builder m_builder;
+
+  aabb_tree m_aabb_tree;
+  std::atomic<bool> aabb_rebuilding{false};  // Track if rebuild is in progress
+  std::thread aabb_rebuild_thread;           // Background thread
+  std::mutex aabb_mutex;                     // Protect tree access
 
   std::vector<std::vector<int>> m_adjacent_faces;
 
@@ -39,11 +47,20 @@ class terrain_model {
   unsigned int m_repeat = 3;
   float m_height = 200.0f;
 
-  aabb_tree m_aabb_tree;
-
   terrain_model() = default;
+  ~terrain_model() {
+    // Ensure thread is joined before destruction
+    if (aabb_rebuild_thread.joinable()) {
+      aabb_rebuild_thread.join();
+    }
+  }
+
   auto draw(const glm::mat4& view, const glm::mat4& projection) const -> void;
   auto create_terrain(bool use_perlin) -> void;
+
+  auto build_aabb_tree() -> void;
+  auto build_aabb_tree_async() -> void;
+  auto wait_for_aabb_rebuild() -> void;
 
  private:
   float m_spacing_ = 5.0f;  // spacing between grid points

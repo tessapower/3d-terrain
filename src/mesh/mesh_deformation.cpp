@@ -65,7 +65,19 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
   // Recompute TBN
   recompute_tbn();
 
-  m_model_.m_mesh = m_model_.m_builder.build();
+  if (m_model_->m_mesh.vao != 0) {
+    glBindBuffer(GL_ARRAY_BUFFER, m_model_->m_mesh.vbo);
+    glBufferSubData(
+        GL_ARRAY_BUFFER, 0,
+        m_model_->m_builder.m_vertices.size() * sizeof(cgra::mesh_vertex),
+        m_model_->m_builder.m_vertices.data());
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  } else {
+    m_model_->m_mesh = m_model_->m_builder.build();
+  }
+
+  m_model_->build_aabb_tree_async();
+  std::cout << "Mesh updated!" << std::endl;
 }
 
 auto mesh_deformation::recompute_tbn() -> void {
@@ -243,15 +255,19 @@ void mesh_deformation::mouse_intersect_mesh(double x_pos, double y_pos,
   // Calculate ray direction
   const glm::vec3 ray_direction = glm::normalize(ray_end_world - ray_origin_world);
 
-  // Iterate through your mesh vertices and test for intersection
-  for (size_t i = 0; i < m_model_.m_builder.m_vertices.size(); ++i) {
-    cgra::mesh_vertex vertex = m_model_.m_builder.m_vertices[i];
+  // Use fast AABB tree intersection (with lock to prevent race conditions)
+  cgra::mesh_vertex hit_vertex;
 
-    // Check if the ray intersects with the vertex
-    if (ray_intersects_vertex(ray_origin_world, ray_direction, static_cast<int>(i), m_model_)) {
-      // You've clicked on this vertex, store its index
-      m_model_.m_selected_point = m_model_.m_builder.m_vertices.at(i);
-      break;  // Exit the loop since you've found the first intersection
+  {
+    std::lock_guard<std::mutex> lock(m_model_->aabb_mutex);
+
+    if (ray_intersects_mesh_fast(ray_origin_world, ray_direction, *m_model_,
+                                 hit_vertex)) {
+      m_model_->m_selected_point = hit_vertex;
     }
+  }
+
+  if (m_model_->aabb_rebuilding.load()) {
+    std::cout << "(Using old AABB tree - rebuild in progress)" << std::endl;
   }
 }

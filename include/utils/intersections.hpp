@@ -82,4 +82,67 @@ inline auto ray_intersects_vertex(const glm::vec3& ray_origin,
   return false; // No intersection
 }
 
+/**
+ * \brief Fast ray-mesh intersection using AABB tree acceleration.
+ * Returns the closest hit and the vertex from the terrain model.
+ */
+inline auto ray_intersects_mesh_fast(const glm::vec3& ray_origin,
+                                     const glm::vec3& ray_direction,
+                                     const terrain_model& model,
+                                     cgra::mesh_vertex& hit_vertex) -> bool {
+  // Query AABB tree for candidate triangles
+  auto candidates = model.m_aabb_tree.query_ray(ray_origin, ray_direction);
+
+  if (candidates.empty()) {
+    return false;
+  }
+
+  float closest_t = std::numeric_limits<float>::max();
+  bool found_hit = false;
+  glm::vec3 closest_hit_point;
+
+  // Test only candidate triangles with Moeller-Trumbore
+  const auto& triangles = model.m_aabb_tree.get_triangles();
+
+  for (unsigned int tri_idx : candidates) {
+    if (tri_idx >= triangles.size()) continue;
+
+    const auto& tri = triangles[tri_idx];
+
+    // The triangle struct stores actual vertex positions
+    if (ray_intersects_triangle(ray_origin, ray_direction, tri.v0, tri.v1,
+                                tri.v2)) {
+      // Calculate distance to determine closest hit
+      glm::vec3 center = (tri.v0 + tri.v1 + tri.v2) / 3.0f;
+      float t = glm::length(center - ray_origin);
+
+      if (t < closest_t) {
+        closest_t = t;
+        closest_hit_point = center;
+        found_hit = true;
+      }
+    }
+  }
+
+  if (found_hit) {
+    // Find the closest vertex in the terrain model to the hit point
+    float min_dist = std::numeric_limits<float>::max();
+    int closest_vertex_idx = 0;
+
+    for (size_t i = 0; i < model.m_builder.m_vertices.size(); ++i) {
+      float dist =
+          glm::length(model.m_builder.m_vertices[i].pos - closest_hit_point);
+      if (dist < min_dist) {
+        min_dist = dist;
+        closest_vertex_idx = i;
+      }
+    }
+
+    hit_vertex = model.m_builder.m_vertices[closest_vertex_idx];
+    return true;
+  }
+
+  return false;
+}
+
 #endif  // INTERSECTIONS_HPP

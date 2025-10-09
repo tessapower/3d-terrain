@@ -46,6 +46,7 @@ application::application(GLFWwindow *window)
   // create terrain mesh
   m_terrain_.m_shader = terrain_shader;
   m_terrain_.create_terrain(m_use_perlin_);
+  m_terrain_.build_aabb_tree();  // Synchronous for initial build
   m_mesh_deform_.set_model(m_terrain_);
   m_mesh_deform_.initialize();
 
