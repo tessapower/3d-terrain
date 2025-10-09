@@ -145,28 +145,44 @@ auto mesh_deformation::recompute_tbn_partial(const glm::vec3& center,
   const float x_offset = -total_width / 2.0f;
   const float z_offset = -total_width / 2.0f;
 
-  int center_i = static_cast<int>((center.x - x_offset) / grid_cell_size);
-  int center_j = static_cast<int>((center.z - z_offset) / grid_cell_size);
+  const int center_i = static_cast<int>((center.x - x_offset) / grid_cell_size);
+  const int center_j = static_cast<int>((center.z - z_offset) / grid_cell_size);
 
   // Calculate grid radius
-  int grid_radius = static_cast<int>(std::ceil(radius / grid_cell_size)) + 1;
+  const int grid_radius = static_cast<int>(std::ceil(radius / grid_cell_size)) + 1;
 
-  int i_min = glm::max(0, center_i - grid_radius);
-  int i_max = glm::min(grid_size - 1, center_i + grid_radius);
-  int j_min = glm::max(0, center_j - grid_radius);
-  int j_max = glm::min(grid_size - 1, center_j + grid_radius);
+  const int i_min = glm::max(0, center_i - grid_radius);
+  const int i_max = glm::min(grid_size - 1, center_i + grid_radius);
+  const int j_min = glm::max(0, center_j - grid_radius);
+  const int j_max = glm::min(grid_size - 1, center_j + grid_radius);
 
-  // Only recompute TBN for affected grid cells
-  for (auto i = i_min; i <= i_max; ++i) {
-    for (auto j = j_min; j <= j_max; ++j) {
-      const int k1 = i * (grid_size + 1) + j;
-      const int k2 = k1 + 1;
-      const int k3 = (i + 1) * (grid_size + 1) + j;
-      const int k4 = k3 + 1;
+  // Multi-threaded TBN computation
+  const int num_threads = std::thread::hardware_concurrency();
+  std::vector<std::thread> threads;
 
-      calculate_tbn(m_model_->m_builder, true, k1, k2, k3, k4);
-      calculate_tbn(m_model_->m_builder, false, k1, k2, k3, k4);
-    }
+  int rows_per_thread = (i_max - i_min + 1) / num_threads;
+
+  for (auto t = 0; t < num_threads; ++t) {
+    int start_i = i_min + t * rows_per_thread;
+    int end_i = (t == num_threads - 1) ? i_max : start_i + rows_per_thread - 1;
+
+    threads.emplace_back([this, start_i, end_i, j_min, j_max, grid_size]() {
+      for (auto i = start_i; i <= end_i; ++i) {
+        for (auto j = j_min; j <= j_max; ++j) {
+          const int k1 = i * (grid_size + 1) + j;
+          const int k2 = k1 + 1;
+          const int k3 = (i + 1) * (grid_size + 1) + j;
+          const int k4 = k3 + 1;
+
+          calculate_tbn(m_model_->m_builder, true, k1, k2, k3, k4);
+          calculate_tbn(m_model_->m_builder, false, k1, k2, k3, k4);
+        }
+      }
+    });
+  }
+
+  for (auto& thread : threads) {
+    thread.join();
   }
 }
 
