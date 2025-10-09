@@ -47,8 +47,7 @@ application::application(GLFWwindow *window)
   m_terrain_.m_shader = terrain_shader;
   m_terrain_.create_terrain(m_use_perlin_);
   m_mesh_deform_.set_model(m_terrain_);
-  m_mesh_deform_.deform_mesh(m_terrain_.m_selected_point, m_terrain_.m_is_bump,
-                             0.0f, 0.0f);
+  m_mesh_deform_.initialize();
 
   glUseProgram(shader);
   // Uncomment to include a voxelized bunny model

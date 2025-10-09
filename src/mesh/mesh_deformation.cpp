@@ -1,6 +1,24 @@
 #include "mesh/mesh_deformation.hpp"
 #include "utils/intersections.hpp"
 
+auto mesh_deformation::initialize() -> void {
+  // Clear normals
+  for (auto& v : m_model_->m_builder.m_vertices) {
+    v.norm = {0.0f, 0.0f, 0.0f};
+  }
+
+  // Recompute vertex normals
+  compute_vertex_normals();
+
+  // Recompute TBN
+  recompute_tbn();
+
+  // Destroy if mesh exists
+  if (m_model_->m_mesh.vao != 0) m_model_->m_mesh.destroy();
+  // Rebuild mesh
+  m_model_->m_mesh = m_model_->m_builder.build();
+}
+
 auto mesh_deformation::set_model(const terrain_model& m) -> void {
   m_model_ = const_cast<terrain_model*>(&m);
 }

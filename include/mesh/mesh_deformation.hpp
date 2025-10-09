@@ -24,6 +24,8 @@ class mesh_deformation {
 
   mesh_deformation() = default;
 
+  auto initialize() -> void;
+
   auto set_model(const terrain_model& m) -> void;
 
   auto deform_mesh(const cgra::mesh_vertex& center, bool is_bump,
