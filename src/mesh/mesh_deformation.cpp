@@ -28,39 +28,79 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
                                    const float deformation_radius,
                                    const float max_deformation_strength)
     -> void {
-  for (cgra::mesh_vertex& v : m_model_.m_builder.m_vertices) {
-    // Calculate the distance between the vertex and the center point.
-    const float distance = std::sqrt(
-        (v.pos.x - center.pos.x) * (v.pos.x - center.pos.x) +
-        //(vertex.pos.y - center.pos.y) * (vertex.pos.y - center.pos.y) +
-        (v.pos.z - center.pos.z) * (v.pos.z - center.pos.z));
+  std::cout << "=== Deforming mesh ===" << std::endl;
+  std::cout << "Center: (" << center.pos.x << ", " << center.pos.y << ", "
+            << center.pos.z << ")" << std::endl;
 
-    // Calculate a normalized strength based on distance (closer points get
-    // stronger deformations)
+  int vertices_affected = 0;
+  float max_displacement = 0.0f;
+  int sample_vertex_idx = -1;
+  float sample_vertex_y_before = 0.0f;
+
+  // Precalculate radius squared for faster distance checks
+  const float radius_sq = deformation_radius * deformation_radius;
+  const float radius_sq_expanded =
+      radius_sq * 1.5f;  // Slightly larger for normals
+
+  for (size_t idx = 0; idx < m_model_->m_builder.m_vertices.size(); ++idx) {
+    cgra::mesh_vertex& v = m_model_->m_builder.m_vertices[idx];
+
+    // Calculate SQUARED distance (faster - no sqrt needed yet)
+    const float dist_sq = (v.pos.x - center.pos.x) * (v.pos.x - center.pos.x) +
+                          (v.pos.z - center.pos.z) * (v.pos.z - center.pos.z);
+
+    // SKIP vertices outside the deformation radius
+    if (dist_sq > radius_sq_expanded) {
+      continue;
+    }
+
+    // Now calculate actual distance only for vertices we're modifying
+    const float distance = std::sqrt(dist_sq);
+
+    // Calculate a normalized strength based on distance
     float normalized_strength =
-        std::exp(-distance * distance /
-                 (deformation_radius * deformation_radius * 0.33f));
+        std::exp(-dist_sq / (radius_sq * 0.33f));  // Use dist_sq directly
 
     // Ensure that the strength is in the range [0, 1]
     normalized_strength = std::max(0.0f, std::min(1.0f, normalized_strength));
 
-    // Scale the deformation strength based on the normalized strength
+    // Scale the deformation strength
     const float deformation_strength =
         max_deformation_strength * normalized_strength;
 
-    // Apply the deformation based on deformation type (bump or ditch)
+    // Apply the deformation
     const float displacement =
         is_bump ? deformation_strength : -deformation_strength;
 
-    // Update the vertex position.
+    if (std::abs(displacement) > 0.01f) {
+      if (vertices_affected == 0) {
+        sample_vertex_idx = idx;
+        sample_vertex_y_before = v.pos.y;
+      }
+      vertices_affected++;
+      max_displacement = std::max(max_displacement, std::abs(displacement));
+    }
+
+    // Update the vertex position (ONLY for vertices inside radius)
     v.pos.y += displacement;
 
-    // Clear the vertex normal for the next computation
+    // Clear the normal for this affected vertex
     v.norm = {0.0f, 0.0f, 0.0f};
   }
 
-  // Recompute vertex normals
-  compute_vertex_normals();
+  std::cout << "Vertices affected: " << vertices_affected << std::endl;
+  std::cout << "Max displacement: " << max_displacement << std::endl;
+
+  if (sample_vertex_idx >= 0) {
+    float sample_vertex_y_after =
+        m_model_->m_builder.m_vertices[sample_vertex_idx].pos.y;
+    std::cout << "Sample vertex [" << sample_vertex_idx
+              << "] Y: " << sample_vertex_y_before << " -> "
+              << sample_vertex_y_after << std::endl;
+  }
+
+  // Recompute normals for only affected vertices
+  compute_vertex_normals_partial(center.pos, deformation_radius);
 
   // Recompute TBN
   recompute_tbn();
@@ -218,6 +258,48 @@ auto mesh_deformation::compute_vertex_normals() -> void {
 
     // Update the vertex normal
     m_model_->m_builder.m_vertices[v_idx].norm = new_normal;
+  }
+}
+
+
+auto mesh_deformation::compute_vertex_normals_partial(const glm::vec3& center,
+                                                      float radius) -> void {
+  float radius_squared = radius * radius * 1.5f;  // Slightly larger area
+
+  for (size_t v_idx = 0; v_idx < m_model_->m_builder.m_vertices.size();
+       ++v_idx) {
+    auto& vertex = m_model_->m_builder.m_vertices[v_idx];
+
+    // Skip vertices far from deformation
+    float dist_sq = (vertex.pos.x - center.x) * (vertex.pos.x - center.x) +
+                    (vertex.pos.z - center.z) * (vertex.pos.z - center.z);
+    if (dist_sq > radius_squared) continue;
+
+    if (m_model_->m_adjacent_faces[v_idx].empty()) continue;
+
+    glm::vec3 new_normal = {0.0f, 0.0f, 0.0f};
+
+    for (size_t i = 0; i < m_model_->m_adjacent_faces[v_idx].size(); i += 3) {
+      const glm::vec3& vertex1 =
+          m_model_->m_builder
+              .m_vertices[m_model_->m_adjacent_faces[v_idx].at(i)]
+              .pos;
+      const glm::vec3& vertex2 =
+          m_model_->m_builder
+              .m_vertices[m_model_->m_adjacent_faces[v_idx].at(i + 1)]
+              .pos;
+      const glm::vec3& vertex3 =
+          m_model_->m_builder
+              .m_vertices[m_model_->m_adjacent_faces[v_idx].at(i + 2)]
+              .pos;
+
+      const glm::vec3 face_normal =
+          calculate_face_normal(vertex1, vertex2, vertex3);
+      new_normal += face_normal;
+    }
+
+    new_normal = normalize(new_normal);
+    vertex.norm = new_normal;
   }
 }
 

@@ -37,6 +37,9 @@ class mesh_deformation {
 
   auto compute_vertex_normals() -> void;
 
+  auto compute_vertex_normals_partial(const glm::vec3& center, float radius)
+      -> void;
+
   auto mouse_intersect_mesh(double x_pos, double y_pos, double window_size_x,
                             double window_size_y) -> void;
   
