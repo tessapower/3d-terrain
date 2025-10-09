@@ -99,11 +99,11 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
               << sample_vertex_y_after << std::endl;
   }
 
-  // Recompute normals for only affected vertices
+  // Recompute normals only for affected vertices
   compute_vertex_normals_partial(center.pos, deformation_radius);
 
-  // Recompute TBN
-  recompute_tbn();
+  // Recompute TBN only for affected area
+  recompute_tbn_partial(center.pos, deformation_radius);
 
   if (m_model_->m_mesh.vao != 0) {
     glBindBuffer(GL_ARRAY_BUFFER, m_model_->m_mesh.vbo);
@@ -126,6 +126,42 @@ auto mesh_deformation::recompute_tbn() -> void {
       const int k1 = i * (m_model_->m_grid_size + 1) + j;
       const int k2 = k1 + 1;
       const int k3 = (i + 1) * (m_model_->m_grid_size + 1) + j;
+      const int k4 = k3 + 1;
+
+      calculate_tbn(m_model_->m_builder, true, k1, k2, k3, k4);
+      calculate_tbn(m_model_->m_builder, false, k1, k2, k3, k4);
+    }
+  }
+}
+
+auto mesh_deformation::recompute_tbn_partial(const glm::vec3& center,
+                                             float radius) -> void {
+  // Calculate grid bounds for affected area
+  const float grid_cell_size = m_model_->m_spacing;
+  const int grid_size = m_model_->m_grid_size;
+
+  // Convert world position to grid coordinates
+  const float total_width = grid_cell_size * static_cast<float>(grid_size);
+  const float x_offset = -total_width / 2.0f;
+  const float z_offset = -total_width / 2.0f;
+
+  int center_i = static_cast<int>((center.x - x_offset) / grid_cell_size);
+  int center_j = static_cast<int>((center.z - z_offset) / grid_cell_size);
+
+  // Calculate grid radius
+  int grid_radius = static_cast<int>(std::ceil(radius / grid_cell_size)) + 1;
+
+  int i_min = glm::max(0, center_i - grid_radius);
+  int i_max = glm::min(grid_size - 1, center_i + grid_radius);
+  int j_min = glm::max(0, center_j - grid_radius);
+  int j_max = glm::min(grid_size - 1, center_j + grid_radius);
+
+  // Only recompute TBN for affected grid cells
+  for (auto i = i_min; i <= i_max; ++i) {
+    for (auto j = j_min; j <= j_max; ++j) {
+      const int k1 = i * (grid_size + 1) + j;
+      const int k2 = k1 + 1;
+      const int k3 = (i + 1) * (grid_size + 1) + j;
       const int k4 = k3 + 1;
 
       calculate_tbn(m_model_->m_builder, true, k1, k2, k3, k4);

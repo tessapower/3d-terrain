@@ -38,6 +38,7 @@ class terrain_model {
   float m_height_change2 = -25;
   float m_height_scale = 1;
   int m_grid_size = 200;
+  float m_spacing = 5.0f;
 
   // noise variables
   unsigned int m_seed = 0;
@@ -63,7 +64,6 @@ class terrain_model {
   auto wait_for_aabb_rebuild() -> void;
 
  private:
-  float m_spacing_ = 5.0f;  // spacing between grid points
   int m_type_ = 0;
 };
 

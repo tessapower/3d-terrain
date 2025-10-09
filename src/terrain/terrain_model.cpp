@@ -12,8 +12,8 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
       perlin(m_seed, m_octaves, m_lacunarity, m_persistence, m_repeat);
 
   // Calculate the total width and length of the grid
-  const float total_width = m_spacing_ * static_cast<float>(m_grid_size);
-  const float total_length = m_spacing_ * static_cast<float>(m_grid_size);
+  const float total_width = m_spacing * static_cast<float>(m_grid_size);
+  const float total_length = m_spacing * static_cast<float>(m_grid_size);
 
   // Calculate the offset to center the grid
   const float x_offset = -total_width / 2.0f;
@@ -27,8 +27,8 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
   for (auto i = 0; i <= m_grid_size; ++i) {
     for (auto j = 0; j <= m_grid_size; ++j) {
       // Calculate vertex position (x, y, z) with increased spacing and centered
-      float x = static_cast<float>(i) * m_spacing_ + x_offset;
-      float z = static_cast<float>(j) * m_spacing_ + z_offset;
+      float x = static_cast<float>(i) * m_spacing + x_offset;
+      float z = static_cast<float>(j) * m_spacing + z_offset;
       // whether to use perlin or not
       float y = use_perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
                              (m_height / 2)

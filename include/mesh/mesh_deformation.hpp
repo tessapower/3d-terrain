@@ -45,6 +45,8 @@ class mesh_deformation {
   
   auto recompute_tbn() -> void;
 
+  auto recompute_tbn_partial(const glm::vec3& center, float radius) -> void;
+
   static auto calculate_tbn(cgra::mesh_builder& mb, bool top_left, int k1, int k2,
                             int k3, int k4) -> void;
 
