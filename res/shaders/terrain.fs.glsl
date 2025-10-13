@@ -134,6 +134,16 @@ vec3 textureColour(sampler2D tex, sampler2D norm){
 void main() {
 
     if (uType == 0){ // terrain
+        // Check if this is a side face (normal not pointing up)
+        // We use the original normal before transformation to detect sides
+        vec3 worldNormal = normalize(mat3(inverse(uModelViewMatrix)) * f_in.normal);
+        
+        // If normal is not pointing mostly upward, render as black (sides and bottom)
+        if (worldNormal.y < 0.5) {
+            fb_color = vec4(0.0, 0.0, 0.0, 1.0);
+            return;
+        }
+
         vec3 selectColor = vec3(0,0.5,1); //blue
 
         // Sample textures
