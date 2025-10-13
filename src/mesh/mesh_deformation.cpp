@@ -42,6 +42,9 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
   const float radius_sq_expanded =
       radius_sq * 1.5f;  // Slightly larger for normals
 
+  // Calculate the index offset for bottom vertices
+  const GLuint top_vertices_count = (m_model_->m_grid_size + 1) * (m_model_->m_grid_size + 1);
+
   for (size_t idx = 0; idx < m_model_->m_builder.m_vertices.size(); ++idx) {
     cgra::mesh_vertex& v = m_model_->m_builder.m_vertices[idx];
 
@@ -83,6 +86,18 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
 
     // Update the vertex position (ONLY for vertices inside radius)
     v.pos.y += displacement;
+
+    // Clamp top face vertices to prevent going below the bottom face
+    // Only apply to top face vertices (first top_vertices_count vertices)
+    if (idx < top_vertices_count) {
+      // Get corresponding bottom vertex position
+      const float bottom_y = m_model_->m_builder.m_vertices[idx + top_vertices_count].pos.y;
+      // Ensure top vertex stays above bottom vertex (with small margin)
+      const float min_y = bottom_y + 0.1f;  // 0.1 unit margin
+      if (v.pos.y < min_y) {
+        v.pos.y = min_y;
+      }
+    }
 
     // Clear the normal for this affected vertex
     v.norm = {0.0f, 0.0f, 0.0f};

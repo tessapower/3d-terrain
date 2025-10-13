@@ -39,6 +39,7 @@ class terrain_model {
   float m_height_scale = 1;
   int m_grid_size = 200;
   float m_spacing = 5.0f;
+  float m_box_depth = 100.0f;  // Box depth for terrain mesh
 
   // noise variables
   unsigned int m_seed = 0;

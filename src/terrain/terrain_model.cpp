@@ -22,7 +22,7 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
   // Box depth (how deep the box extends below the terrain)
   // This value determines the "thickness" of the terrain mesh, creating walls
   // that prevent the camera from going through the bottom
-  const float box_depth = 100.0f;
+  const float box_depth = m_box_depth;
 
   // Create a 2D array to store adjacent faces for each vertex (only for top face)
   m_adjacent_faces =
