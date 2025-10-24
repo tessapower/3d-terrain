@@ -239,7 +239,7 @@ auto mesh_deformation::calculate_tbn(cgra::mesh_builder& mb, bool top_left,
   float denominator = delta_uv1.x * delta_uv2.y - delta_uv2.x * delta_uv1.y;
   
   // Avoid division by zero or very small denominators
-  if (abs(denominator) < 0.0001f) {
+  if (std::abs(denominator) < 0.0001f) {
     // Use the triangle's edges as fallback for tangent/bitangent
     tangent = glm::normalize(edge1);
     bitangent = glm::normalize(edge2);
