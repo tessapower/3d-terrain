@@ -54,27 +54,35 @@ float perlin::generate_perlin(const float x, const float y,
   float total = 0.0f;
   float frequency = 1.0f;
   float amplitude = 1.0f;
-  float max = 0.0f;
+  float max_value = 0.0f;
 
   for (unsigned i = 0; i < m_octaves_; i++) {
-    total +=
-        noise(x * frequency / 200.0f, y * frequency, z * frequency / 200.0f) *
-        amplitude;
+    // Scale all coordinates consistently
+    // Divide by 200 to get appropriate feature size for large terrains
+    float sample_x = (x * frequency) / 200.0f;
+    float sample_y = (y * frequency) / 200.0f; 
+    float sample_z = (z * frequency) / 200.0f;
+    
+    total += noise(sample_x, sample_y, sample_z) * amplitude;
 
-    max += amplitude;
+    max_value += amplitude;
 
     frequency *= m_lacunarity_;
     amplitude *= m_persistence_;
   }
 
-  return total / max;
+  // Normalize to [-1, 1] range, then to [0, 1]
+  return (total / max_value + 1.0f) / 2.0f;
 }
 
 float perlin::noise(float x, float y, float z) const {
+  // Apply repeat wrapping if enabled
   if (m_repeat_ > 0) {
-    x = static_cast<float>(fmod(x, m_repeat_));
-    y = static_cast<float>(fmod(y, m_repeat_));
-    z = static_cast<float>(fmod(z, m_repeat_));
+    // Use positive modulo to avoid negative coordinates
+    const float repeat_float = static_cast<float>(m_repeat_);
+    x = fmod(fmod(x, repeat_float) + repeat_float, repeat_float);
+    y = fmod(fmod(y, repeat_float) + repeat_float, repeat_float);
+    z = fmod(fmod(z, repeat_float) + repeat_float, repeat_float);
   }
 
   // define unit cube containing point
@@ -119,10 +127,8 @@ float perlin::noise(float x, float y, float z) const {
             u);                                                   // w
   const float y2 = lerp(x1, x2, v);
 
-  // Normalize the result
-  const float result = (lerp(y1, y2, w) + 1.0f) / 2.0f;
-
-  return result;
+  // Return the interpolated value (range is approximately [-1, 1])
+  return lerp(y1, y2, w);
 }
 
 // smooth transition between gradients with ease curve
