@@ -29,6 +29,7 @@ out VertexData {
     vec3 vertexPosition;
     vec3 tangent;
     vec3 bitangent;
+    vec3 worldNormal;  // World-space normal for side detection
 } v_out;
 
 void main() {
@@ -63,6 +64,8 @@ void main() {
     v_out.vertexPosition = new_position;
     v_out.tangent = normalize((uModelViewMatrix * vec4(aTangent, 0.0f)).xyz);
     v_out.bitangent = normalize((uModelViewMatrix * vec4(aBitangent, 0.0f)).xyz);
+    // Store world-space normal for side detection in fragment shader
+    v_out.worldNormal = aNormal;
 
     // set the screenspace position (needed for converting to fragment data)
     gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(new_position, 1);

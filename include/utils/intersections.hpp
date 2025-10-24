@@ -125,11 +125,15 @@ inline auto ray_intersects_mesh_fast(const glm::vec3& ray_origin,
   }
 
   if (found_hit) {
-    // Find the closest vertex in the terrain model to the hit point
+    // Calculate the number of top face vertices
+    const size_t top_vertices_count = (model.m_grid_size + 1) * (model.m_grid_size + 1);
+    
+    // Find the closest vertex in the TOP FACE ONLY to the hit point
     float min_dist = std::numeric_limits<float>::max();
     int closest_vertex_idx = 0;
 
-    for (size_t i = 0; i < model.m_builder.m_vertices.size(); ++i) {
+    // Only search through top face vertices
+    for (size_t i = 0; i < top_vertices_count; ++i) {
       float dist =
           glm::length(model.m_builder.m_vertices[i].pos - closest_hit_point);
       if (dist < min_dist) {

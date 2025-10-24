@@ -39,13 +39,14 @@ class terrain_model {
   float m_height_scale = 1;
   int m_grid_size = 200;
   float m_spacing = 5.0f;
+  float m_box_depth = 100.0f;  // Box depth for terrain mesh
 
   // noise variables
   unsigned int m_seed = 0;
   unsigned int m_octaves = 5;
   float m_lacunarity = 2.0f;
   float m_persistence = 0.5f;
-  unsigned int m_repeat = 3;
+  unsigned int m_repeat = 0;  // Disable repeat - it causes harsh tiling on large terrains
   float m_height = 200.0f;
 
   terrain_model() = default;

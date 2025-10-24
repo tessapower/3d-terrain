@@ -19,20 +19,30 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
   const float x_offset = -total_width / 2.0f;
   const float z_offset = -total_length / 2.0f;
 
-  // Create a 2D array to store adjacent faces for each vertex
+  // Box depth (how deep the box extends below the terrain)
+  // This value determines the "thickness" of the terrain mesh, creating walls
+  // that prevent the camera from going through the bottom
+  const float box_depth = m_box_depth;
+
+  // Create a 2D array to store adjacent faces for each vertex (only for top face)
   m_adjacent_faces =
       std::vector<std::vector<int>>((m_grid_size + 1) * (m_grid_size + 1));
 
-  // Generate the grid vertices
+  // Generate the TOP grid vertices
   for (auto i = 0; i <= m_grid_size; ++i) {
     for (auto j = 0; j <= m_grid_size; ++j) {
       // Calculate vertex position (x, y, z) with increased spacing and centered
       float x = static_cast<float>(i) * m_spacing + x_offset;
       float z = static_cast<float>(j) * m_spacing + z_offset;
-      // whether to use perlin or not
-      float y = use_perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
-                             (m_height / 2)
-                       : 0.0f;
+      
+      // Generate Perlin noise height
+      // terrain.generate_perlin returns [0, 1], so we map it to [-m_height/2, m_height/2]
+      float y = 0.0f;
+      if (use_perlin) {
+        float noise_value = terrain.generate_perlin(x, 0.0f, z);
+        // Map from [0, 1] to [-m_height/2, m_height/2]
+        y = (noise_value * m_height) - (m_height / 2.0f);
+      }
 
       mv.pos = {x, y, z};
 
@@ -47,7 +57,146 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
     }
   }
 
-  // Generate triangle indices to create the grid
+  const GLuint top_vertices_count = (m_grid_size + 1) * (m_grid_size + 1);
+
+  // Generate the BOTTOM grid vertices (same x, z positions but lower y)
+  for (auto i = 0; i <= m_grid_size; ++i) {
+    for (auto j = 0; j <= m_grid_size; ++j) {
+      float x = static_cast<float>(i) * m_spacing + x_offset;
+      float z = static_cast<float>(j) * m_spacing + z_offset;
+      
+      float y = -box_depth;
+      if (use_perlin) {
+        float noise_value = terrain.generate_perlin(x, 0.0f, z);
+        y = (noise_value * m_height) - (m_height / 2.0f) - box_depth;
+      }
+
+      mv.pos = {x, y, z};
+
+      // Normal vectors for bottom (facing down)
+      mv.norm = {0.0f, -1.0f, 0.0f};
+
+      // Texture coordinates
+      mv.uv = {static_cast<float>(i) * 10.0f / static_cast<float>(m_grid_size),
+               static_cast<float>(j) * 10.0f / static_cast<float>(m_grid_size)};
+
+      mb.push_vertex(mv);
+    }
+  }
+
+  // Store base vertex count for side vertices
+  const GLuint base_vertex_count = mb.m_vertices.size();
+
+  // Generate vertices for SIDE WALLS with proper normals
+  // Front side (z = z_offset, normal pointing in -z direction)
+  for (auto i = 0; i <= m_grid_size; ++i) {
+    float x = static_cast<float>(i) * m_spacing + x_offset;
+    float z = z_offset;
+    
+    float y_top = 0.0f;
+    if (use_perlin) {
+      float noise_value = terrain.generate_perlin(x, 0.0f, z);
+      y_top = (noise_value * m_height) - (m_height / 2.0f);
+    }
+    float y_bottom = use_perlin ? y_top - box_depth : -box_depth;
+
+    // Top vertex of front side
+    mv.pos = {x, y_top, z};
+    mv.norm = {0.0f, 0.0f, -1.0f};  // Front face normal
+    mv.uv = {static_cast<float>(i) / static_cast<float>(m_grid_size), 0.0f};
+    mb.push_vertex(mv);
+
+    // Bottom vertex of front side
+    mv.pos = {x, y_bottom, z};
+    mv.norm = {0.0f, 0.0f, -1.0f};  // Front face normal
+    mv.uv = {static_cast<float>(i) / static_cast<float>(m_grid_size), 1.0f};
+    mb.push_vertex(mv);
+  }
+
+  const GLuint front_side_start = base_vertex_count;
+
+  // Back side (z = z_offset + total_length, normal pointing in +z direction)
+  for (auto i = 0; i <= m_grid_size; ++i) {
+    float x = static_cast<float>(i) * m_spacing + x_offset;
+    float z = z_offset + total_length;
+    
+    float y_top = 0.0f;
+    if (use_perlin) {
+      float noise_value = terrain.generate_perlin(x, 0.0f, z);
+      y_top = (noise_value * m_height) - (m_height / 2.0f);
+    }
+    float y_bottom = use_perlin ? y_top - box_depth : -box_depth;
+
+    // Top vertex of back side
+    mv.pos = {x, y_top, z};
+    mv.norm = {0.0f, 0.0f, 1.0f};  // Back face normal
+    mv.uv = {static_cast<float>(i) / static_cast<float>(m_grid_size), 0.0f};
+    mb.push_vertex(mv);
+
+    // Bottom vertex of back side
+    mv.pos = {x, y_bottom, z};
+    mv.norm = {0.0f, 0.0f, 1.0f};  // Back face normal
+    mv.uv = {static_cast<float>(i) / static_cast<float>(m_grid_size), 1.0f};
+    mb.push_vertex(mv);
+  }
+
+  const GLuint back_side_start = front_side_start + (m_grid_size + 1) * 2;
+
+  // Left side (x = x_offset, normal pointing in -x direction)
+  for (auto j = 0; j <= m_grid_size; ++j) {
+    float x = x_offset;
+    float z = static_cast<float>(j) * m_spacing + z_offset;
+    
+    float y_top = 0.0f;
+    if (use_perlin) {
+      float noise_value = terrain.generate_perlin(x, 0.0f, z);
+      y_top = (noise_value * m_height) - (m_height / 2.0f);
+    }
+    float y_bottom = use_perlin ? y_top - box_depth : -box_depth;
+
+    // Top vertex of left side
+    mv.pos = {x, y_top, z};
+    mv.norm = {-1.0f, 0.0f, 0.0f};  // Left face normal
+    mv.uv = {static_cast<float>(j) / static_cast<float>(m_grid_size), 0.0f};
+    mb.push_vertex(mv);
+
+    // Bottom vertex of left side
+    mv.pos = {x, y_bottom, z};
+    mv.norm = {-1.0f, 0.0f, 0.0f};  // Left face normal
+    mv.uv = {static_cast<float>(j) / static_cast<float>(m_grid_size), 1.0f};
+    mb.push_vertex(mv);
+  }
+
+  const GLuint left_side_start = back_side_start + (m_grid_size + 1) * 2;
+
+  // Right side (x = x_offset + total_width, normal pointing in +x direction)
+  for (auto j = 0; j <= m_grid_size; ++j) {
+    float x = x_offset + total_width;
+    float z = static_cast<float>(j) * m_spacing + z_offset;
+    
+    float y_top = 0.0f;
+    if (use_perlin) {
+      float noise_value = terrain.generate_perlin(x, 0.0f, z);
+      y_top = (noise_value * m_height) - (m_height / 2.0f);
+    }
+    float y_bottom = use_perlin ? y_top - box_depth : -box_depth;
+
+    // Top vertex of right side
+    mv.pos = {x, y_top, z};
+    mv.norm = {1.0f, 0.0f, 0.0f};  // Right face normal
+    mv.uv = {static_cast<float>(j) / static_cast<float>(m_grid_size), 0.0f};
+    mb.push_vertex(mv);
+
+    // Bottom vertex of right side
+    mv.pos = {x, y_bottom, z};
+    mv.norm = {1.0f, 0.0f, 0.0f};  // Right face normal
+    mv.uv = {static_cast<float>(j) / static_cast<float>(m_grid_size), 1.0f};
+    mb.push_vertex(mv);
+  }
+
+  const GLuint right_side_start = left_side_start + (m_grid_size + 1) * 2;
+
+  // Generate triangle indices for the TOP face (only these are interactable)
   for (auto i = 0; i < m_grid_size; ++i) {
     for (auto j = 0; j < m_grid_size; ++j) {
       const GLuint k1 = i * (m_grid_size + 1) + j;
@@ -58,7 +207,7 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
       mb.push_indices({k1, k2, k3});  // First triangle
       mb.push_indices({k2, k4, k3}); // Second triangle
 
-      // Helper lambda to add triangle to adjacent faces
+      // Helper lambda to add triangle to adjacent faces (ONLY for top face)
       auto add_triangle = [&](int v1, int v2, int v3) {
         m_adjacent_faces[v1].insert(m_adjacent_faces[v1].end(), {v1, v2, v3});
         m_adjacent_faces[v2].insert(m_adjacent_faces[v2].end(), {v1, v2, v3});
@@ -68,6 +217,65 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
       add_triangle(k1, k2, k3);
       add_triangle(k2, k4, k3);
     }
+  }
+
+  // Generate triangle indices for the BOTTOM face (not interactable, no adjacent faces)
+  for (auto i = 0; i < m_grid_size; ++i) {
+    for (auto j = 0; j < m_grid_size; ++j) {
+      const GLuint k1 = top_vertices_count + i * (m_grid_size + 1) + j;
+      const GLuint k2 = k1 + 1;
+      const GLuint k3 = top_vertices_count + (i + 1) * (m_grid_size + 1) + j;
+      const GLuint k4 = k3 + 1;
+
+      // Reverse winding order for bottom face (so normals face down/out)
+      mb.push_indices({k1, k3, k2});  // First triangle
+      mb.push_indices({k2, k3, k4}); // Second triangle
+    }
+  }
+
+  // Generate SIDE WALLS indices using the dedicated side vertices
+  // Front side
+  for (auto i = 0; i < m_grid_size; ++i) {
+    GLuint top_left = front_side_start + i * 2;
+    GLuint bottom_left = top_left + 1;
+    GLuint top_right = front_side_start + (i + 1) * 2;
+    GLuint bottom_right = top_right + 1;
+
+    mb.push_indices({top_left, bottom_left, top_right});
+    mb.push_indices({top_right, bottom_left, bottom_right});
+  }
+
+  // Back side
+  for (auto i = 0; i < m_grid_size; ++i) {
+    GLuint top_left = back_side_start + i * 2;
+    GLuint bottom_left = top_left + 1;
+    GLuint top_right = back_side_start + (i + 1) * 2;
+    GLuint bottom_right = top_right + 1;
+
+    mb.push_indices({top_left, top_right, bottom_left});
+    mb.push_indices({top_right, bottom_right, bottom_left});
+  }
+
+  // Left side
+  for (auto j = 0; j < m_grid_size; ++j) {
+    GLuint top_left = left_side_start + j * 2;
+    GLuint bottom_left = top_left + 1;
+    GLuint top_right = left_side_start + (j + 1) * 2;
+    GLuint bottom_right = top_right + 1;
+
+    mb.push_indices({top_left, top_right, bottom_left});
+    mb.push_indices({top_right, bottom_right, bottom_left});
+  }
+
+  // Right side
+  for (auto j = 0; j < m_grid_size; ++j) {
+    GLuint top_left = right_side_start + j * 2;
+    GLuint bottom_left = top_left + 1;
+    GLuint top_right = right_side_start + (j + 1) * 2;
+    GLuint bottom_right = top_right + 1;
+
+    mb.push_indices({top_left, bottom_left, top_right});
+    mb.push_indices({top_right, bottom_left, bottom_right});
   }
 
   m_builder = mb;

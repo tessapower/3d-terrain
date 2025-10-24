@@ -92,7 +92,6 @@ auto tree::draw_leaves(const glm::mat4& view, const glm::mat4& projection) const
     }
 
     cgra::draw_sphere();
-    glUseProgram(0);
   }
 }
 
@@ -294,8 +293,6 @@ auto tree::draw_branches_nodes(int current_branch, const glm::mat4& view,
     }
 
     cgra::draw_sphere();
-
-    glUseProgram(0);
   }
 }
 
@@ -453,8 +450,6 @@ void tree::draw_foliage(const glm::mat4& view) const {
     glm::mat4 scaling_matrix = glm::scale(position_matrix, le.m_leaf_size);
     glm::mat4 sphere_model_matrix = glm::scale(scaling_matrix, m_model_scale);
 
-    glUseProgram(m_shader);
-
     if (const GLuint sphere_model_view_matrix_location =
             glGetUniformLocation(m_shader, "uModelViewMatrix");
         sphere_model_view_matrix_location != -1) {
@@ -466,6 +461,4 @@ void tree::draw_foliage(const glm::mat4& view) const {
 
     cgra::draw_sphere();
   }
-
-  glUseProgram(0);
 }
