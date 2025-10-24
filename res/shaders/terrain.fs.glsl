@@ -92,11 +92,29 @@ vec3 textureColour(sampler2D tex, sampler2D norm){
     vec3 lightCol = vec3(1);
     vec3 color = baseCol;
 
+    // Safety check: if normal is invalid (NaN or zero), use a default
+    if (length(normal) < 0.1 || any(isnan(normal))) {
+        normal = vec3(0.0, 1.0, 0.0); // Default upward normal
+    }
+
     if (uTex == 1) {
         // TBN
         mat3 TBN = mat3(normalize(f_in.tangent), normalize(f_in.bitangent), normalize(f_in.normal));
-        normal = normCol * 2.0 - 1.0; 
-        normal = normalize(TBN * normal);
+        
+        // Safety check for TBN matrix validity
+        if (any(isnan(TBN[0])) || any(isnan(TBN[1])) || any(isnan(TBN[2])) ||
+            length(TBN[0]) < 0.1 || length(TBN[1]) < 0.1 || length(TBN[2]) < 0.1) {
+            // If TBN is invalid, just use the vertex normal
+            normal = normalize(f_in.normal);
+        } else {
+            normal = normCol * 2.0 - 1.0; 
+            normal = normalize(TBN * normal);
+            
+            // Final safety check after transformation
+            if (length(normal) < 0.1 || any(isnan(normal))) {
+                normal = normalize(f_in.normal);
+            }
+        }
     }
 
     // ambient
@@ -138,8 +156,9 @@ void main() {
         // Check if this is a side face (normal not pointing up)
         // worldNormal comes from vertex shader to avoid expensive inverse in fragment shader
         
-        // If normal is not pointing mostly upward, render as black (sides and bottom)
-        if (f_in.worldNormal.y < 0.5) {
+        // If normal is not pointing upward at all (pointing down or sideways), render as black
+        // Use a low threshold to only exclude truly sideways/downward faces
+        if (f_in.worldNormal.y < 0.1) {
             fb_color = vec4(0.0, 0.0, 0.0, 1.0);
             return;
         }
