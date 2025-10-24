@@ -2,15 +2,18 @@
 #include "utils/intersections.hpp"
 
 auto mesh_deformation::initialize() -> void {
-  // Clear normals
-  for (auto& v : m_model_->m_builder.m_vertices) {
-    v.norm = {0.0f, 0.0f, 0.0f};
+  // Calculate the number of top face vertices
+  const GLuint top_vertices_count = (m_model_->m_grid_size + 1) * (m_model_->m_grid_size + 1);
+  
+  // Only clear normals for top face vertices that will be recomputed
+  for (size_t i = 0; i < top_vertices_count; ++i) {
+    m_model_->m_builder.m_vertices[i].norm = {0.0f, 0.0f, 0.0f};
   }
 
-  // Recompute vertex normals
+  // Recompute vertex normals for top face
   compute_vertex_normals();
 
-  // Recompute TBN
+  // Recompute TBN for top face
   recompute_tbn();
 
   // Destroy if mesh exists
@@ -39,13 +42,12 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
 
   // Precalculate radius squared for faster distance checks
   const float radius_sq = deformation_radius * deformation_radius;
-  const float radius_sq_expanded =
-      radius_sq * 1.5f;  // Slightly larger for normals
 
   // Calculate the index offset for bottom vertices
   const GLuint top_vertices_count = (m_model_->m_grid_size + 1) * (m_model_->m_grid_size + 1);
 
-  for (size_t idx = 0; idx < m_model_->m_builder.m_vertices.size(); ++idx) {
+  // ONLY process top face vertices for deformation
+  for (size_t idx = 0; idx < top_vertices_count; ++idx) {
     cgra::mesh_vertex& v = m_model_->m_builder.m_vertices[idx];
 
     // Calculate SQUARED distance (faster - no sqrt needed yet)
@@ -53,7 +55,7 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
                           (v.pos.z - center.pos.z) * (v.pos.z - center.pos.z);
 
     // SKIP vertices outside the deformation radius
-    if (dist_sq > radius_sq_expanded) {
+    if (dist_sq > radius_sq) {
       continue;
     }
 
@@ -84,22 +86,18 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
       max_displacement = std::max(max_displacement, std::abs(displacement));
     }
 
-    // Update the vertex position (ONLY for vertices inside radius)
+    // Update the vertex position
     v.pos.y += displacement;
 
-    // Clamp top face vertices to prevent going below the bottom face
-    // Only apply to top face vertices (first top_vertices_count vertices)
-    if (idx < top_vertices_count) {
-      // Get corresponding bottom vertex position
-      const float bottom_y = m_model_->m_builder.m_vertices[idx + top_vertices_count].pos.y;
-      // Ensure top vertex stays above bottom vertex (with small margin)
-      const float min_y = bottom_y + 0.1f;  // 0.1 unit margin
-      if (v.pos.y < min_y) {
-        v.pos.y = min_y;
-      }
+    // Get corresponding bottom vertex position
+    const float bottom_y = m_model_->m_builder.m_vertices[idx + top_vertices_count].pos.y;
+    // Ensure top vertex stays above bottom vertex (with small margin)
+    const float min_y = bottom_y + 0.1f;  // 0.1 unit margin
+    if (v.pos.y < min_y) {
+      v.pos.y = min_y;
     }
 
-    // Clear the normal for this affected vertex
+    // Clear the normal for this affected vertex - will be recomputed
     v.norm = {0.0f, 0.0f, 0.0f};
   }
 
@@ -114,8 +112,8 @@ auto mesh_deformation::deform_mesh(const cgra::mesh_vertex& center,
               << sample_vertex_y_after << std::endl;
   }
 
-  // Recompute normals only for affected vertices
-  compute_vertex_normals_partial(center.pos, deformation_radius);
+  // Recompute normals for affected area (with slightly larger radius to catch neighboring vertices)
+  compute_vertex_normals_partial(center.pos, deformation_radius * 1.2f);
 
   // Recompute TBN only for affected area
   recompute_tbn_partial(center.pos, deformation_radius);
@@ -237,19 +235,41 @@ auto mesh_deformation::calculate_tbn(cgra::mesh_builder& mb, bool top_left,
 
   glm::vec3 tangent{};
   glm::vec3 bitangent{};
-  float f = 1.0f / (delta_uv1.x * delta_uv2.y - delta_uv2.x * delta_uv1.y);
+  
+  float denominator = delta_uv1.x * delta_uv2.y - delta_uv2.x * delta_uv1.y;
+  
+  // Avoid division by zero or very small denominators
+  if (abs(denominator) < 0.0001f) {
+    // Use the triangle's edges as fallback for tangent/bitangent
+    tangent = glm::normalize(edge1);
+    bitangent = glm::normalize(edge2);
+  } else {
+    float f = 1.0f / denominator;
 
-  tangent.x = f * (delta_uv2.y * edge1.x - delta_uv1.y * edge2.x);
-  tangent.y = f * (delta_uv2.y * edge1.y - delta_uv1.y * edge2.y);
-  tangent.z = f * (delta_uv2.y * edge1.z - delta_uv1.y * edge2.z);
+    tangent.x = f * (delta_uv2.y * edge1.x - delta_uv1.y * edge2.x);
+    tangent.y = f * (delta_uv2.y * edge1.y - delta_uv1.y * edge2.y);
+    tangent.z = f * (delta_uv2.y * edge1.z - delta_uv1.y * edge2.z);
 
-  bitangent.x = f * (-delta_uv2.x * edge1.x + delta_uv1.x * edge2.x);
-  bitangent.y = f * (-delta_uv2.x * edge1.y + delta_uv1.x * edge2.y);
-  bitangent.z = f * (-delta_uv2.x * edge1.z + delta_uv1.x * edge2.z);
+    bitangent.x = f * (-delta_uv2.x * edge1.x + delta_uv1.x * edge2.x);
+    bitangent.y = f * (-delta_uv2.x * edge1.y + delta_uv1.x * edge2.y);
+    bitangent.z = f * (-delta_uv2.x * edge1.z + delta_uv1.x * edge2.z);
 
-  // normalize tangent and bitangent
-  tangent = normalize(tangent);
-  bitangent = normalize(bitangent);
+    // Safety check and normalize tangent and bitangent
+    float tangent_length = glm::length(tangent);
+    float bitangent_length = glm::length(bitangent);
+    
+    if (tangent_length > 0.0001f) {
+      tangent = tangent / tangent_length;
+    } else {
+      tangent = glm::vec3(1.0f, 0.0f, 0.0f); // Default tangent
+    }
+    
+    if (bitangent_length > 0.0001f) {
+      bitangent = bitangent / bitangent_length;
+    } else {
+      bitangent = glm::vec3(0.0f, 0.0f, 1.0f); // Default bitangent
+    }
+  }
 
   if (top_left) {
     // store tangent and bitangent in vertex attributes for top left triangle
@@ -283,18 +303,35 @@ auto mesh_deformation::calculate_face_normal(const glm::vec3& vertex1,
   // Calculate the cross product of the two edge vectors to get the face normal
   glm::vec3 face_normal = cross(edge_1, edge_2);
 
-  // Normalize the face normal to ensure it has a unit length
-  face_normal = normalize(face_normal);
+  // Check if the normal is valid (non-zero length) before normalizing
+  float length_sq = glm::dot(face_normal, face_normal);
+  if (length_sq > 0.0001f) {
+    // Normalize the face normal to ensure it has a unit length
+    face_normal = normalize(face_normal);
+  } else {
+    // Degenerate triangle (zero area), return a default upward normal
+    face_normal = glm::vec3(0.0f, 1.0f, 0.0f);
+  }
 
   return face_normal;
 }
 
 auto mesh_deformation::compute_vertex_normals() -> void {
-  for (size_t v_idx = 0; v_idx < m_model_->m_builder.m_vertices.size();
-       ++v_idx) {
-    if (m_model_->m_adjacent_faces[v_idx].empty()) continue;
+  // Calculate the number of top face vertices
+  const GLuint top_vertices_count = (m_model_->m_grid_size + 1) * (m_model_->m_grid_size + 1);
+  
+  // Only compute normals for top face vertices (bottom and sides have fixed normals)
+  for (size_t v_idx = 0; v_idx < top_vertices_count; ++v_idx) {
+    // Check if vertex has adjacent faces
+    if (v_idx >= m_model_->m_adjacent_faces.size() || 
+        m_model_->m_adjacent_faces[v_idx].empty()) {
+      // No adjacent faces - use default upward normal for top face
+      m_model_->m_builder.m_vertices[v_idx].norm = glm::vec3(0.0f, 1.0f, 0.0f);
+      continue;
+    }
 
     glm::vec3 new_normal = {0.0f, 0.0f, 0.0f};
+    int valid_face_count = 0;
 
     // Iterate through adjacent faces of the current vertex
     for (size_t i = 0; i < m_model_->m_adjacent_faces[v_idx].size(); i += 3) {
@@ -316,25 +353,43 @@ auto mesh_deformation::compute_vertex_normals() -> void {
       const glm::vec3 face_normal =
           calculate_face_normal(vertex1, vertex2, vertex3);
 
-      // Accumulate the face normal to compute the new vertex normal
-      new_normal += face_normal;
+      // Only accumulate if the face normal is valid (not zero)
+      float face_normal_length_sq = glm::dot(face_normal, face_normal);
+      if (face_normal_length_sq > 0.0001f) {
+        new_normal += face_normal;
+        valid_face_count++;
+      }
     }
 
-    // Normalize the computed vertex normal
-    new_normal = normalize(new_normal);
-
-    // Update the vertex normal
-    m_model_->m_builder.m_vertices[v_idx].norm = new_normal;
+    // Check if normal is valid before normalizing
+    float normal_length_sq = glm::dot(new_normal, new_normal);
+    if (normal_length_sq > 0.0001f && valid_face_count > 0) {
+      new_normal = normalize(new_normal);
+      
+      // Final safety check: ensure normalized normal is still valid
+      if (glm::length(new_normal) > 0.9f) {
+        m_model_->m_builder.m_vertices[v_idx].norm = new_normal;
+      } else {
+        // If somehow still invalid, default to upward normal
+        m_model_->m_builder.m_vertices[v_idx].norm = glm::vec3(0.0f, 1.0f, 0.0f);
+      }
+    } else {
+      // Fallback to upward-facing normal if calculation fails
+      m_model_->m_builder.m_vertices[v_idx].norm = glm::vec3(0.0f, 1.0f, 0.0f);
+    }
   }
 }
 
 
 auto mesh_deformation::compute_vertex_normals_partial(const glm::vec3& center,
                                                       float radius) -> void {
-  float radius_squared = radius * radius * 1.5f;  // Slightly larger area
+  float radius_squared = radius * radius;  // Match the deformation radius exactly
+  
+  // Calculate the number of top face vertices
+  const GLuint top_vertices_count = (m_model_->m_grid_size + 1) * (m_model_->m_grid_size + 1);
 
-  for (size_t v_idx = 0; v_idx < m_model_->m_builder.m_vertices.size();
-       ++v_idx) {
+  // Only compute normals for top face vertices
+  for (size_t v_idx = 0; v_idx < top_vertices_count; ++v_idx) {
     auto& vertex = m_model_->m_builder.m_vertices[v_idx];
 
     // Skip vertices far from deformation
@@ -342,9 +397,15 @@ auto mesh_deformation::compute_vertex_normals_partial(const glm::vec3& center,
                     (vertex.pos.z - center.z) * (vertex.pos.z - center.z);
     if (dist_sq > radius_squared) continue;
 
-    if (m_model_->m_adjacent_faces[v_idx].empty()) continue;
+    if (v_idx >= m_model_->m_adjacent_faces.size() || 
+        m_model_->m_adjacent_faces[v_idx].empty()) {
+      // No adjacent faces - use default upward normal
+      vertex.norm = glm::vec3(0.0f, 1.0f, 0.0f);
+      continue;
+    }
 
     glm::vec3 new_normal = {0.0f, 0.0f, 0.0f};
+    int valid_face_count = 0;
 
     for (size_t i = 0; i < m_model_->m_adjacent_faces[v_idx].size(); i += 3) {
       const glm::vec3& vertex1 =
@@ -362,11 +423,31 @@ auto mesh_deformation::compute_vertex_normals_partial(const glm::vec3& center,
 
       const glm::vec3 face_normal =
           calculate_face_normal(vertex1, vertex2, vertex3);
-      new_normal += face_normal;
+      
+      // Only accumulate if the face normal is valid
+      float face_normal_length_sq = glm::dot(face_normal, face_normal);
+      if (face_normal_length_sq > 0.0001f) {
+        new_normal += face_normal;
+        valid_face_count++;
+      }
     }
 
-    new_normal = normalize(new_normal);
-    vertex.norm = new_normal;
+    // Check if normal is valid before normalizing
+    float normal_length_sq = glm::dot(new_normal, new_normal);
+    if (normal_length_sq > 0.0001f && valid_face_count > 0) {
+      new_normal = normalize(new_normal);
+      
+      // Final safety check: ensure normalized normal is still valid
+      if (glm::length(new_normal) > 0.9f) {
+        vertex.norm = new_normal;
+      } else {
+        // If somehow still invalid, default to upward normal
+        vertex.norm = glm::vec3(0.0f, 1.0f, 0.0f);
+      }
+    } else {
+      // Fallback to upward-facing normal if calculation fails
+      vertex.norm = glm::vec3(0.0f, 1.0f, 0.0f);
+    }
   }
 }
 

@@ -34,10 +34,15 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
       // Calculate vertex position (x, y, z) with increased spacing and centered
       float x = static_cast<float>(i) * m_spacing + x_offset;
       float z = static_cast<float>(j) * m_spacing + z_offset;
-      // whether to use perlin or not
-      float y = use_perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
-                             (m_height / 2)
-                       : 0.0f;
+      
+      // Generate Perlin noise height
+      // terrain.generate_perlin returns [0, 1], so we map it to [-m_height/2, m_height/2]
+      float y = 0.0f;
+      if (use_perlin) {
+        float noise_value = terrain.generate_perlin(x, 0.0f, z);
+        // Map from [0, 1] to [-m_height/2, m_height/2]
+        y = (noise_value * m_height) - (m_height / 2.0f);
+      }
 
       mv.pos = {x, y, z};
 
@@ -59,9 +64,12 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
     for (auto j = 0; j <= m_grid_size; ++j) {
       float x = static_cast<float>(i) * m_spacing + x_offset;
       float z = static_cast<float>(j) * m_spacing + z_offset;
-      float y = use_perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
-                             (m_height / 2) - box_depth
-                       : -box_depth;
+      
+      float y = -box_depth;
+      if (use_perlin) {
+        float noise_value = terrain.generate_perlin(x, 0.0f, z);
+        y = (noise_value * m_height) - (m_height / 2.0f) - box_depth;
+      }
 
       mv.pos = {x, y, z};
 
@@ -84,9 +92,12 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
   for (auto i = 0; i <= m_grid_size; ++i) {
     float x = static_cast<float>(i) * m_spacing + x_offset;
     float z = z_offset;
-    float y_top = use_perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
-                               (m_height / 2)
-                             : 0.0f;
+    
+    float y_top = 0.0f;
+    if (use_perlin) {
+      float noise_value = terrain.generate_perlin(x, 0.0f, z);
+      y_top = (noise_value * m_height) - (m_height / 2.0f);
+    }
     float y_bottom = use_perlin ? y_top - box_depth : -box_depth;
 
     // Top vertex of front side
@@ -108,9 +119,12 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
   for (auto i = 0; i <= m_grid_size; ++i) {
     float x = static_cast<float>(i) * m_spacing + x_offset;
     float z = z_offset + total_length;
-    float y_top = use_perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
-                               (m_height / 2)
-                             : 0.0f;
+    
+    float y_top = 0.0f;
+    if (use_perlin) {
+      float noise_value = terrain.generate_perlin(x, 0.0f, z);
+      y_top = (noise_value * m_height) - (m_height / 2.0f);
+    }
     float y_bottom = use_perlin ? y_top - box_depth : -box_depth;
 
     // Top vertex of back side
@@ -132,9 +146,12 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
   for (auto j = 0; j <= m_grid_size; ++j) {
     float x = x_offset;
     float z = static_cast<float>(j) * m_spacing + z_offset;
-    float y_top = use_perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
-                               (m_height / 2)
-                             : 0.0f;
+    
+    float y_top = 0.0f;
+    if (use_perlin) {
+      float noise_value = terrain.generate_perlin(x, 0.0f, z);
+      y_top = (noise_value * m_height) - (m_height / 2.0f);
+    }
     float y_bottom = use_perlin ? y_top - box_depth : -box_depth;
 
     // Top vertex of left side
@@ -156,9 +173,12 @@ auto terrain_model::create_terrain(bool use_perlin) -> void {
   for (auto j = 0; j <= m_grid_size; ++j) {
     float x = x_offset + total_width;
     float z = static_cast<float>(j) * m_spacing + z_offset;
-    float y_top = use_perlin ? (terrain.generate_perlin(x, 0.0, z) * m_height) -
-                               (m_height / 2)
-                             : 0.0f;
+    
+    float y_top = 0.0f;
+    if (use_perlin) {
+      float noise_value = terrain.generate_perlin(x, 0.0f, z);
+      y_top = (noise_value * m_height) - (m_height / 2.0f);
+    }
     float y_bottom = use_perlin ? y_top - box_depth : -box_depth;
 
     // Top vertex of right side

@@ -46,7 +46,7 @@ class terrain_model {
   unsigned int m_octaves = 5;
   float m_lacunarity = 2.0f;
   float m_persistence = 0.5f;
-  unsigned int m_repeat = 3;
+  unsigned int m_repeat = 0;  // Disable repeat - it causes harsh tiling on large terrains
   float m_height = 200.0f;
 
   terrain_model() = default;

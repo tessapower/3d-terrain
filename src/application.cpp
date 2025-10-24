@@ -70,8 +70,10 @@ application::application(GLFWwindow *window)
 
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<int> rand_vertices(
-      0, static_cast<int>(m_terrain_.m_builder.get_vertices().size()));
+  
+  // Only place trees on top face vertices (not on sides or bottom)
+  const int top_vertices_count = (m_terrain_.m_grid_size + 1) * (m_terrain_.m_grid_size + 1);
+  std::uniform_int_distribution<int> rand_vertices(0, top_vertices_count - 1);
   std::uniform_real_distribution<float> size_tree(3.0f, 7.0f);
 
   for (auto i = 0; i < m_num_trees_; ++i) {
